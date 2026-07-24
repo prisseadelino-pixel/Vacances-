@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ma Checklist Vacances</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            padding-top: 10px;
+            padding-bottom: 10px;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 1.4rem;
+            margin: 0 0 5px 0;
+            color: var(--primary);
+        }
+
+        .progress-container {
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            height: 12px;
+            width: 100%;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            background-color: #22c55e;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            background: var(--card);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .item input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            margin-right: 12px;
+            cursor: pointer;
+            accent-color: #22c55e;
+        }
+
+        .item-text {
+            flex-grow: 1;
+            font-size: 0.95rem;
+        }
+
+        .item-details {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Style quand la case est cochée */
+        .item.checked {
+            background-color: #f1f5f9;
+            opacity: 0.5;
+        }
+
+        .item.checked .item-title {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .reset-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🧳 Checklist Vacances</h1>
+        <div id="status-text">0 / 0 éléments cochés</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div id="checklist-container"></div>
+
+    <button class="reset-btn" onclick="resetAll()">Tout décocher</button>
+
+    <script>
+        const checklistData = [
+            {
+                category: "☀️ Vêtements",
+                items: [
+                    { title: "T-shirts légers", details: "6 à 7 par personne" },
+                    { title: "Shorts", details: "2 par personne" },
+                    { title: "Pantalons légers ou en lin", details: "2 par personne" },
+                    { title: "Jean", details: "1 par personne" },
+                    { title: "Polaire légère ou sweat", details: "Les Contamines le soir" },
+                    { title: "Coupe-vent imperméable", details: "Orage de montagne" },
+                    { title: "Sous-vêtements & chaussettes", details: "Pour 1 semaine" },
+                    { title: "Pyjama léger", details: "" },
+                    { title: "Casquette ou chapeau", details: "" },
+                    { title: "Lunettes de soleil", details: "" },
+                    { title: "Baskets confortables", details: "Pour Milan" },
+                    { title: "Sandales", details: "" },
+                    { title: "Chaussures de randonnée légères", details: "Les Contamines" },
+                    { title: "Chaussures d'eau", details: "Plages de galets Lac de Côme" }
+                ]
+            },
+            {
+                category: "🏖️ Pour le lac",
+                items: [
+                    { title: "Maillots de bain", details: "2 chacun" },
+                    { title: "Serviette microfibre", details: "" },
+                    { title: "Petit sac étanche", details: "" },
+                    { title: "Tongs", details: "" },
+                    { title: "Lunettes de natation", details: "" },
+                    { title: "Petit parasol de plage", details: "Très appréciable" }
+                ]
+            },
+            {
+                category: "🚗 Pour la voiture",
+                items: [
+                    { title: "Glacière", details: "Électrique ou classique" },
+                    { title: "Gourdes isothermes", details: "" },
+                    { title: "Pare-soleil pare-brise", details: "" },
+                    { title: "Chargeurs USB & Batterie externe", details: "" },
+                    { title: "Support téléphone", details: "" },
+                    { title: "Essuie-tout, lingettes, sacs poubelle", details: "" },
+                    { title: "Encas", details: "Fruits secs, barres..." }
+                ]
+            },
+            {
+                category: "🌞 Protection & Santé",
+                items: [
+                    { title: "Crème solaire SPF 50 & Après-soleil", details: "" },
+                    { title: "Brumisateur & Baume à lèvres", details: "" },
+                    { title: "Trousse de premiers secours", details: "" },
+                    { title: "Répulsif anti-moustiques", details: "Lacs" }
+                ]
+            },
+            {
+                category: "🐶 Pour le chien",
+                items: [
+                    { title: "Carnet de santé & Médaille", details: "Avec n° de téléphone" },
+                    { title: "Harnais, Laisse courte & Longue longe", details: "" },
+                    { title: "Gourde & Gamelle pliable", details: "" },
+                    { title: "Alimentation complète & Friandises", details: "" },
+                    { title: "Tapis/coussin & Couverture légère", details: "" },
+                    { title: "Serviette dédiée & Brosse", details: "" },
+                    { title: "Sacs à déjections & Pince à tiques", details: "" },
+                    { title: "Tapis & Serviette rafraîchissants", details: "Indispensable" },
+                    { title: "Pare-soleil pour sa place voiture", details: "" }
+                ]
+            },
+            {
+                category: "📄 Documents",
+                items: [
+                    { title: "Papiers d'identité & Permis", details: "Cartes / Passeports" },
+                    { title: "Carte grise & Attestation assurance", details: "" },
+                    { title: "Carte européenne d'assurance maladie", details: "" },
+                    { title: "Cartes bancaires & Espèces", details: "En euros" }
+                ]
+            },
+            {
+                category: "💡 Les petits plus",
+                items: [
+                    { title: "Lessive en feuilles & Pinces à linge", details: "" },
+                    { title: "Couteau suisse", details: "Dans les bagages" },
+                    { title: "Lampe frontale & Parapluie", details: "" },
+                    { title: "Sac à dos & Tote bag pliable", details: "" },
+                    { title: "Multiprise", details: "Airbnb" }
+                ]
+            }
+        ];
+
+        function renderChecklist() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = '';
+            let totalItems = 0;
+            let checkedItems = 0;
+
+            checklistData.forEach((cat, catIdx) => {
+                const catEl = document.createElement('div');
+                catEl.className = 'category-title';
+                catEl.innerText = cat.category;
+                container.appendChild(catEl);
+
+                cat.items.forEach((item, itemIdx) => {
+                    totalItems++;
+                    const key = `check_${catIdx}_${itemIdx}`;
+                    const isChecked = localStorage.getItem(key) === 'true';
+                    if (isChecked) checkedItems++;
+
+                    const itemEl = document.createElement('div');
+                    itemEl.className = `item ${isChecked ? 'checked' : ''}`;
+                    itemEl.onclick = () => toggleCheck(key, !isChecked);
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = isChecked;
+                    checkbox.onclick = (e) => e.stopPropagation();
+                    checkbox.onchange = () => toggleCheck(key, !isChecked);
+
+                    const textDiv = document.createElement('div');
+                    textDiv.className = 'item-text';
+                    
+                    const titleSpan = document.createElement('span');
+                    titleSpan.className = 'item-title';
+                    titleSpan.innerText = item.title;
+                    textDiv.appendChild(titleSpan);
+
+                    if (item.details) {
+                        const detailsSpan = document.createElement('span');
+                        detailsSpan.className = 'item-details';
+                        detailsSpan.innerText = item.details;
+                        textDiv.appendChild(detailsSpan);
+                    }
+
+                    itemEl.appendChild(checkbox);
+                    itemEl.appendChild(textDiv);
+                    container.appendChild(itemEl);
+                });
+            });
+
+            const percent = totalItems ? Math.round((checkedItems / totalItems) * 100) : 0;
+            document.getElementById('progress-bar').style.width = percent + '%';
+            document.getElementById('status-text').innerText = `${checkedItems} / ${totalItems} éléments cochés (${percent}%)`;
+        }
+
+        function toggleCheck(key, value) {
+            localStorage.setItem(key, value);
+            renderChecklist();
+        }
+
+        function resetAll() {
+            if (confirm("Voulez-vous décocher toutes les cases ?")) {
+                localStorage.clear();
+                renderChecklist();
+            }
+        }
+
+        renderChecklist();
+    </script>
+</body>
+</html>
