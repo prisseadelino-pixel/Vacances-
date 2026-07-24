@@ -28,12 +28,9 @@
             color: var(--text);
             margin: 0;
             padding: 16px;
-            padding-bottom: 80px;
         }
 
         .header {
-            text-align: center;
-            margin-bottom: 20px;
             position: sticky;
             top: 0;
             background: var(--bg);
@@ -42,27 +39,54 @@
             z-index: 10;
         }
 
-        .header-logo {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 8px;
-            border-radius: 16px;
+        }
+
+        .header-logo {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            border-radius: 8px;
         }
 
         .header h1 {
-            font-size: 1.4rem;
-            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            margin: 0;
             color: var(--primary);
+            text-align: center;
+            flex-grow: 1;
+            padding: 0 8px;
+        }
+
+        .save-btn {
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            white-space: nowrap;
+        }
+
+        .status-text {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
 
         .progress-container {
             background-color: #e2e8f0;
             border-radius: 10px;
-            height: 12px;
+            height: 10px;
             width: 100%;
             overflow: hidden;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
         .progress-bar {
@@ -123,39 +147,23 @@
             text-decoration: line-through;
             color: var(--text-muted);
         }
-
-        .save-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #22c55e;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 30px;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            cursor: default;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <img src="logo.png" alt="Logo" class="header-logo">
-        <h1>Checklist Vacances (Partagée)</h1>
-        <div id="status-text">Chargement de la liste...</div>
+        <div class="header-top">
+            <img src="logo.png" alt="Logo" class="header-logo">
+            <h1>Checklist Vacances</h1>
+            <div class="save-btn">✓ Sauvegardé</div>
+        </div>
+        <div id="status-text" class="status-text">Chargement de la liste...</div>
         <div class="progress-container">
             <div class="progress-bar" id="progress-bar"></div>
         </div>
     </div>
 
     <div id="checklist-container"></div>
-
-    <div class="save-btn">✓ Sauvegardé</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
