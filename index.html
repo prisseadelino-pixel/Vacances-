@@ -124,18 +124,21 @@
             color: var(--text-muted);
         }
 
-        .reset-btn {
+        .save-btn {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background-color: #ef4444;
+            background-color: #22c55e;
             color: white;
             border: none;
             padding: 12px 20px;
             border-radius: 30px;
             font-weight: bold;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            cursor: pointer;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
     </style>
 </head>
@@ -152,7 +155,7 @@
 
     <div id="checklist-container"></div>
 
-    <button class="reset-btn" onclick="resetAll()">Tout décocher</button>
+    <div class="save-btn">✓ Sauvegardé</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -329,14 +332,6 @@
             renderChecklist();
             await setDoc(docRef, { [key]: value }, { merge: true });
         }
-
-        window.resetAll = async function() {
-            if (confirm("Voulez-vous décocher toutes les cases pour tout le monde ?")) {
-                currentData = {};
-                renderChecklist();
-                await setDoc(docRef, {});
-            }
-        };
     </script>
 </body>
 </html>
