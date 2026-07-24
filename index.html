@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ma Checklist Vacances</title>
+    <title>Checklist Vacances Partagée</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -98,7 +98,6 @@
             color: var(--text-muted);
         }
 
-        /* Style quand la case est cochée */
         .item.checked {
             background-color: #f1f5f9;
             opacity: 0.5;
@@ -127,8 +126,8 @@
 <body>
 
     <div class="header">
-        <h1>🧳 Checklist Vacances</h1>
-        <div id="status-text">0 / 0 éléments cochés</div>
+        <h1>🧳 Checklist Vacances (Partagée)</h1>
+        <div id="status-text">Chargement de la liste...</div>
         <div class="progress-container">
             <div class="progress-bar" id="progress-bar"></div>
         </div>
@@ -138,8 +137,28 @@
 
     <button class="reset-btn" onclick="resetAll()">Tout décocher</button>
 
-    <script>
-        const checklistData = [
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Vos identifiants Firebase intégrés
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHefIbY5LYOOlsevUhwYn8frlYsA7K9yw",
+            authDomain: "vacances-22b22.firebaseapp.com",
+            projectId: "vacances-22b22",
+            storageBucket: "vacances-22b22.firebasestorage.app",
+            messagingSenderId: "63081073246",
+            appId: "1:63081073246:web:fb943c8b7d80d4d3e802cf",
+            measurementId: "G-X4WXTSLZB9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const docRef = doc(db, "vacances", "checklist");
+
+        let currentData = {};
+
+        const checklistStructure = [
             {
                 category: "☀️ Vêtements",
                 items: [
@@ -226,13 +245,23 @@
             }
         ];
 
+        // Écoute en temps réel des changements dans Firebase
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                currentData = docSnap.data();
+            } else {
+                currentData = {};
+            }
+            renderChecklist();
+        });
+
         function renderChecklist() {
             const container = document.getElementById('checklist-container');
             container.innerHTML = '';
             let totalItems = 0;
             let checkedItems = 0;
 
-            checklistData.forEach((cat, catIdx) => {
+            checklistStructure.forEach((cat, catIdx) => {
                 const catEl = document.createElement('div');
                 catEl.className = 'category-title';
                 catEl.innerText = cat.category;
@@ -241,7 +270,7 @@
                 cat.items.forEach((item, itemIdx) => {
                     totalItems++;
                     const key = `check_${catIdx}_${itemIdx}`;
-                    const isChecked = localStorage.getItem(key) === 'true';
+                    const isChecked = currentData[key] === true;
                     if (isChecked) checkedItems++;
 
                     const itemEl = document.createElement('div');
@@ -280,19 +309,19 @@
             document.getElementById('status-text').innerText = `${checkedItems} / ${totalItems} éléments cochés (${percent}%)`;
         }
 
-        function toggleCheck(key, value) {
-            localStorage.setItem(key, value);
+        async function toggleCheck(key, value) {
+            currentData[key] = value;
             renderChecklist();
+            await setDoc(docRef, { [key]: value }, { merge: true });
         }
 
-        function resetAll() {
-            if (confirm("Voulez-vous décocher toutes les cases ?")) {
-                localStorage.clear();
+        window.resetAll = async function() {
+            if (confirm("Voulez-vous décocher toutes les cases pour tout le monde ?")) {
+                currentData = {};
                 renderChecklist();
+                await setDoc(docRef, {});
             }
-        }
-
-        renderChecklist();
+        };
     </script>
 </body>
 </html>
