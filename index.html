@@ -77,11 +77,12 @@
             flex-shrink: 0;
             cursor: pointer;
             outline: none;
+            transition: transform 0.1s ease;
             -webkit-tap-highlight-color: transparent;
         }
 
         .save-btn:active {
-            transform: scale(0.96);
+            transform: scale(0.95);
         }
 
         .status-text {
@@ -193,6 +194,33 @@
         .delete-btn {
             color: var(--danger);
         }
+
+        /* Notification Toast élégante */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: #1e293b;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -201,7 +229,7 @@
         <div class="header-top">
             <img src="logo.png" alt="Logo" class="header-logo">
             <h1>Checklist Vacances</h1>
-            <button class="save-btn" id="save-btn-el" onclick="alert('Vos modifications sont automatiquement synchronisées en temps réel !')">✓ Sauvegardé</button>
+            <button class="save-btn" id="save-btn-el">✓ Sauvegardé</button>
         </div>
         <div id="status-text" class="status-text">Chargement de la liste...</div>
         <div class="progress-container">
@@ -210,6 +238,11 @@
     </div>
 
     <div id="checklist-container"></div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">
+        <span>✅</span> Votre checklist est sauvegardée.
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -317,6 +350,18 @@
         ];
 
         let currentData = { checks: {}, structure: null };
+        let toastTimeout;
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        document.getElementById('save-btn-el').onclick = showToast;
 
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
@@ -436,6 +481,7 @@
 
             renderChecklist();
             await setDoc(docRef, { structure: currentData.structure }, { merge: true });
+            showToast();
         }
 
         async function editItem(catIdx, itemIdx) {
@@ -448,6 +494,7 @@
 
             renderChecklist();
             await setDoc(docRef, { structure: currentData.structure }, { merge: true });
+            showToast();
         }
 
         async function deleteItem(catIdx, itemIdx) {
@@ -456,6 +503,7 @@
                 currentData.structure[catIdx].items.splice(itemIdx, 1);
                 renderChecklist();
                 await setDoc(docRef, { structure: currentData.structure }, { merge: true });
+                showToast();
             }
         }
     </script>
