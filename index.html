@@ -81,14 +81,28 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .save-btn:active {
-            transform: scale(0.95);
+        .header-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .reset-btn {
+            background: none;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            opacity: 0.8;
         }
 
         .status-text {
             text-align: center;
             font-size: 0.85rem;
             color: var(--text-muted);
+            margin-top: 5px;
         }
 
         .progress-container {
@@ -195,7 +209,6 @@
             color: var(--danger);
         }
 
-        /* Notification Toast élégante */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -231,15 +244,20 @@
             <h1>Checklist Vacances</h1>
             <button class="save-btn" id="save-btn-el">✓ Sauvegardé</button>
         </div>
-        <div id="status-text" class="status-text">Chargement de la liste...</div>
+        
         <div class="progress-container">
             <div class="progress-bar" id="progress-bar"></div>
         </div>
+        
+        <div class="header-actions">
+            <button class="reset-btn" onclick="uncheckAll()">Tout décocher</button>
+        </div>
+        
+        <div id="status-text" class="status-text">Chargement de la liste...</div>
     </div>
 
     <div id="checklist-container"></div>
 
-    <!-- Notification Toast -->
     <div id="toast" class="toast">
         <span>✅</span> Votre checklist est sauvegardée.
     </div>
@@ -352,8 +370,9 @@
         let currentData = { checks: {}, structure: null };
         let toastTimeout;
 
-        function showToast() {
+        function showToast(message = "Votre checklist est sauvegardée.") {
             const toast = document.getElementById('toast');
+            toast.innerHTML = `<span>✅</span> ${message}`;
             toast.classList.add('show');
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => {
@@ -361,17 +380,13 @@
             }, 2000);
         }
 
-        document.getElementById('save-btn-el').onclick = showToast;
+        document.getElementById('save-btn-el').onclick = () => showToast("Tout est déjà à jour !");
 
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
                 currentData = docSnap.data();
-                if (!currentData.structure) {
-                    currentData.structure = defaultStructure;
-                }
-                if (!currentData.checks) {
-                    currentData.checks = {};
-                }
+                if (!currentData.structure) currentData.structure = defaultStructure;
+                if (!currentData.checks) currentData.checks = {};
             } else {
                 currentData = { checks: {}, structure: defaultStructure };
             }
@@ -436,20 +451,12 @@
                     const editBtn = document.createElement('button');
                     editBtn.className = 'action-btn';
                     editBtn.innerText = '✏️';
-                    editBtn.title = 'Modifier';
-                    editBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        editItem(catIdx, itemIdx);
-                    };
+                    editBtn.onclick = (e) => { e.stopPropagation(); editItem(catIdx, itemIdx); };
 
                     const deleteBtn = document.createElement('button');
                     deleteBtn.className = 'action-btn delete-btn';
                     deleteBtn.innerText = '🗑️';
-                    deleteBtn.title = 'Supprimer';
-                    deleteBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        deleteItem(catIdx, itemIdx);
-                    };
+                    deleteBtn.onclick = (e) => { e.stopPropagation(); deleteItem(catIdx, itemIdx); };
 
                     itemEl.appendChild(checkbox);
                     itemEl.appendChild(textDiv);
@@ -471,17 +478,24 @@
             await setDoc(docRef, { checks: currentData.checks }, { merge: true });
         }
 
+        async function uncheckAll() {
+            if (confirm("Voulez-vous vraiment tout décocher ?")) {
+                currentData.checks = {};
+                renderChecklist();
+                await setDoc(docRef, { checks: {} }, { merge: true });
+                showToast("Toute la liste a été décochée.");
+            }
+        }
+
         async function addItem(catIdx) {
             const title = prompt("Nom de l'élément à ajouter :");
             if (!title) return;
             const details = prompt("Précision / Détails (optionnel) :") || "";
-
             if (!currentData.structure) currentData.structure = JSON.parse(JSON.stringify(defaultStructure));
             currentData.structure[catIdx].items.push({ title, details });
-
             renderChecklist();
             await setDoc(docRef, { structure: currentData.structure }, { merge: true });
-            showToast();
+            showToast("Élément ajouté.");
         }
 
         async function editItem(catIdx, itemIdx) {
@@ -489,12 +503,10 @@
             const newTitle = prompt("Modifier le nom :", currentItem.title);
             if (!newTitle) return;
             const newDetails = prompt("Modifier les détails :", currentItem.details || "");
-
             currentData.structure[catIdx].items[itemIdx] = { title: newTitle, details: newDetails };
-
             renderChecklist();
             await setDoc(docRef, { structure: currentData.structure }, { merge: true });
-            showToast();
+            showToast("Élément modifié.");
         }
 
         async function deleteItem(catIdx, itemIdx) {
@@ -503,7 +515,7 @@
                 currentData.structure[catIdx].items.splice(itemIdx, 1);
                 renderChecklist();
                 await setDoc(docRef, { structure: currentData.structure }, { merge: true });
-                showToast();
+                showToast("Élément supprimé.");
             }
         }
     </script>
