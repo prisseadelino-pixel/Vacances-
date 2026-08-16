@@ -18,26 +18,25 @@
         .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
         .header-logo { width: 50px; height: 50px; object-fit: contain; border-radius: 8px; }
         .header h1 { font-size: 1.1rem; margin: 0; color: var(--primary); text-align: center; flex-grow: 1; }
-        .save-btn { background-color: #22c55e; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .save-btn { background-color: #22c55e; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
         .header-actions { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
         .reset-btn { background: none; border: 1px solid var(--danger); color: var(--danger); padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; cursor: pointer; }
         .add-cat-btn { background: var(--primary); color: white; border: none; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; cursor: pointer; }
         .status-text { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; }
         .progress-container { background-color: #e2e8f0; border-radius: 10px; height: 8px; width: 100%; overflow: hidden; margin-top: 8px; }
         .progress-bar { background-color: #22c55e; height: 100%; width: 0%; transition: width 0.3s ease; }
-        
         .category-header { display: flex; align-items: center; margin: 20px 0 10px 0; padding-bottom: 5px; border-bottom: 2px solid var(--primary); gap: 5px; }
         .category-title { font-size: 1rem; font-weight: bold; color: var(--primary); flex-grow: 1; cursor: pointer; }
-        .add-item-btn { background: var(--primary); color: white; border: none; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; }
-        
+        .add-item-btn { background: var(--primary); color: white; border: none; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; cursor: pointer; }
         .item { display: flex; align-items: center; background: var(--card); padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid var(--border); }
-        .item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 10px; }
+        .item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 10px; flex-shrink: 0; cursor: pointer; }
         .item-text { flex-grow: 1; font-size: 0.9rem; cursor: pointer; }
         .item-details { display: block; font-size: 0.75rem; color: var(--text-muted); }
         .item.checked { opacity: 0.5; background-color: #f1f5f9; }
         .item.checked .item-title { text-decoration: line-through; }
-        
         .action-btn { background: none; border: none; font-size: 0.9rem; cursor: pointer; padding: 4px; }
+        
+        /* Modale personnalisée */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal { background: white; padding: 20px; border-radius: 15px; width: 85%; max-width: 300px; text-align: center; }
         .modal-actions { display: flex; justify-content: space-around; margin-top: 15px; }
@@ -53,11 +52,11 @@
         <div class="header-top">
             <img src="logo.png" alt="Logo" class="header-logo">
             <h1>Vacances</h1>
-            <button class="save-btn" id="save-btn-el">✓</button>
+            <button class="save-btn" id="save-btn-el">✓ Sauvegardé</button>
         </div>
         <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
         <div class="header-actions">
-            <button class="reset-btn" onclick="window.uncheckAll()">Tout décocher</button>
+            <button class="reset-btn" onclick="window.confirmAction('Tout décocher ?', window.uncheckAll)">Tout décocher</button>
             <button class="add-cat-btn" onclick="window.addCategory()">+ Catégorie</button>
         </div>
         <div id="status-text" class="status-text">Chargement...</div>
@@ -89,6 +88,12 @@
         let currentData = { checks: {}, structure: [] };
 
         window.closeModal = () => document.getElementById('custom-modal').style.display = 'none';
+        window.confirmAction = (msg, callback) => {
+            document.getElementById('modal-message').innerText = msg;
+            document.getElementById('btn-confirm-yes').onclick = () => { callback(); window.closeModal(); };
+            document.getElementById('custom-modal').style.display = 'flex';
+        };
+
         function showToast(msg) { const toast = document.getElementById('toast'); toast.innerText = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2000); }
 
         onSnapshot(docRef, (docSnap) => {
@@ -105,7 +110,7 @@
                 div.innerHTML = `<div class="category-header">
                     <span class="category-title" onclick="window.editCategory(${catIdx})">✏️ ${cat.category}</span>
                     <button class="add-item-btn" onclick="window.addItem(${catIdx})">+ Élément</button>
-                    <button class="action-btn" onclick="window.deleteCategory(${catIdx})">🗑️</button>
+                    <button class="action-btn" onclick="window.confirmAction('Supprimer la catégorie ?', () => window.deleteCategory(${catIdx}))">🗑️</button>
                 </div>`;
                 container.appendChild(div);
                 cat.items.forEach((item, itemIdx) => {
@@ -117,7 +122,7 @@
                     itemEl.innerHTML = `<input type="checkbox" ${currentData.checks[key]?'checked':''} onchange="window.toggle('${key}', this.checked)">
                         <div class="item-text" onclick="window.toggle('${key}', !${!!currentData.checks[key]})"><b>${item.title}</b><span class="item-details">${item.details}</span></div>
                         <button class="action-btn" onclick="window.editItem(${catIdx}, ${itemIdx})">✏️</button>
-                        <button class="action-btn" onclick="window.deleteItem(${catIdx}, ${itemIdx})">🗑️</button>`;
+                        <button class="action-btn" onclick="window.confirmAction('Supprimer l\'élément ?', () => window.deleteItem(${catIdx}, ${itemIdx}))">🗑️</button>`;
                     container.appendChild(itemEl);
                 });
             });
@@ -128,11 +133,12 @@
         window.toggle = async (k, v) => { currentData.checks[k] = v; renderChecklist(); await setDoc(docRef, currentData, { merge: true }); };
         window.addCategory = () => { const n = prompt("Nom de la catégorie :"); if(n) { currentData.structure.push({category: n, items: []}); save(); } };
         window.editCategory = (c) => { const n = prompt("Renommer :", currentData.structure[c].category); if(n) { currentData.structure[c].category = n; save(); } };
-        window.deleteCategory = (c) => { if(confirm("Supprimer toute la catégorie ?")) { currentData.structure.splice(c, 1); save(); } };
+        window.deleteCategory = (c) => { currentData.structure.splice(c, 1); save(); };
         window.addItem = (c) => { const t = prompt("Nom :"); if(t) { currentData.structure[c].items.push({title: t, details: ""}); save(); } };
         window.editItem = (c, i) => { const item = currentData.structure[c].items[i]; const t = prompt("Nom", item.title); if(t) { item.title = t; save(); } };
-        window.deleteItem = (c, i) => { if(confirm("Supprimer l'élément ?")) { currentData.structure[c].items.splice(i, 1); save(); } };
-        window.uncheckAll = () => { if(confirm("Tout décocher ?")) { currentData.checks = {}; save(); } };
+        window.deleteItem = (c, i) => { currentData.structure[c].items.splice(i, 1); save(); };
+        window.uncheckAll = () => { currentData.checks = {}; save(); };
+        document.getElementById('save-btn-el').onclick = () => showToast("Synchronisé en temps réel.");
         
         async function save() { renderChecklist(); await setDoc(docRef, currentData, { merge: true }); showToast("Sauvegardé !"); }
     </script>
