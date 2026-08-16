@@ -12,16 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
-        :root {
-            --primary: #2563eb;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --danger: #ef4444;
-        }
-
+        :root { --primary: #2563eb; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-muted: #64748b; --border: #e2e8f0; --danger: #ef4444; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 16px; }
         .header { position: sticky; top: 0; background: var(--bg); padding-top: 10px; padding-bottom: 10px; z-index: 10; }
         .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
@@ -45,18 +36,15 @@
         .action-btn { background: none; border: none; font-size: 1rem; cursor: pointer; padding: 4px 6px; opacity: 0.6; }
         .action-btn:hover { opacity: 1; }
         .delete-btn { color: var(--danger); }
-        
-        /* Styles de la fenêtre modale personnalisée */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal { background: white; padding: 20px; border-radius: 15px; width: 85%; max-width: 300px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .modal p { font-weight: bold; margin-bottom: 20px; }
-        .modal-actions { display: flex; justify-content: space-around; gap: 10px; }
-        .btn-modal { padding: 10px 20px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-no { background: #e2e8f0; color: #475569; }
-        .btn-yes { background: var(--danger); color: white; }
-
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background-color: #1e293b; color: #ffffff; padding: 12px 24px; border-radius: 25px; font-size: 0.9rem; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; display: flex; align-items: center; gap: 8px; }
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        
+        /* Modale */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal { background: white; padding: 20px; border-radius: 15px; width: 85%; max-width: 300px; text-align: center; }
+        .modal-actions { display: flex; justify-content: space-around; margin-top: 15px; }
+        .btn-modal { padding: 10px 20px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-no { background: #e2e8f0; } .btn-yes { background: var(--danger); color: white; }
     </style>
 </head>
 <body>
@@ -74,12 +62,11 @@
 
     <div id="checklist-container"></div>
 
-    <!-- Modale personnalisée -->
     <div id="custom-modal" class="modal-overlay">
         <div class="modal">
             <p id="modal-message">Êtes-vous sûr ?</p>
             <div class="modal-actions">
-                <button class="btn-modal btn-no" onclick="closeModal()">Annuler</button>
+                <button class="btn-modal btn-no" onclick="window.closeModal()">Annuler</button>
                 <button class="btn-modal btn-yes" id="btn-confirm-yes">Confirmer</button>
             </div>
         </div>
@@ -105,47 +92,109 @@
         const db = getFirestore(app);
         const docRef = doc(db, "vacances", "checklist");
 
-        let currentData = { checks: {}, structure: null };
+        const defaultStructure = [
+            { category: "☀️ Vêtements", items: [{ title: "T-shirts légers", details: "6 à 7 par personne" }, { title: "Shorts", details: "2 par personne" }, { title: "Pantalons légers ou en lin", details: "2 par personne" }, { title: "Jean", details: "1 par personne" }, { title: "Polaire légère ou sweat", details: "Les Contamines le soir" }, { title: "Coupe-vent imperméable", details: "Orage de montagne" }, { title: "Sous-vêtements & chaussettes", details: "Pour 1 semaine" }, { title: "Pyjama léger", details: "" }, { title: "Casquette ou chapeau", details: "" }, { title: "Lunettes de soleil", details: "" }, { title: "Baskets confortables", details: "Pour Milan" }, { title: "Sandales", details: "" }, { title: "Chaussures de randonnée légères", details: "Les Contamines" }, { title: "Chaussures d'eau", details: "Plages de galets Lac de Côme" }] },
+            { category: "🏖️ Pour le lac", items: [{ title: "Maillots de bain", details: "2 chacun" }, { title: "Serviette microfibre", details: "" }, { title: "Petit sac étanche", details: "" }, { title: "Tongs", details: "" }, { title: "Lunettes de natation", details: "" }, { title: "Petit parasol de plage", details: "Très appréciable" }] },
+            { category: "🚗 Pour la voiture", items: [{ title: "Glacière", details: "Électrique ou classique" }, { title: "Gourdes isothermes", details: "" }, { title: "Pare-soleil pare-brise", details: "" }, { title: "Chargeurs USB & Batterie externe", details: "" }, { title: "Support téléphone", details: "" }, { title: "Essuie-tout, lingettes, sacs poubelle", details: "" }, { title: "Encas", details: "Fruits secs, barres..." }] },
+            { category: "🌞 Protection & Santé", items: [{ title: "Crème solaire SPF 50 & Après-soleil", details: "" }, { title: "Brumisateur & Baume à lèvres", details: "" }, { title: "Trousse de premiers secours", details: "" }, { title: "Répulsif anti-moustiques", details: "Lacs" }] },
+            { category: "🐶 Pour le chien", items: [{ title: "Carnet de santé & Médaille", details: "Avec n° de téléphone" }, { title: "Harnais, Laisse courte & Longue longe", details: "" }, { title: "Gourde & Gamelle pliable", details: "" }, { title: "Alimentation complète & Friandises", details: "" }, { title: "Tapis/coussin & Couverture légère", details: "" }, { title: "Serviette dédiée & Brosse", details: "" }, { title: "Sacs à déjections & Pince à tiques", details: "" }, { title: "Tapis & Serviette rafraîchissants", details: "Indispensable" }, { title: "Pare-soleil pour sa place voiture", details: "" }] },
+            { category: "📄 Documents", items: [{ title: "Papiers d'identité & Permis", details: "Cartes / Passeports" }, { title: "Carte grise & Attestation assurance", details: "" }, { title: "Carte européenne d'assurance maladie", details: "" }, { title: "Cartes bancaires & Espèces", details: "En euros" }] },
+            { category: "💡 Les petits plus", items: [{ title: "Lessive en feuilles & Pinces à linge", details: "" }, { title: "Couteau suisse", details: "Dans les bagages" }, { title: "Lampe frontale & Parapluie", details: "" }, { title: "Sac à dos & Tote bag pliable", details: "" }, { title: "Multiprise", details: "Airbnb" }] }
+        ];
+
+        let currentData = { checks: {}, structure: [] };
         let toastTimeout;
 
-        // --- Logique Modale ---
         window.closeModal = () => document.getElementById('custom-modal').style.display = 'none';
-        function showModal(msg, onConfirm) {
-            document.getElementById('modal-message').innerText = msg;
-            document.getElementById('custom-modal').style.display = 'flex';
-            document.getElementById('btn-confirm-yes').onclick = () => { onConfirm(); closeModal(); };
-        }
 
-        function showToast(message) {
+        function showToast(msg) {
             const toast = document.getElementById('toast');
-            toast.innerHTML = `<span>✅</span> ${message}`;
+            toast.innerHTML = `<span>✅</span> ${msg}`;
             toast.classList.add('show');
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        document.getElementById('save-btn-el').onclick = () => showToast("Tout est déjà à jour !");
-
-        // --- Fonctions principales ---
-        window.uncheckAll = () => showModal("Voulez-vous vraiment tout décocher ?", async () => {
-            currentData.checks = {};
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                // Si la structure manque dans la BDD, on met la structure par défaut
+                currentData.structure = data.structure || JSON.parse(JSON.stringify(defaultStructure));
+                currentData.checks = data.checks || {};
+            } else {
+                currentData = { checks: {}, structure: JSON.parse(JSON.stringify(defaultStructure)) };
+            }
             renderChecklist();
-            await setDoc(docRef, { checks: {} }, { merge: true });
-            showToast("Liste décochée.");
         });
 
-        async function deleteItem(catIdx, itemIdx) {
-            const item = currentData.structure[catIdx].items[itemIdx];
-            showModal(`Supprimer "${item.title}" ?`, async () => {
-                currentData.structure[catIdx].items.splice(itemIdx, 1);
-                renderChecklist();
-                await setDoc(docRef, { structure: currentData.structure }, { merge: true });
-                showToast("Élément supprimé.");
+        function renderChecklist() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = '';
+            let total = 0, checked = 0;
+            currentData.structure.forEach((cat, catIdx) => {
+                const div = document.createElement('div');
+                div.innerHTML = `<div class="category-header"><div class="category-title">${cat.category}</div><button class="add-btn" onclick="window.addItem(${catIdx})">+ Ajouter</button></div>`;
+                container.appendChild(div);
+                cat.items.forEach((item, itemIdx) => {
+                    total++;
+                    const key = `k_${catIdx}_${itemIdx}`;
+                    const isChecked = currentData.checks[key];
+                    if (isChecked) checked++;
+                    const itemEl = document.createElement('div');
+                    itemEl.className = `item ${isChecked ? 'checked' : ''}`;
+                    itemEl.innerHTML = `<input type="checkbox" ${isChecked ? 'checked' : ''} onchange="window.toggle('${key}', this.checked)">
+                        <div class="item-text" onclick="window.toggle('${key}', !${!!isChecked})"><span>${item.title}</span><span class="item-details">${item.details}</span></div>
+                        <button class="action-btn" onclick="window.editItem(${catIdx}, ${itemIdx})">✏️</button>
+                        <button class="action-btn delete-btn" onclick="window.deleteItem(${catIdx}, ${itemIdx})">🗑️</button>`;
+                    container.appendChild(itemEl);
+                });
             });
+            document.getElementById('progress-bar').style.width = total ? (checked/total)*100 + '%' : '0%';
+            document.getElementById('status-text').innerText = `${checked} / ${total} éléments (${total ? Math.round((checked/total)*100) : 0}%)`;
         }
 
-        // [Code de renderChecklist, addItem, editItem, toggleCheck, etc. reste identique...]
-        // (Pour garder la réponse courte, j'ai omis le bloc redondant, mais vous l'avez déjà)
+        window.toggle = async (key, val) => {
+            currentData.checks[key] = val;
+            renderChecklist();
+            await setDoc(docRef, { checks: currentData.checks }, { merge: true });
+        };
+        
+        window.addItem = (c) => {
+            const t = prompt("Nom :"); if(!t) return;
+            currentData.structure[c].items.push({title: t, details: ""});
+            renderChecklist();
+            setDoc(docRef, { structure: currentData.structure }, { merge: true });
+        };
+        
+        window.editItem = (c, i) => {
+            const item = currentData.structure[c].items[i];
+            const t = prompt("Nom", item.title); if(!t) return;
+            item.title = t;
+            renderChecklist();
+            setDoc(docRef, { structure: currentData.structure }, { merge: true });
+        };
+
+        window.deleteItem = (c, i) => {
+             document.getElementById('custom-modal').style.display = 'flex';
+             document.getElementById('btn-confirm-yes').onclick = async () => {
+                 currentData.structure[c].items.splice(i, 1);
+                 renderChecklist();
+                 await setDoc(docRef, { structure: currentData.structure }, { merge: true });
+                 document.getElementById('custom-modal').style.display = 'none';
+             };
+        };
+
+        window.uncheckAll = () => {
+            document.getElementById('custom-modal').style.display = 'flex';
+            document.getElementById('btn-confirm-yes').onclick = async () => {
+                currentData.checks = {};
+                renderChecklist();
+                await setDoc(docRef, { checks: {} }, { merge: true });
+                document.getElementById('custom-modal').style.display = 'none';
+            }
+        }
+
+        document.getElementById('save-btn-el').onclick = () => showToast("Synchronisé en temps réel.");
     </script>
 </body>
 </html>
