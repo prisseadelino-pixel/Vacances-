@@ -250,7 +250,7 @@
         </div>
         
         <div class="header-actions">
-            <button class="reset-btn" onclick="uncheckAll()">Tout décocher</button>
+            <button class="reset-btn" onclick="window.uncheckAll()">Tout décocher</button>
         </div>
         
         <div id="status-text" class="status-text">Chargement de la liste...</div>
@@ -382,6 +382,16 @@
 
         document.getElementById('save-btn-el').onclick = () => showToast("Tout est déjà à jour !");
 
+        // --- FIX : On expose la fonction au scope global ---
+        window.uncheckAll = async function() {
+            if (confirm("Voulez-vous vraiment tout décocher ?")) {
+                currentData.checks = {};
+                renderChecklist();
+                await setDoc(docRef, { checks: {} }, { merge: true });
+                showToast("Toute la liste a été décochée.");
+            }
+        };
+
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
                 currentData = docSnap.data();
@@ -476,15 +486,6 @@
             currentData.checks[key] = value;
             renderChecklist();
             await setDoc(docRef, { checks: currentData.checks }, { merge: true });
-        }
-
-        async function uncheckAll() {
-            if (confirm("Voulez-vous vraiment tout décocher ?")) {
-                currentData.checks = {};
-                renderChecklist();
-                await setDoc(docRef, { checks: {} }, { merge: true });
-                showToast("Toute la liste a été décochée.");
-            }
         }
 
         async function addItem(catIdx) {
