@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -231,20 +231,20 @@
     }
 
     .form-group {
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
     }
 
     label {
       display: block;
       font-weight: 600;
-      margin-bottom: 0.2rem;
-      font-size: 0.75rem;
+      margin-bottom: 0.1rem;
+      font-size: 0.7rem;
       color: var(--secondary);
     }
 
     input, textarea {
       width: 100%;
-      padding: 0.5rem;
+      padding: 0.45rem;
       border: 1px solid var(--border);
       border-radius: 6px;
       font-size: 0.85rem;
@@ -255,9 +255,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
       background: #fff7ed;
-      padding: 0.75rem;
+      padding: 0.6rem 0.75rem;
       border-radius: 10px;
       border: 1px solid #fed7aa;
       gap: 0.5rem;
@@ -268,9 +268,9 @@
       background-color: var(--primary);
       color: white;
       border: none;
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 0.8rem;
       border-radius: 8px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
       transition: background 0.2s ease;
@@ -280,41 +280,44 @@
       background-color: var(--primary-hover);
     }
 
-    /* GRILLE DES BLOCS INDIVIDUELS */
-    .photos-grid-container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      margin-bottom: 1rem;
+    /* CONTENEUR DES BLOCS COMPACTS */
+    .blocs-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
     }
 
-    @media (max-width: 600px) {
-      .photos-grid-container {
-        grid-template-columns: 1fr;
-      }
-    }
-
+    /* LIGNE COMPACTE POUR CHAQUE PRODUIT */
     .photo-input-block {
       background: #f8fafc;
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0.85rem;
+      border-radius: 10px;
+      padding: 0.6rem;
       display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
+      align-items: center;
+      gap: 0.6rem;
       position: relative;
+    }
+
+    @media (max-width: 650px) {
+      .photo-input-block {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.4rem;
+      }
     }
 
     .btn-remove-block {
       position: absolute;
-      top: 8px;
-      right: 8px;
+      top: 6px;
+      right: 6px;
       background: #fee2e2;
       color: #ef4444;
       border: 1px solid #fca5a5;
       border-radius: 6px;
-      padding: 0.2rem 0.5rem;
-      font-size: 0.75rem;
+      padding: 0.1rem 0.4rem;
+      font-size: 0.7rem;
       font-weight: bold;
       cursor: pointer;
     }
@@ -323,10 +326,10 @@
       background: #fecaca;
     }
 
-    /* CASE AVEC LE + POUR APPAREIL PHOTO */
+    /* MINIATURE / BOUTON PHOTO COMPACT */
     .photo-add-box {
-      width: 100%;
-      height: 100px;
+      width: 75px;
+      height: 70px;
       background: #f1f5f9;
       border: 2px dashed var(--border);
       border-radius: 8px;
@@ -337,7 +340,15 @@
       cursor: pointer;
       position: relative;
       overflow: hidden;
+      flex-shrink: 0;
       transition: all 0.2s ease;
+    }
+
+    @media (max-width: 650px) {
+      .photo-add-box {
+        width: 100%;
+        height: 85px;
+      }
     }
 
     .photo-add-box:hover {
@@ -346,14 +357,14 @@
     }
 
     .plus-icon {
-      font-size: 1.8rem;
+      font-size: 1.3rem;
       font-weight: bold;
       color: var(--primary);
       line-height: 1;
     }
 
     .plus-label {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       color: #64748b;
       margin-top: 2px;
       font-weight: 600;
@@ -361,12 +372,20 @@
 
     .photo-preview-container {
       position: relative;
-      width: 100%;
-      height: 100px;
+      width: 75px;
+      height: 70px;
       display: none;
       border-radius: 8px;
       overflow: hidden;
       border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 650px) {
+      .photo-preview-container {
+        width: 100%;
+        height: 90px;
+      }
     }
 
     .photo-preview {
@@ -377,15 +396,15 @@
 
     .btn-remove-photo {
       position: absolute;
-      top: 4px;
-      right: 4px;
+      top: 2px;
+      right: 2px;
       background: rgba(239, 68, 68, 0.9);
       color: white;
       border: none;
       border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      font-size: 0.7rem;
+      width: 18px;
+      height: 18px;
+      font-size: 0.6rem;
       font-weight: bold;
       cursor: pointer;
       display: flex;
@@ -393,17 +412,36 @@
       justify-content: center;
     }
 
+    /* CHAMPS INTERNES DU BLOC COMPACT */
+    .block-fields {
+      display: flex;
+      gap: 0.5rem;
+      flex: 1;
+      align-items: flex-end;
+    }
+
+    @media (max-width: 650px) {
+      .block-fields {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+
+    .field-col {
+      flex: 1;
+    }
+
     .btn-add-more {
       background-color: #f1f5f9;
       color: var(--primary);
       border: 2px dashed var(--primary);
-      padding: 0.75rem;
+      padding: 0.55rem;
       border-radius: 8px;
       font-weight: 700;
       cursor: pointer;
       width: 100%;
-      font-size: 0.95rem;
-      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
       transition: background 0.2s ease;
     }
 
@@ -415,19 +453,19 @@
       background-color: var(--primary);
       color: white;
       border: none;
-      padding: 0.75rem 1.25rem;
+      padding: 0.65rem 1rem;
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
       width: 100%;
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
 
     button.btn-secondary {
       background-color: #64748b;
       color: white;
       border: none;
-      padding: 0.75rem 1.25rem;
+      padding: 0.65rem 1rem;
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
@@ -437,34 +475,34 @@
     .export-filter-container {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
       background: #f1f5f9;
-      padding: 0.75rem;
+      padding: 0.6rem;
       border-radius: 10px;
       border: 1px solid var(--border);
     }
 
     .export-filter-label {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 700;
       color: var(--secondary);
     }
 
     .export-actions-row {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.4rem;
       align-items: center;
       flex-wrap: wrap;
     }
 
     .input-date-custom {
       flex: 1;
-      min-width: 140px;
+      min-width: 130px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 0.5rem;
-      font-size: 0.9rem;
+      padding: 0.4rem;
+      font-size: 0.85rem;
       color: var(--text);
       outline: none;
       background: white;
@@ -474,9 +512,9 @@
       background-color: #0284c7;
       color: white;
       border: none;
-      padding: 0.6rem 0.85rem;
+      padding: 0.5rem 0.75rem;
       border-radius: 8px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s ease;
@@ -488,14 +526,14 @@
     }
 
     .section-header {
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
     }
 
     .liste-commandes {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 1rem;
+      gap: 0.4rem;
+      margin-top: 0.75rem;
     }
 
     .commande-item-compact {
@@ -504,8 +542,8 @@
       justify-content: space-between;
       background: #f8fafc;
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
       cursor: pointer;
       transition: background 0.2s ease;
     }
@@ -517,34 +555,34 @@
     .commande-main-btn {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.6rem;
       flex-grow: 1;
     }
 
     .commande-num-badge {
       font-weight: bold;
-      font-size: 1.05rem;
+      font-size: 0.95rem;
       color: var(--primary);
     }
 
     .commande-date-compact {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #64748b;
     }
 
     .commande-actions {
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.3rem;
     }
 
     .btn-edit-small {
       background: #ffffff;
       border: 1px solid var(--border);
       color: var(--secondary);
-      padding: 0.35rem 0.6rem;
+      padding: 0.3rem 0.5rem;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
     }
@@ -557,9 +595,9 @@
       background: #fef2f2;
       border: 1px solid #fca5a5;
       color: #ef4444;
-      padding: 0.35rem 0.5rem;
+      padding: 0.3rem 0.4rem;
       border-radius: 6px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
     }
@@ -780,7 +818,7 @@
     </header>
 
     <!-- SECTION RECHERCHE -->
-    <section class="card" style="padding: 1rem;">
+    <section class="card" style="padding: 0.75rem;">
       <div class="search-box">
         <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro de commande..." autocomplete="off">
         <button type="button" class="btn-search" id="btnLancerRecherche">Rechercher</button>
@@ -790,22 +828,22 @@
     <!-- FORMULAIRE DE PRÉPARATION -->
     <section class="card" id="sectionPreparation">
       <div class="form-header-actions">
-        <h2 id="formTitle" style="font-size: 1.1rem; color:var(--primary);">Nouveaux Reliquats</h2>
+        <h2 id="formTitle" style="font-size: 1rem; color:var(--primary);">Nouveaux Reliquats</h2>
         <button type="button" class="btn-new-cmd" id="btnNouvelleCommande">➕ Nouvelle commande</button>
       </div>
 
-      <!-- CONTENEUR DES BLOCS INDIVIDUELS -->
-      <div class="photos-grid-container" id="blocsContainer"></div>
+      <!-- CONTENEUR DES BLOCS COMPACTS -->
+      <div class="blocs-container" id="blocsContainer"></div>
 
-      <!-- BOUTON POUR RAJOUTER UN PRODUIT SUR LA MÊME COMMANDE -->
+      <!-- BOUTON POUR RAJOUTER UN PRODUIT -->
       <button type="button" class="btn-add-more" id="btnAddBloc">➕ Ajouter un autre produit manquant sur cette commande</button>
 
-      <div class="form-group" style="margin-top: 1rem;">
-        <label for="notes" style="font-size: 0.85rem;">Remarques globales (optionnel)</label>
-        <textarea id="notes" rows="2" placeholder="Ex: Produit fragile, carton réutilisé..." autocomplete="off"></textarea>
+      <div class="form-group" style="margin-top: 0.5rem;">
+        <label for="notes">Remarques globales (optionnel)</label>
+        <textarea id="notes" rows="1" placeholder="Ex: Produit fragile..." autocomplete="off"></textarea>
       </div>
 
-      <div style="display:flex; gap:0.5rem; margin-top: 1rem;">
+      <div style="display:flex; gap:0.5rem; margin-top: 0.75rem;">
         <button class="btn-main" id="btnEnregistrer">Enregistrer les reliquats</button>
         <button class="btn-secondary" id="btnAnnulerEdit" style="display:none; width:auto;">Annuler</button>
       </div>
@@ -954,19 +992,14 @@
       img.src = dataUrl;
     }
 
-    // FONCTION POUR AJOUTER UN BLOC INDÉPENDANT
+    // FONCTION POUR AJOUTER UN BLOC COMPACT
     function ajouterBlocProduit(photoData = "", numVal = "", refVal = "") {
       const blockDiv = document.createElement('div');
       blockDiv.className = 'photo-input-block';
 
       blockDiv.innerHTML = `
-        <button type="button" class="btn-remove-block" title="Supprimer ce bloc">✕ Supprimer</button>
+        <button type="button" class="btn-remove-block" title="Supprimer ce bloc">✕</button>
         
-        <div class="form-group" style="margin-bottom: 0.3rem;">
-          <label>N° de Commande</label>
-          <input type="text" class="input-num" placeholder="Ex: S-103567" value="${numVal}" autocomplete="off">
-        </div>
-
         <div class="photo-add-box" style="${photoData ? 'display:none;' : 'display:flex;'}">
           <span class="plus-icon">+</span>
           <span class="plus-label">Photo</span>
@@ -979,9 +1012,15 @@
 
         <input type="file" class="file-camera" accept="image/*" capture="environment" style="display: none;">
 
-        <div class="form-group" style="margin-bottom: 0; margin-top: 0.3rem;">
-          <label>Référence</label>
-          <input type="text" class="input-ref" placeholder="Ex: Xdc-3468" value="${refVal}" autocomplete="off">
+        <div class="block-fields">
+          <div class="field-col">
+            <label>N° de Commande</label>
+            <input type="text" class="input-num" placeholder="Ex: S-103567" value="${numVal}" autocomplete="off">
+          </div>
+          <div class="field-col">
+            <label>Référence</label>
+            <input type="text" class="input-ref" placeholder="Ex: Xdc-3468" value="${refVal}" autocomplete="off">
+          </div>
         </div>
       `;
 
@@ -1171,7 +1210,7 @@
       });
 
       if (liste.length === 0) {
-        galerieCommandes.innerHTML = `<p style="text-align:center; color:#64748b; padding:1rem;">Aucun reliquat trouvé.</p>`;
+        galerieCommandes.innerHTML = `<p style="text-align:center; color:#64748b; padding:0.75rem;">Aucun reliquat trouvé.</p>`;
         return;
       }
 
@@ -1187,7 +1226,7 @@
 
         item.innerHTML = `
           <div class="commande-main-btn">
-            <span>📷 (${countPhotos} photo${countPhotos > 1 ? 's' : ''})</span>
+            <span>📷 (${countPhotos})</span>
             <div>
               <div class="commande-num-badge">N° ${cmd.numero}</div>
               <div class="commande-date-compact">${cmd.date}</div>
@@ -1325,40 +1364,5 @@
       ajouterBlocProduit();
     });
   </script>
-</body>
-</html>q                  <span class="category-title" onclick="window.editCategory(${catIdx})">✏️ ${cat.category}</span>
-                    <button class="add-item-btn" onclick="window.addItem(${catIdx})">+ Élément</button>
-                    <button class="action-btn" onclick="window.confirmAction('Supprimer la catégorie ?', () => window.deleteCategory(${catIdx}))">🗑️</button>
-                </div>`;
-                container.appendChild(div);
-                cat.items.forEach((item, itemIdx) => {
-                    total++;
-                    const key = `k_${catIdx}_${itemIdx}`;
-                    if (currentData.checks[key]) checked++;
-                    const itemEl = document.createElement('div');
-                    itemEl.className = `item ${currentData.checks[key] ? 'checked' : ''}`;
-                    itemEl.innerHTML = `<input type="checkbox" ${currentData.checks[key]?'checked':''} onchange="window.toggle('${key}', this.checked)">
-                        <div class="item-text" onclick="window.toggle('${key}', !${!!currentData.checks[key]})"><b>${item.title}</b><span class="item-details">${item.details}</span></div>
-                        <button class="action-btn" onclick="window.editItem(${catIdx}, ${itemIdx})">✏️</button>
-                        <button class="action-btn" onclick="window.confirmAction('Supprimer l\'élément ?', () => window.deleteItem(${catIdx}, ${itemIdx}))">🗑️</button>`;
-                    container.appendChild(itemEl);
-                });
-            });
-            document.getElementById('progress-bar').style.width = total ? (checked/total)*100 + '%' : '0%';
-            document.getElementById('status-text').innerText = `${checked} / ${total} éléments (${total ? Math.round((checked/total)*100) : 0}%)`;
-        }
-
-        window.toggle = async (k, v) => { currentData.checks[k] = v; renderChecklist(); await setDoc(docRef, currentData, { merge: true }); };
-        window.addCategory = () => { const n = prompt("Nom de la catégorie :"); if(n) { currentData.structure.push({category: n, items: []}); save(); } };
-        window.editCategory = (c) => { const n = prompt("Renommer :", currentData.structure[c].category); if(n) { currentData.structure[c].category = n; save(); } };
-        window.deleteCategory = (c) => { currentData.structure.splice(c, 1); save(); };
-        window.addItem = (c) => { const t = prompt("Nom :"); if(t) { currentData.structure[c].items.push({title: t, details: ""}); save(); } };
-        window.editItem = (c, i) => { const item = currentData.structure[c].items[i]; const t = prompt("Nom", item.title); if(t) { item.title = t; save(); } };
-        window.deleteItem = (c, i) => { currentData.structure[c].items.splice(i, 1); save(); };
-        window.uncheckAll = () => { currentData.checks = {}; save(); };
-        document.getElementById('save-btn-el').onclick = () => showToast("Synchronisé en temps réel.");
-        
-        async function save() { renderChecklist(); await setDoc(docRef, currentData, { merge: true }); showToast("Sauvegardé !"); }
-    </script>
 </body>
 </html>
