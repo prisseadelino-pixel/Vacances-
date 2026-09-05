@@ -1,6 +1,6 @@
 {
-  "name": "Checklist Vacances",
-  "short_name": "Vacances",
+  "name": "Feux Reliquats",
+  "short_name": "Reliquats",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
