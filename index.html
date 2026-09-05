@@ -1,114 +1,1332 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reliquats</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AD Contrôle</title>
 
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- ICÔNE AD CONTRÔLE DE L'APPLICATION -->
+  <link rel="icon" type="image/png" href="https://i49.servimg.com/u/f49/11/31/89/70/17848310.png">
+  <link rel="manifest" href="manifest.json">
 
-    <style>
-        :root { --primary: #2563eb; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-muted: #64748b; --border: #e2e8f0; --danger: #ef4444; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 16px; }
-        .header { position: sticky; top: 0; background: var(--bg); padding: 10px 0; z-index: 10; border-bottom: 1px solid var(--border); }
-        .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-        .header-logo { width: 50px; height: 50px; object-fit: contain; border-radius: 8px; }
-        .header h1 { font-size: 1.1rem; margin: 0; color: var(--primary); text-align: center; flex-grow: 1; }
-        .save-btn { background-color: #22c55e; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
-        .header-actions { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
-        .reset-btn { background: none; border: 1px solid var(--danger); color: var(--danger); padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; cursor: pointer; }
-        .add-cat-btn { background: var(--primary); color: white; border: none; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; cursor: pointer; }
-        .status-text { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; }
-        .progress-container { background-color: #e2e8f0; border-radius: 10px; height: 8px; width: 100%; overflow: hidden; margin-top: 8px; }
-        .progress-bar { background-color: #22c55e; height: 100%; width: 0%; transition: width 0.3s ease; }
-        .category-header { display: flex; align-items: center; margin: 20px 0 10px 0; padding-bottom: 5px; border-bottom: 2px solid var(--primary); gap: 5px; }
-        .category-title { font-size: 1rem; font-weight: bold; color: var(--primary); flex-grow: 1; cursor: pointer; }
-        .add-item-btn { background: var(--primary); color: white; border: none; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; cursor: pointer; }
-        .item { display: flex; align-items: center; background: var(--card); padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid var(--border); }
-        .item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 10px; flex-shrink: 0; cursor: pointer; }
-        .item-text { flex-grow: 1; font-size: 0.9rem; cursor: pointer; }
-        .item-details { display: block; font-size: 0.75rem; color: var(--text-muted); }
-        .item.checked { opacity: 0.5; background-color: #f1f5f9; }
-        .item.checked .item-title { text-decoration: line-through; }
-        .action-btn { background: none; border: none; font-size: 0.9rem; cursor: pointer; padding: 4px; }
-        
-        /* Modale personnalisée */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal { background: white; padding: 20px; border-radius: 15px; width: 85%; max-width: 300px; text-align: center; }
-        .modal-actions { display: flex; justify-content: space-around; margin-top: 15px; }
-        .btn-modal { padding: 10px 20px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-yes { background: var(--danger); color: white; }
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.85rem; opacity: 0; transition: all 0.3s; z-index: 1000; }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-    </style>
+  <style>
+    :root {
+      --primary: #ea580c;
+      --primary-hover: #c2410c;
+      --secondary: #1e293b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --border: #cbd5e1;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* --- ACCUEIL --- */
+    #home-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1rem;
+      text-align: center;
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    }
+
+    .logo-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .home-logo-img {
+      width: 85vw !important;
+      max-width: 600px !important;
+      height: auto !important;
+      max-height: 350px !important;
+      object-fit: contain;
+      filter: contrast(135%) brightness(112%);
+      mix-blend-mode: multiply;
+      display: block;
+    }
+
+    .app-subtitle {
+      font-size: 1.1rem;
+      color: #64748b;
+      max-width: 480px;
+      margin-bottom: 2rem;
+      line-height: 1.4;
+    }
+
+    .btn-start {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 30px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    /* --- APPLICATION --- */
+    #app-screen {
+      display: none;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+      gap: 0.5rem;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+    }
+
+    .header-brand img {
+      max-height: 65px !important;
+      width: auto !important;
+      object-fit: contain;
+      flex-shrink: 0;
+      filter: contrast(135%) brightness(112%);
+      mix-blend-mode: multiply;
+    }
+
+    .header-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      position: relative;
+      gap: 0.3rem;
+    }
+
+    .btn-nav-home {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: #64748b;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .btn-menu-hamburger {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--secondary);
+      padding: 0.25rem 0.6rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      z-index: 100;
+      min-width: 200px;
+      overflow: hidden;
+      margin-top: 0.4rem;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      background: none;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s ease;
+    }
+
+    .dropdown-item.danger {
+      color: #ef4444;
+    }
+
+    .dropdown-item:hover {
+      background: #f1f5f9;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .search-box input {
+      flex: 1;
+    }
+
+    .btn-search {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s ease;
+    }
+
+    .btn-search:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .form-group {
+      margin-bottom: 0.5rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+      font-size: 0.75rem;
+      color: var(--secondary);
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    /* BARRE D'ACTION HAUT DE FORMULAIRE */
+    .form-header-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      background: #fff7ed;
+      padding: 0.75rem;
+      border-radius: 10px;
+      border: 1px solid #fed7aa;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-new-cmd {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-new-cmd:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* GRILLE DES BLOCS INDIVIDUELS */
+    .photos-grid-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      .photos-grid-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .photo-input-block {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      position: relative;
+    }
+
+    .btn-remove-block {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #fee2e2;
+      color: #ef4444;
+      border: 1px solid #fca5a5;
+      border-radius: 6px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-remove-block:hover {
+      background: #fecaca;
+    }
+
+    /* CASE AVEC LE + POUR APPAREIL PHOTO */
+    .photo-add-box {
+      width: 100%;
+      height: 100px;
+      background: #f1f5f9;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .photo-add-box:hover {
+      border-color: var(--primary);
+      background: #fff7ed;
+    }
+
+    .plus-icon {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .plus-label {
+      font-size: 0.7rem;
+      color: #64748b;
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    .photo-preview-container {
+      position: relative;
+      width: 100%;
+      height: 100px;
+      display: none;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .photo-preview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .btn-remove-photo {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-add-more {
+      background-color: #f1f5f9;
+      color: var(--primary);
+      border: 2px dashed var(--primary);
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      transition: background 0.2s ease;
+    }
+
+    .btn-add-more:hover {
+      background-color: #fff7ed;
+    }
+
+    button.btn-main {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      font-size: 1rem;
+    }
+
+    button.btn-secondary {
+      background-color: #64748b;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .export-filter-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      background: #f1f5f9;
+      padding: 0.75rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .export-filter-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--secondary);
+    }
+
+    .export-actions-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .input-date-custom {
+      flex: 1;
+      min-width: 140px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text);
+      outline: none;
+      background: white;
+    }
+
+    button.btn-pdf {
+      background-color: #0284c7;
+      color: white;
+      border: none;
+      padding: 0.6rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      white-space: nowrap;
+    }
+
+    button.btn-pdf:hover {
+      background-color: #0369a1;
+    }
+
+    .section-header {
+      margin-bottom: 0.5rem;
+    }
+
+    .liste-commandes {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .commande-item-compact {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .commande-item-compact:hover {
+      background: #f1f5f9;
+    }
+
+    .commande-main-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-grow: 1;
+    }
+
+    .commande-num-badge {
+      font-weight: bold;
+      font-size: 1.05rem;
+      color: var(--primary);
+    }
+
+    .commande-date-compact {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .commande-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-edit-small {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--secondary);
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-edit-small:hover {
+      background: var(--border);
+    }
+
+    .btn-delete-small {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #ef4444;
+      padding: 0.35rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-delete-small:hover {
+      background: #fee2e2;
+    }
+
+    /* MODAL DE ZOOM */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.88);
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .modal-content-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      max-width: 95%;
+      margin: auto;
+    }
+
+    .modal-images-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 100%;
+    }
+
+    .modal-photo-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.75rem;
+      border-radius: 10px;
+    }
+
+    .modal-images-row img {
+      max-width: 25vw;
+      max-height: 40vh;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      object-fit: contain;
+    }
+
+    .modal-badge-info {
+      color: white;
+      background: rgba(234, 88, 12, 0.9);
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    @media (max-width: 600px) {
+      .modal-images-row img {
+        max-width: 80vw;
+        max-height: 25vh;
+      }
+    }
+
+    .modal-notes {
+      color: white;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      max-width: 500px;
+      text-align: center;
+      font-size: 0.95rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1001;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-area, #print-area * {
+        visibility: visible;
+      }
+      #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 20px;
+      }
+      .print-title {
+        font-size: 22px;
+        color: #ea580c;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      .print-subtitle {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #ea580c;
+        padding-bottom: 10px;
+      }
+      .print-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+      .print-card {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 10px;
+        page-break-inside: avoid;
+        background: #ffffff;
+      }
+      .print-card h3 {
+        font-size: 16px;
+        color: #0f172a;
+        margin-bottom: 4px;
+      }
+      .print-card .date {
+        font-size: 11px;
+        color: #64748b;
+        margin-bottom: 8px;
+      }
+      .print-photos-flex {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .print-photo-box-print {
+        width: 48%;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .print-photos-flex img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+      }
+      .print-ref-text {
+        font-size: 9px;
+        font-weight: bold;
+        color: #ea580c;
+        background: #f1f5f9;
+        padding: 2px;
+        border-radius: 3px;
+        text-align: center;
+      }
+      .print-card .notes {
+        font-size: 12px;
+        color: #334155;
+        margin-top: 6px;
+        font-style: italic;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="header-top">
-            <img src="logo.png" alt="Logo" class="header-logo">
-            <h1>Vacances</h1>
-            <button class="save-btn" id="save-btn-el">✓ Sauvegardé</button>
-        </div>
-        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
-        <div class="header-actions">
-            <button class="reset-btn" onclick="window.confirmAction('Tout décocher ?', window.uncheckAll)">Tout décocher</button>
-            <button class="add-cat-btn" onclick="window.addCategory()">+ Catégorie</button>
-        </div>
-        <div id="status-text" class="status-text">Chargement...</div>
+  <!-- ACCUEIL -->
+  <div id="home-screen">
+    <div class="logo-container">
+      <a href="https://servimg.com/view/11318970/307" target="_blank">
+        <img class="home-logo-img" src="https://i49.servimg.com/u/f49/11/31/89/70/17848310.png" style="border:0;" alt="AD Contrôle Logo" />
+      </a>
     </div>
+    <p class="app-subtitle">Prenez en photo vos reliquats et gardez une preuve visuelle incontestable.</p>
+    <button class="btn-start" id="btnCommencer">🚀 Lancer les reliquats</button>
+  </div>
 
-    <div id="checklist-container"></div>
-
-    <div id="custom-modal" class="modal-overlay">
-        <div class="modal">
-            <p id="modal-message">Êtes-vous sûr ?</p>
-            <div class="modal-actions">
-                <button class="btn-modal" onclick="window.closeModal()">Annuler</button>
-                <button class="btn-modal btn-yes" id="btn-confirm-yes">Confirmer</button>
-            </div>
+  <!-- APPLICATION -->
+  <div id="app-screen">
+    <header>
+      <div class="header-brand">
+        <a href="https://servimg.com/view/11318970/307" target="_blank">
+          <img src="https://i49.servimg.com/u/f49/11/31/89/70/17848310.png" style="border:0;" alt="AD Contrôle Logo" />
+        </a>
+      </div>
+      
+      <div class="header-controls">
+        <button class="btn-nav-home" id="btnRetourAccueil">🏠 Accueil</button>
+        <button class="btn-menu-hamburger" id="btnMenu" title="Menu options">☰</button>
+        
+        <div class="dropdown-menu" id="dropdownMenu">
+          <button class="dropdown-item danger" id="btnViderHistorique">
+            🗑️ Vider l'historique
+          </button>
         </div>
+      </div>
+    </header>
+
+    <!-- SECTION RECHERCHE -->
+    <section class="card" style="padding: 1rem;">
+      <div class="search-box">
+        <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro de commande..." autocomplete="off">
+        <button type="button" class="btn-search" id="btnLancerRecherche">Rechercher</button>
+      </div>
+    </section>
+
+    <!-- FORMULAIRE DE PRÉPARATION -->
+    <section class="card" id="sectionPreparation">
+      <div class="form-header-actions">
+        <h2 id="formTitle" style="font-size: 1.1rem; color:var(--primary);">Nouveaux Reliquats</h2>
+        <button type="button" class="btn-new-cmd" id="btnNouvelleCommande">➕ Nouvelle commande</button>
+      </div>
+
+      <!-- CONTENEUR DES BLOCS INDIVIDUELS -->
+      <div class="photos-grid-container" id="blocsContainer"></div>
+
+      <!-- BOUTON POUR RAJOUTER UN PRODUIT SUR LA MÊME COMMANDE -->
+      <button type="button" class="btn-add-more" id="btnAddBloc">➕ Ajouter un autre produit manquant sur cette commande</button>
+
+      <div class="form-group" style="margin-top: 1rem;">
+        <label for="notes" style="font-size: 0.85rem;">Remarques globales (optionnel)</label>
+        <textarea id="notes" rows="2" placeholder="Ex: Produit fragile, carton réutilisé..." autocomplete="off"></textarea>
+      </div>
+
+      <div style="display:flex; gap:0.5rem; margin-top: 1rem;">
+        <button class="btn-main" id="btnEnregistrer">Enregistrer les reliquats</button>
+        <button class="btn-secondary" id="btnAnnulerEdit" style="display:none; width:auto;">Annuler</button>
+      </div>
+    </section>
+
+    <!-- HISTORIQUE DES PREUVES -->
+    <section class="card">
+      <div class="section-header">
+        <h2>Historique des Preuves</h2>
+      </div>
+
+      <div class="export-filter-container">
+        <span class="export-filter-label">📅 Filtrer par date pour l'export (Optionnel) :</span>
+        <div class="export-actions-row">
+          <input type="date" id="dateFiltreExport" class="input-date-custom">
+          <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
+        </div>
+      </div>
+
+      <div class="liste-commandes" id="galerieCommandes"></div>
+    </section>
+  </div>
+
+  <div id="print-area"></div>
+
+  <!-- MODAL ZOOM -->
+  <div id="imageModal" class="modal">
+    <span class="modal-close" id="closeModal">&times;</span>
+    <div class="modal-content-container">
+      <div class="modal-images-row" id="modalImagesContainer"></div>
+      <div id="modalNotes" class="modal-notes" style="display: none;"></div>
     </div>
+  </div>
 
-    <div id="toast" class="toast">Action effectuée.</div>
+  <!-- SDK FIREBASE COMPAT -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAsYfXgNnrskxOwgX081lv",
+      authDomain: "ad-controle.firebaseapp.com",
+      databaseURL: "https://ad-controle-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "ad-controle",
+      storageBucket: "ad-controle.firebaseapp.com",
+      messagingSenderId: "745097117764",
+      appId: "1:745097117764:web:59feae933",
+      measurementId: "G-RZ3Q22WDH6"
+    };
 
-        const firebaseConfig = { apiKey: "AIzaSyCHefIbY5LYOOlsevUhwYn8frlYsA7K9yw", authDomain: "vacances-22b22.firebaseapp.com", projectId: "vacances-22b22", storageBucket: "vacances-22b22.firebasestorage.app", messagingSenderId: "63081073246", appId: "1:63081073246:web:fb943c8b7d80d4d3e802cf", measurementId: "G-X4WXTSLZB9" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const docRef = doc(db, "vacances", "checklist");
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        let currentData = { checks: {}, structure: [] };
+    const homeScreen = document.getElementById('home-screen');
+    const appScreen = document.getElementById('app-screen');
+    const btnCommencer = document.getElementById('btnCommencer');
+    const btnRetourAccueil = document.getElementById('btnRetourAccueil');
+    const sectionPreparation = document.getElementById('sectionPreparation');
 
-        window.closeModal = () => document.getElementById('custom-modal').style.display = 'none';
-        window.confirmAction = (msg, callback) => {
-            document.getElementById('modal-message').innerText = msg;
-            document.getElementById('btn-confirm-yes').onclick = () => { callback(); window.closeModal(); };
-            document.getElementById('custom-modal').style.display = 'flex';
-        };
+    const btnMenu = document.getElementById('btnMenu');
+    const dropdownMenu = document.getElementById('dropdownMenu');
 
-        function showToast(msg) { const toast = document.getElementById('toast'); toast.innerText = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2000); }
+    btnMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle('show');
+    });
 
-        onSnapshot(docRef, (docSnap) => {
-            currentData = docSnap.exists() ? docSnap.data() : { checks: {}, structure: [] };
-            renderChecklist();
+    document.addEventListener('click', () => {
+      dropdownMenu.classList.remove('show');
+    });
+
+    btnCommencer.addEventListener('click', () => {
+      homeScreen.style.display = 'none';
+      appScreen.style.display = 'block';
+      reinitialiserFormulaire();
+    });
+
+    btnRetourAccueil.addEventListener('click', () => {
+      reinitialiserFormulaire();
+      inputRecherche.value = "";
+      sectionPreparation.style.display = 'block';
+      afficherGalerie();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    let commandes = [];
+    let modeEditionId = null;
+
+    const blocsContainer = document.getElementById('blocsContainer');
+    const btnAddBloc = document.getElementById('btnAddBloc');
+    const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
+    const inputNotes = document.getElementById('notes');
+    const btnEnregistrer = document.getElementById('btnEnregistrer');
+    const btnAnnulerEdit = document.getElementById('btnAnnulerEdit');
+    const formTitle = document.getElementById('formTitle');
+    const galerieCommandes = document.getElementById('galerieCommandes');
+    const inputRecherche = document.getElementById('recherche');
+    const btnLancerRecherche = document.getElementById('btnLancerRecherche');
+    const btnViderHistorique = document.getElementById('btnViderHistorique');
+    const btnExportPDF = document.getElementById('btnExportPDF');
+    const dateFiltreExport = document.getElementById('dateFiltreExport');
+
+    const modal = document.getElementById('imageModal');
+    const modalImagesContainer = document.getElementById('modalImagesContainer');
+    const modalNotes = document.getElementById('modalNotes');
+    const closeModal = document.getElementById('closeModal');
+
+    // ÉCOUTE FIREBASE
+    db.ref('commandes').on('value', (snapshot) => {
+      const data = snapshot.val();
+      commandes = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          commandes.push(data[key]);
         });
+        commandes.sort((a, b) => b.id - a.id);
+      }
+      afficherGalerie(inputRecherche.value);
+    }, (error) => {
+      alert("Erreur de lecture Firebase : " + error.message);
+    });
 
-        function renderChecklist() {
-            const container = document.getElementById('checklist-container');
-            container.innerHTML = '';
-            let total = 0, checked = 0;
-            currentData.structure.forEach((cat, catIdx) => {
-                const div = document.createElement('div');
-                div.innerHTML = `<div class="category-header">
-                    <span class="category-title" onclick="window.editCategory(${catIdx})">✏️ ${cat.category}</span>
+    // COMPRESSION IMAGE
+    function compresserImage(dataUrl, callback) {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const maxDimension = 1200;
+
+        if (width > height && width > maxDimension) {
+          height *= maxDimension / width;
+          width = maxDimension;
+        } else if (height > maxDimension) {
+          width *= maxDimension / height;
+          height = maxDimension;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        callback(canvas.toDataURL('image/jpeg', 0.75));
+      };
+      img.src = dataUrl;
+    }
+
+    // FONCTION POUR AJOUTER UN BLOC INDÉPENDANT
+    function ajouterBlocProduit(photoData = "", numVal = "", refVal = "") {
+      const blockDiv = document.createElement('div');
+      blockDiv.className = 'photo-input-block';
+
+      blockDiv.innerHTML = `
+        <button type="button" class="btn-remove-block" title="Supprimer ce bloc">✕ Supprimer</button>
+        
+        <div class="form-group" style="margin-bottom: 0.3rem;">
+          <label>N° de Commande</label>
+          <input type="text" class="input-num" placeholder="Ex: S-103567" value="${numVal}" autocomplete="off">
+        </div>
+
+        <div class="photo-add-box" style="${photoData ? 'display:none;' : 'display:flex;'}">
+          <span class="plus-icon">+</span>
+          <span class="plus-label">Photo</span>
+        </div>
+
+        <div class="photo-preview-container" style="${photoData ? 'display:block;' : 'display:none;'}">
+          <img class="photo-preview" src="${photoData}" alt="Aperçu">
+          <button type="button" class="btn-remove-photo">×</button>
+        </div>
+
+        <input type="file" class="file-camera" accept="image/*" capture="environment" style="display: none;">
+
+        <div class="form-group" style="margin-bottom: 0; margin-top: 0.3rem;">
+          <label>Référence</label>
+          <input type="text" class="input-ref" placeholder="Ex: Xdc-3468" value="${refVal}" autocomplete="off">
+        </div>
+      `;
+
+      const addBox = blockDiv.querySelector('.photo-add-box');
+      const fileInput = blockDiv.querySelector('.file-camera');
+      const previewContainer = blockDiv.querySelector('.photo-preview-container');
+      const photoPreview = blockDiv.querySelector('.photo-preview');
+      const btnRemovePhoto = blockDiv.querySelector('.btn-remove-photo');
+      const btnRemoveBlock = blockDiv.querySelector('.btn-remove-block');
+
+      let currentPhoto = photoData;
+
+      addBox.addEventListener('click', () => fileInput.click());
+
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            compresserImage(event.target.result, (compressed) => {
+              currentPhoto = compressed;
+              photoPreview.src = compressed;
+              addBox.style.display = 'none';
+              previewContainer.style.display = 'block';
+            });
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      btnRemovePhoto.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentPhoto = "";
+        photoPreview.src = "";
+        fileInput.value = "";
+        previewContainer.style.display = 'none';
+        addBox.style.display = 'flex';
+      });
+
+      btnRemoveBlock.addEventListener('click', () => {
+        if (blocsContainer.children.length > 1) {
+          blockDiv.remove();
+        } else {
+          alert("Vous devez garder au moins un bloc.");
+        }
+      });
+
+      blockDiv.dataset.getPhoto = () => currentPhoto;
+      blocsContainer.appendChild(blockDiv);
+    }
+
+    btnAddBloc.addEventListener('click', () => {
+      ajouterBlocProduit();
+    });
+
+    btnNouvelleCommande.addEventListener('click', () => {
+      reinitialiserFormulaire();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ENREGISTREMENT
+    btnEnregistrer.addEventListener('click', () => {
+      const blocks = blocsContainer.querySelectorAll('.photo-input-block');
+      const itemsData = [];
+      let hasAtLeastOne = false;
+
+      blocks.forEach(block => {
+        const num = block.querySelector('.input-num').value.trim();
+        const ref = block.querySelector('.input-ref').value.trim();
+        const photo = block.dataset.getPhoto();
+
+        if (photo || num || ref) {
+          hasAtLeastOne = true;
+        }
+        itemsData.push({ numero: num, ref: ref, photo: photo });
+      });
+
+      if (!hasAtLeastOne) {
+        alert("Veuillez remplir au moins un bloc complet.");
+        return;
+      }
+
+      let principalNum = "Reliquat";
+      for (let item of itemsData) {
+        if (item.numero) {
+          principalNum = item.numero;
+          break;
+        }
+      }
+
+      btnEnregistrer.disabled = true;
+      btnEnregistrer.textContent = "Enregistrement...";
+
+      const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
+      const commandeData = {
+        id: idObjet,
+        numero: principalNum,
+        items: itemsData,
+        notes: inputNotes.value.trim(),
+        date: modeEditionId !== null ? commandes.find(c => c.id === modeEditionId).date : new Date().toLocaleString('fr-FR')
+      };
+
+      db.ref('commandes/' + idObjet).set(commandeData)
+        .then(() => {
+          reinitialiserFormulaire();
+          btnEnregistrer.disabled = false;
+        })
+        .catch((error) => {
+          btnEnregistrer.disabled = false;
+          btnEnregistrer.textContent = "Enregistrer les reliquats";
+          alert("❌ ÉCHEC FIREBASE : " + error.message);
+        });
+    });
+
+    function reinitialiserFormulaire() {
+      modeEditionId = null;
+      inputNotes.value = "";
+      blocsContainer.innerHTML = "";
+      ajouterBlocProduit();
+
+      btnEnregistrer.textContent = "Enregistrer les reliquats";
+      btnEnregistrer.disabled = false;
+      btnAnnulerEdit.style.display = "none";
+      formTitle.textContent = "Nouveaux Reliquats";
+    }
+
+    btnAnnulerEdit.addEventListener('click', reinitialiserFormulaire);
+
+    window.editerCommande = function(id, event) {
+      if (event) event.stopPropagation();
+      const item = commandes.find(c => c.id === id);
+      if (!item) return;
+
+      inputRecherche.value = "";
+      sectionPreparation.style.display = 'block';
+
+      modeEditionId = id;
+      inputNotes.value = item.notes || "";
+      blocsContainer.innerHTML = "";
+
+      if (item.items && Array.isArray(item.items) && item.items.length > 0) {
+        item.items.forEach(it => {
+          ajouterBlocProduit(it.photo || "", it.numero || "", it.ref || "");
+        });
+      } else {
+        ajouterBlocProduit();
+      }
+
+      btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
+      btnAnnulerEdit.style.display = "inline-block";
+      formTitle.textContent = "✏️ Modifier le reliquat";
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.supprimerCommande = function(id, event) {
+      if (event) event.stopPropagation();
+      const item = commandes.find(c => c.id === id);
+      if (!item) return;
+
+      if (confirm(`Voulez-vous vraiment supprimer cet enregistrement ?`)) {
+        db.ref('commandes/' + id).remove()
+          .then(() => {
+            if (modeEditionId === id) reinitialiserFormulaire();
+          });
+      }
+    };
+
+    btnViderHistorique.addEventListener('click', () => {
+      dropdownMenu.classList.remove('show');
+      if (confirm("Voulez-vous vraiment effacer TOUT l'historique de la base de données ?")) {
+        db.ref('commandes').remove()
+          .then(() => {
+            reinitialiserFormulaire();
+          });
+      }
+    });
+
+    function afficherGalerie(filtre = "") {
+      galerieCommandes.innerHTML = "";
+      const liste = commandes.filter(c => {
+        if ((c.numero || "").toLowerCase().includes(filtre.toLowerCase())) return true;
+        if (c.items && Array.isArray(c.items)) {
+          return c.items.some(it => (it.numero || "").toLowerCase().includes(filtre.toLowerCase()) || (it.ref || "").toLowerCase().includes(filtre.toLowerCase()));
+        }
+        return false;
+      });
+
+      if (liste.length === 0) {
+        galerieCommandes.innerHTML = `<p style="text-align:center; color:#64748b; padding:1rem;">Aucun reliquat trouvé.</p>`;
+        return;
+      }
+
+      liste.forEach(cmd => {
+        const item = document.createElement('div');
+        item.className = 'commande-item-compact';
+        item.onclick = () => ouvrirModal(cmd);
+        
+        let countPhotos = 0;
+        if (cmd.items) {
+          countPhotos = cmd.items.filter(it => it.photo).length;
+        }
+
+        item.innerHTML = `
+          <div class="commande-main-btn">
+            <span>📷 (${countPhotos} photo${countPhotos > 1 ? 's' : ''})</span>
+            <div>
+              <div class="commande-num-badge">N° ${cmd.numero}</div>
+              <div class="commande-date-compact">${cmd.date}</div>
+            </div>
+          </div>
+          <div class="commande-actions">
+            <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">✏️ Modifier</button>
+            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)">❌</button>
+          </div>
+        `;
+        galerieCommandes.appendChild(item);
+      });
+    }
+
+    window.ouvrirModal = function(cmd) {
+      modal.style.display = "flex";
+      modalImagesContainer.innerHTML = "";
+
+      if (cmd.items && Array.isArray(cmd.items)) {
+        cmd.items.forEach(it => {
+          if (it.photo) {
+            let badgeText = "";
+            if (it.numero) badgeText += `N°: ${it.numero} `;
+            if (it.ref) badgeText += `| Réf: ${it.ref}`;
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'modal-photo-wrapper';
+            wrapper.innerHTML = `
+              <img src="${it.photo}" alt="Photo zoom">
+              ${badgeText.trim() !== "" ? `<div class="modal-badge-info">${badgeText}</div>` : ''}
+            `;
+            modalImagesContainer.appendChild(wrapper);
+          }
+        });
+      }
+
+      if (cmd.notes && cmd.notes.trim() !== "") {
+        modalNotes.textContent = "💬 " + cmd.notes;
+        modalNotes.style.display = "block";
+      } else {
+        modalNotes.style.display = "none";
+      }
+    };
+
+    closeModal.addEventListener('click', () => modal.style.display = "none");
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = "none";
+    });
+
+    function executerRecherche() {
+      const valeur = inputRecherche.value.trim();
+      if (valeur !== "") {
+        sectionPreparation.style.display = 'none';
+      } else {
+        sectionPreparation.style.display = 'block';
+      }
+      afficherGalerie(valeur);
+    }
+
+    btnLancerRecherche.addEventListener('click', executerRecherche);
+    inputRecherche.addEventListener('input', executerRecherche);
+    inputRecherche.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') executerRecherche();
+    });
+
+    btnExportPDF.addEventListener('click', () => {
+      const dateSelect = dateFiltreExport.value;
+      let listeAExporter = commandes;
+      let titreExport = "Historique Complet des Reliquats";
+
+      if (dateSelect) {
+        const parts = dateSelect.split('-');
+        const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        
+        listeAExporter = commandes.filter(cmd => cmd.date.startsWith(dateFormatee));
+        titreExport = `Historique des Reliquats - Date : ${dateFormatee}`;
+
+        if (listeAExporter.length === 0) {
+          alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`);
+          return;
+        }
+      } else {
+        if (commandes.length === 0) {
+          alert("L'historique est vide, aucun document à exporter.");
+          return;
+        }
+      }
+
+      const printArea = document.getElementById('print-area');
+      const dateHeureExport = new Date().toLocaleString('fr-FR');
+
+      let html = `
+        <div class="print-title">${titreExport}</div>
+        <div class="print-subtitle">Document généré le ${dateHeureExport} - Total : ${listeAExporter.length} enregistrement(s)</div>
+        <div class="print-grid">
+      `;
+
+      listeAExporter.forEach(cmd => {
+        html += `
+          <div class="print-card">
+            <h3>Reliquat global : ${cmd.numero}</h3>
+            <div class="date">Date : ${cmd.date}</div>
+            <div class="print-photos-flex">
+        `;
+
+        if (cmd.items && Array.isArray(cmd.items)) {
+          cmd.items.forEach(it => {
+            if (it.photo) {
+              html += `
+                <div class="print-photo-box-print">
+                  <img src="${it.photo}" alt="Photo">
+                  ${it.numero ? `<div class="print-ref-text">N°: ${it.numero}</div>` : ''}
+                  ${it.ref ? `<div class="print-ref-text">Réf: ${it.ref}</div>` : ''}
+                </div>
+              `;
+            }
+          });
+        }
+
+        html += `
+            </div>
+            ${cmd.notes ? `<div class="notes">💬 ${cmd.notes}</div>` : ''}
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+      printArea.innerHTML = html;
+
+      window.print();
+    });
+
+    // Initialisation d'un bloc par défaut au démarrage
+    document.addEventListener('DOMContentLoaded', () => {
+      ajouterBlocProduit();
+    });
+  </script>
+</body>
+</html>q                  <span class="category-title" onclick="window.editCategory(${catIdx})">✏️ ${cat.category}</span>
                     <button class="add-item-btn" onclick="window.addItem(${catIdx})">+ Élément</button>
                     <button class="action-btn" onclick="window.confirmAction('Supprimer la catégorie ?', () => window.deleteCategory(${catIdx}))">🗑️</button>
                 </div>`;
