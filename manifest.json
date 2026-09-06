@@ -1,16 +1,16 @@
 {
-  "name": "Feux Reliquats",
+  "name": "Reliquats Fleux",
   "short_name": "Reliquats",
-  "start_url": "./index.html",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "background_color": "#090d16",
+  "theme_color": "#ff6b00",
   "icons": [
     {
-      "src": "logo.png",
-      "sizes": "192x192 512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
     }
   ]
 }
+1
