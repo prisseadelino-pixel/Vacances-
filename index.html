@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -755,7 +756,7 @@
     <section class="card" id="sectionPreparation">
       <div class="form-header-actions">
         <h2 id="formTitle" style="font-size: 0.95rem; font-weight: 700; color:var(--primary);">Reliquats Fleux</h2>
-        <button type="button" class="btn-new-cmd" id="btnNouvelleCommande">➕ Nouvelle commande</button>
+        <button type="button" class="btn-new-cmd" id="btnNouvelleCommande">➕ Nvx reliquats</button>
       </div>
 
       <!-- CONTENEUR DES BLOCS -->
@@ -891,7 +892,7 @@
       }
       afficherGalerie(inputRecherche.value);
     }, (error) => {
-      alert("Erreur de lecture Firebase : " + error.message);
+      console.error("Erreur Firebase :", error.message);
     });
 
     // COMPRESSION IMAGE
