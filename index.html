@@ -12,14 +12,12 @@
   <style>
     :root {
       --primary: #ff6b00;
-      --primary-glow: rgba(255, 107, 0, 0.25);
-      --bg-dark: #090d16;
+      --primary-hover: #e05e00;
+      --secondary: #1e293b;
+      --bg: #090d16;
       --card-bg: #131c2e;
-      --card-border: #1e293b;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --danger: #f43f5e;
-      --success: #10b981;
+      --text: #f8fafc;
+      --border: #1e293b;
       --radius: 16px;
     }
 
@@ -27,40 +25,37 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
     }
 
     body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
+      background-color: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
     }
 
-    /* --- ÉCRAN D'ACCUEIL --- */
+    /* --- ACCUEIL --- */
     #home-screen {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 2rem;
+      padding: 1rem;
       text-align: center;
-      background: radial-gradient(circle at 50% 20%, #1a2642 0%, var(--bg-dark) 70%);
+      background: radial-gradient(circle at 50% 20%, #1a2642 0%, var(--bg) 70%);
     }
 
-    .home-logo-wrapper {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 2rem;
-      border-radius: 24px;
-      backdrop-filter: blur(10px);
+    .logo-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin-bottom: 2rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
 
     .home-logo-img {
-      width: 80vw !important;
+      width: 85vw !important;
       max-width: 420px !important;
       height: auto !important;
       max-height: 180px !important;
@@ -71,36 +66,31 @@
 
     .app-subtitle {
       font-size: 1.1rem;
-      color: var(--text-muted);
-      max-width: 440px;
-      margin-bottom: 2.5rem;
-      line-height: 1.6;
+      color: #94a3b8;
+      max-width: 480px;
+      margin-bottom: 2rem;
+      line-height: 1.4;
     }
 
     .btn-start {
-      background: linear-gradient(135deg, #ff6b00 0%, #ff8833 100%);
+      background-color: var(--primary);
       color: white;
       border: none;
-      padding: 1.1rem 2.8rem;
-      border-radius: 50px;
-      font-size: 1.15rem;
+      padding: 1rem 2rem;
+      border-radius: 30px;
+      font-size: 1.2rem;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 10px 30px var(--primary-glow);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 14px rgba(255, 107, 0, 0.4);
+      transition: all 0.2s ease;
     }
 
-    .btn-start:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 15px 35px rgba(255, 107, 0, 0.4);
-    }
-
-    /* --- APPLICATION PRINCIPALE --- */
+    /* --- APPLICATION --- */
     #app-screen {
       display: none;
       max-width: 800px;
       margin: 0 auto;
-      padding: 1.5rem 1rem;
+      padding: 1rem;
     }
 
     header {
@@ -109,13 +99,22 @@
       justify-content: space-between;
       margin-bottom: 1.5rem;
       padding-bottom: 1rem;
-      border-bottom: 1px solid var(--card-border);
+      border-bottom: 2px solid var(--border);
+      gap: 0.5rem;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
     }
 
     .header-brand img {
-      max-height: 42px !important;
+      max-height: 45px !important;
       width: auto !important;
       object-fit: contain;
+      flex-shrink: 0;
       filter: drop-shadow(0 2px 8px rgba(255,255,255,0.1));
     }
 
@@ -124,34 +123,32 @@
       flex-direction: column;
       align-items: flex-end;
       position: relative;
-      gap: 0.4rem;
+      gap: 0.3rem;
     }
 
     .btn-nav-home {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
-      padding: 0.4rem 0.8rem;
-      border-radius: 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: #94a3b8;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
-      font-size: 0.8rem;
-      transition: all 0.2s;
-    }
-
-    .btn-nav-home:hover {
-      color: var(--text-main);
-      border-color: var(--primary);
+      flex-shrink: 0;
     }
 
     .btn-menu-hamburger {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 0.3rem 0.6rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.25rem 0.6rem;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
     }
 
     .dropdown-menu {
@@ -160,9 +157,9 @@
       top: 100%;
       right: 0;
       background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       z-index: 100;
       min-width: 200px;
       overflow: hidden;
@@ -179,17 +176,18 @@
       text-align: left;
       background: none;
       border: none;
-      font-size: 0.85rem;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      color: var(--text);
+      transition: background 0.2s ease;
     }
 
     .dropdown-item.danger {
-      color: var(--danger);
+      color: #f43f5e;
     }
 
     .dropdown-item:hover {
@@ -199,10 +197,10 @@
     .card {
       background: var(--card-bg);
       border-radius: var(--radius);
-      padding: 1.5rem;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
-      border: 1px solid var(--card-border);
-      margin-bottom: 1.25rem;
+      padding: 1.25rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
     }
 
     .search-box {
@@ -220,198 +218,82 @@
       background-color: var(--primary);
       color: white;
       border: none;
-      padding: 0.65rem 1.1rem;
-      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
       font-weight: 600;
-      font-size: 0.85rem;
       cursor: pointer;
       white-space: nowrap;
+      transition: background 0.2s ease;
     }
 
     .form-group {
-      margin-bottom: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .photo-box-container {
+      background: rgba(255,255,255,0.02);
+      padding: 0.85rem;
+      border-radius: 10px;
+      border: 1px dashed var(--border);
+      margin-bottom: 1rem;
     }
 
     label {
       display: block;
       font-weight: 600;
-      margin-bottom: 0.2rem;
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: #94a3b8;
     }
 
     input, textarea {
       width: 100%;
-      padding: 0.65rem 0.85rem;
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      font-size: 0.9rem;
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text-main);
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
       outline: none;
     }
 
     input:focus, textarea:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-glow);
-    }
-
-    .form-header-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      background: rgba(255, 107, 0, 0.08);
-      padding: 0.75rem 1rem;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 107, 0, 0.2);
-    }
-
-    .btn-new-cmd {
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      padding: 0.4rem 0.8rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .blocs-container {
-      display: flex;
-      flex-direction: column;
-      gap: 0.85rem;
-      margin-bottom: 0.85rem;
-    }
-
-    .photo-input-block {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 0.85rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      position: relative;
-    }
-
-    .btn-remove-block {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(244, 63, 94, 0.15);
-      color: var(--danger);
-      border: 1px solid rgba(244, 63, 94, 0.3);
-      border-radius: 6px;
-      padding: 0.15rem 0.45rem;
-      font-size: 0.7rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .photo-add-box {
-      width: 100%;
-      height: 95px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 2px dashed var(--card-border);
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .photo-add-box:hover {
-      border-color: var(--primary);
-      background: rgba(255, 107, 0, 0.04);
-    }
-
-    .plus-icon {
-      font-size: 1.4rem;
-      color: var(--primary);
-      font-weight: bold;
-    }
-
-    .plus-label {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .photo-preview-container {
-      position: relative;
-      width: 100%;
-      height: 110px;
-      display: none;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--card-border);
     }
 
     .photo-preview {
       width: 100%;
-      height: 100%;
+      max-height: 200px;
       object-fit: cover;
+      border-radius: 8px;
+      display: none;
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--border);
     }
 
-    .btn-remove-photo {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      font-size: 0.7rem;
-      font-weight: bold;
-      cursor: pointer;
+    .camera-controls {
       display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .btn-add-more {
-      background: transparent;
-      color: var(--primary);
-      border: 2px dashed var(--primary);
-      padding: 0.65rem;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      font-size: 0.85rem;
-      margin-bottom: 0.85rem;
-    }
-
-    .btn-add-more:hover {
-      background: rgba(255, 107, 0, 0.05);
+      gap: 0.5rem;
     }
 
     button.btn-main {
-      background: linear-gradient(135deg, #ff6b00 0%, #ff8833 100%);
+      background-color: var(--primary);
       color: white;
       border: none;
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
-      font-weight: 700;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
       cursor: pointer;
       width: 100%;
-      font-size: 0.95rem;
-      box-shadow: 0 4px 15px var(--primary-glow);
+      font-size: 1rem;
     }
 
     button.btn-secondary {
       background-color: #334155;
       color: white;
       border: none;
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
       width: 100%;
@@ -420,72 +302,72 @@
     .export-filter-container {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.5rem;
       margin-top: 0.75rem;
       background: rgba(255,255,255,0.02);
       padding: 0.75rem;
-      border-radius: 12px;
-      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      border: 1px solid var(--border);
     }
 
     .export-filter-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #94a3b8;
     }
 
     .export-actions-row {
       display: flex;
-      gap: 0.4rem;
+      gap: 0.5rem;
       align-items: center;
       flex-wrap: wrap;
     }
 
     .input-date-custom {
       flex: 1;
-      min-width: 130px;
+      min-width: 140px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text);
+      outline: none;
       background: rgba(255,255,255,0.03);
     }
 
     button.btn-pdf {
-      background-color: #0ea5e9;
+      background-color: #0284c7;
       color: white;
       border: none;
-      padding: 0.5rem 0.8rem;
+      padding: 0.6rem 0.85rem;
       border-radius: 8px;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
-    }
-
-    .section-header h2 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--text-main);
+      white-space: nowrap;
     }
 
     .liste-commandes {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
-      margin-top: 0.75rem;
+      margin-top: 1rem;
     }
 
     .commande-item-compact {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--card-border);
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 0.65rem 0.9rem;
+      padding: 0.75rem 1rem;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background 0.2s ease;
     }
 
     .commande-item-compact:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: var(--primary);
+      background: rgba(255,255,255,0.05);
     }
 
     .commande-main-btn {
@@ -496,29 +378,29 @@
     }
 
     .commande-num-badge {
-      font-weight: 700;
-      font-size: 0.95rem;
+      font-weight: bold;
+      font-size: 1.05rem;
       color: var(--primary);
     }
 
     .commande-date-compact {
-      font-size: 0.7rem;
-      color: var(--text-muted);
+      font-size: 0.75rem;
+      color: #94a3b8;
     }
 
     .commande-actions {
       display: flex;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.4rem;
     }
 
     .btn-edit-small {
       background: rgba(255,255,255,0.05);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 0.3rem 0.5rem;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.6rem;
       border-radius: 6px;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
     }
@@ -526,13 +408,15 @@
     .btn-delete-small {
       background: rgba(244, 63, 94, 0.1);
       border: 1px solid rgba(244, 63, 94, 0.2);
-      color: var(--danger);
-      padding: 0.3rem 0.4rem;
+      color: #f43f5e;
+      padding: 0.35rem 0.5rem;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 600;
       cursor: pointer;
     }
 
+    /* MODAL ZOOM */
     .modal {
       display: none;
       position: fixed;
@@ -541,8 +425,7 @@
       top: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(9, 13, 22, 0.9);
-      backdrop-filter: blur(8px);
+      background-color: rgba(0, 0, 0, 0.88);
       align-items: center;
       justify-content: center;
       padding: 1rem;
@@ -567,49 +450,32 @@
       max-width: 100%;
     }
 
-    .modal-photo-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(255, 255, 255, 0.03);
-      padding: 0.75rem;
-      border-radius: 12px;
-      border: 1px solid var(--card-border);
-    }
-
     .modal-images-row img {
-      max-width: 25vw;
-      max-height: 40vh;
+      max-width: 45vw;
+      max-height: 65vh;
       border-radius: 8px;
       object-fit: contain;
     }
 
-    .modal-badge-info {
-      color: white;
-      background: var(--primary);
-      padding: 0.3rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-
     @media (max-width: 600px) {
+      .modal-images-row {
+        flex-direction: column;
+      }
       .modal-images-row img {
-        max-width: 80vw;
-        max-height: 25vh;
+        max-width: 90vw;
+        max-height: 40vh;
       }
     }
 
     .modal-notes {
-      color: var(--text-main);
-      background: var(--card-bg);
+      color: white;
+      background: rgba(19, 28, 46, 0.9);
       padding: 0.75rem 1rem;
-      border-radius: 10px;
+      border-radius: 8px;
       max-width: 500px;
       text-align: center;
-      font-size: 0.9rem;
-      border: 1px solid var(--card-border);
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
     }
 
     .modal-close {
@@ -620,6 +486,7 @@
       font-size: 2rem;
       font-weight: bold;
       cursor: pointer;
+      z-index: 1001;
     }
 
     @media print {
@@ -675,30 +542,14 @@
       }
       .print-photos-flex {
         display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-      .print-photo-box-print {
-        width: 48%;
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
+        gap: 8px;
       }
       .print-photos-flex img {
-        width: 100%;
-        height: 100px;
+        width: 50%;
+        height: 140px;
         object-fit: cover;
-        border-radius: 4px;
+        border-radius: 6px;
         border: 1px solid #e2e8f0;
-      }
-      .print-ref-text {
-        font-size: 9px;
-        font-weight: bold;
-        color: #ff6b00;
-        background: #f8fafc;
-        padding: 2px;
-        border-radius: 3px;
-        text-align: center;
       }
       .print-card .notes {
         font-size: 12px;
@@ -713,13 +564,13 @@
 
   <!-- ACCUEIL -->
   <div id="home-screen">
-    <div class="home-logo-wrapper">
+    <div class="logo-container">
       <a href="https://servimg.com/view/11318970/309" target="_blank">
         <img class="home-logo-img" src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" style="border:0;" alt="Reliquats Fleux Logo" />
       </a>
     </div>
-    <p class="app-subtitle">Prenez en photos les articles manquants suivi de ces numéros de commande.</p>
-    <button class="btn-start" id="btnCommencer">🚀 Lancer Reliquats Fleux</button>
+    <p class="app-subtitle">Prenez en photo vos articles manquants et suivez vos numéros de commande.</p>
+    <button class="btn-start" id="btnCommencer">🚀 Lancer les reliquats</button>
   </div>
 
   <!-- APPLICATION -->
@@ -733,7 +584,7 @@
       
       <div class="header-controls">
         <button class="btn-nav-home" id="btnRetourAccueil">🏠 Accueil</button>
-        <button class="btn-menu-hamburger" id="btnMenu" title="Options">☰</button>
+        <button class="btn-menu-hamburger" id="btnMenu" title="Menu options">☰</button>
         
         <div class="dropdown-menu" id="dropdownMenu">
           <button class="dropdown-item danger" id="btnViderHistorique">
@@ -744,32 +595,58 @@
     </header>
 
     <!-- SECTION RECHERCHE -->
-    <section class="card">
+    <section class="card" style="padding: 1rem;">
       <div class="search-box">
-        <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro de commande..." autocomplete="off">
+        <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro..." autocomplete="off">
         <button type="button" class="btn-search" id="btnLancerRecherche">Rechercher</button>
       </div>
     </section>
 
-    <!-- FORMULAIRE DE PRÉPARATION -->
+    <!-- NOUVEAU RELIQUAT -->
     <section class="card" id="sectionPreparation">
-      <div class="form-header-actions">
-        <h2 id="formTitle" style="font-size: 0.95rem; font-weight: 700; color:var(--primary);">Reliquats Fleux</h2>
-        <button type="button" class="btn-new-cmd" id="btnNouvelleCommande">➕ Nvx reliquats</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2 id="formTitle" style="font-size: 1.1rem; color:var(--primary);">Nvx reliquats</h2>
       </div>
 
-      <!-- CONTENEUR DES BLOCS -->
-      <div class="blocs-container" id="blocsContainer"></div>
-
-      <!-- BOUTON POUR RAJOUTER UN PRODUIT -->
-      <button type="button" class="btn-add-more" id="btnAddBloc">➕ Ajouter un autre produit manquant sur cette commande</button>
-
-      <div class="form-group" style="margin-top: 0.6rem;">
-        <label for="notes">Remarques globales (optionnel)</label>
-        <textarea id="notes" rows="1" placeholder="Ex: Produit fragile..." autocomplete="off"></textarea>
+      <div class="form-group">
+        <label for="numeroCommande">N° de Commande</label>
+        <input type="text" id="numeroCommande" name="no_autofill_cmd" autocomplete="off" placeholder="Ex: S-103567">
       </div>
 
-      <div style="display:flex; gap:0.5rem; margin-top: 0.85rem;">
+      <!-- PHOTO 1 -->
+      <div class="photo-box-container">
+        <label>📸 Photo 1 (Article manquant)</label>
+        <img id="photoPreview1" class="photo-preview" alt="Aperçu Photo 1">
+        
+        <input type="file" id="fileGallery1" accept="image/*" style="display: none;">
+        <input type="file" id="fileCamera1" accept="image/*" capture="environment" style="display: none;">
+        
+        <div class="camera-controls">
+          <button type="button" class="btn-secondary" id="btnGalerie1">📁 Galerie 1</button>
+          <button type="button" class="btn-secondary" id="btnPhotoDirecte1">📸 Photo 1</button>
+        </div>
+      </div>
+
+      <!-- PHOTO 2 -->
+      <div class="photo-box-container">
+        <label>📸 Photo 2 (Référence / Autre angle) - Optionnelle</label>
+        <img id="photoPreview2" class="photo-preview" alt="Aperçu Photo 2">
+        
+        <input type="file" id="fileGallery2" accept="image/*" style="display: none;">
+        <input type="file" id="fileCamera2" accept="image/*" capture="environment" style="display: none;">
+        
+        <div class="camera-controls">
+          <button type="button" class="btn-secondary" id="btnGalerie2">📁 Galerie 2</button>
+          <button type="button" class="btn-secondary" id="btnPhotoDirecte2">📸 Photo 2</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Remarques (optionnel)</label>
+        <textarea id="notes" rows="2" placeholder="Ex: Produit fragile..." autocomplete="off"></textarea>
+      </div>
+
+      <div style="display:flex; gap:0.5rem;">
         <button class="btn-main" id="btnEnregistrer">Enregistrer les reliquats</button>
         <button class="btn-secondary" id="btnAnnulerEdit" style="display:none; width:auto;">Annuler</button>
       </div>
@@ -799,12 +676,15 @@
   <div id="imageModal" class="modal">
     <span class="modal-close" id="closeModal">&times;</span>
     <div class="modal-content-container">
-      <div class="modal-images-row" id="modalImagesContainer"></div>
+      <div class="modal-images-row">
+        <img id="modalImg1" src="" alt="Zoom photo 1">
+        <img id="modalImg2" src="" alt="Zoom photo 2" style="display:none;">
+      </div>
       <div id="modalNotes" class="modal-notes" style="display: none;"></div>
     </div>
   </div>
 
-  <!-- SDK FIREBASE COMPAT CORRIGÉ POUR LE PROJET RELIQUATS-FLEUX -->
+  <!-- SDK FIREBASE COMPAT -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
@@ -844,7 +724,7 @@
     btnCommencer.addEventListener('click', () => {
       homeScreen.style.display = 'none';
       appScreen.style.display = 'block';
-      reinitialiserFormulaire();
+      document.getElementById('numeroCommande').value = "";
     });
 
     btnRetourAccueil.addEventListener('click', () => {
@@ -856,12 +736,25 @@
     });
 
     let commandes = [];
-    let modeEditionFirebaseKey = null;
+    let imageCaptureeData1 = "";
+    let imageCaptureeData2 = "";
+    let modeEditionId = null;
 
-    const blocsContainer = document.getElementById('blocsContainer');
-    const btnAddBloc = document.getElementById('btnAddBloc');
-    const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
+    const inputNumero = document.getElementById('numeroCommande');
     const inputNotes = document.getElementById('notes');
+    
+    const photoPreview1 = document.getElementById('photoPreview1');
+    const fileGallery1 = document.getElementById('fileGallery1');
+    const fileCamera1 = document.getElementById('fileCamera1');
+    const btnGalerie1 = document.getElementById('btnGalerie1');
+    const btnPhotoDirecte1 = document.getElementById('btnPhotoDirecte1');
+
+    const photoPreview2 = document.getElementById('photoPreview2');
+    const fileGallery2 = document.getElementById('fileGallery2');
+    const fileCamera2 = document.getElementById('fileCamera2');
+    const btnGalerie2 = document.getElementById('btnGalerie2');
+    const btnPhotoDirecte2 = document.getElementById('btnPhotoDirecte2');
+
     const btnEnregistrer = document.getElementById('btnEnregistrer');
     const btnAnnulerEdit = document.getElementById('btnAnnulerEdit');
     const formTitle = document.getElementById('formTitle');
@@ -873,28 +766,26 @@
     const dateFiltreExport = document.getElementById('dateFiltreExport');
 
     const modal = document.getElementById('imageModal');
-    const modalImagesContainer = document.getElementById('modalImagesContainer');
+    const modalImg1 = document.getElementById('modalImg1');
+    const modalImg2 = document.getElementById('modalImg2');
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
 
-    // ÉCOUTE FIREBASE SÉCURISÉE
+    // ÉCOUTE FIREBASE FIABLE
     db.ref('commandes').on('value', (snapshot) => {
       const data = snapshot.val();
       commandes = [];
       if (data) {
         Object.keys(data).forEach(key => {
-          let item = data[key];
-          item.firebaseKey = key;
-          commandes.push(item);
+          commandes.push(data[key]);
         });
-        commandes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        commandes.sort((a, b) => b.id - a.id);
       }
       afficherGalerie(inputRecherche.value);
     }, (error) => {
-      console.error("Erreur Firebase :", error.message);
+      alert("Erreur de lecture Firebase : " + error.message);
     });
 
-    // COMPRESSION IMAGE
     function compresserImage(dataUrl, callback) {
       const img = new Image();
       img.onload = () => {
@@ -920,149 +811,72 @@
       img.src = dataUrl;
     }
 
-    // FONCTION POUR AJOUTER UN BLOC
-    function ajouterBlocProduit(photoData = "", numVal = "", refVal = "") {
-      const blockDiv = document.createElement('div');
-      blockDiv.className = 'photo-input-block';
+    btnGalerie1.addEventListener('click', () => fileGallery1.click());
+    btnPhotoDirecte1.addEventListener('click', () => fileCamera1.click());
 
-      blockDiv.innerHTML = `
-        <button type="button" class="btn-remove-block" title="Supprimer ce bloc">✕ Supprimer</button>
-        
-        <div class="form-group" style="margin-bottom: 0.3rem;">
-          <label>N° de Commande</label>
-          <input type="text" class="input-num" placeholder="Ex: S-103567" value="${numVal}" autocomplete="off">
-        </div>
-
-        <div class="photo-add-box" style="${photoData ? 'display:none;' : 'display:flex;'}">
-          <span class="plus-icon">+</span>
-          <span class="plus-label">Ajouter une photo</span>
-        </div>
-
-        <div class="photo-preview-container" style="${photoData ? 'display:block;' : 'display:none;'}">
-          <img class="photo-preview" src="${photoData}" alt="Aperçu">
-          <button type="button" class="btn-remove-photo">×</button>
-        </div>
-
-        <input type="file" class="file-camera" accept="image/*" capture="environment" style="display: none;">
-
-        <div class="form-group" style="margin-bottom: 0; margin-top: 0.3rem;">
-          <label>Référence</label>
-          <input type="text" class="input-ref" placeholder="Ex: Xdc-3468" value="${refVal}" autocomplete="off">
-        </div>
-      `;
-
-      const addBox = blockDiv.querySelector('.photo-add-box');
-      const fileInput = blockDiv.querySelector('.file-camera');
-      const previewContainer = blockDiv.querySelector('.photo-preview-container');
-      const photoPreview = blockDiv.querySelector('.photo-preview');
-      const btnRemovePhoto = blockDiv.querySelector('.btn-remove-photo');
-      const btnRemoveBlock = blockDiv.querySelector('.btn-remove-block');
-
-      let currentPhoto = photoData;
-
-      addBox.addEventListener('click', () => fileInput.click());
-
-      fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            compresserImage(event.target.result, (compressed) => {
-              currentPhoto = compressed;
-              photoPreview.src = compressed;
-              addBox.style.display = 'none';
-              previewContainer.style.display = 'block';
-            });
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-
-      btnRemovePhoto.addEventListener('click', (e) => {
-        e.stopPropagation();
-        currentPhoto = "";
-        photoPreview.src = "";
-        fileInput.value = "";
-        previewContainer.style.display = 'none';
-        addBox.style.display = 'flex';
-      });
-
-      btnRemoveBlock.addEventListener('click', () => {
-        if (blocsContainer.children.length > 1) {
-          blockDiv.remove();
-        } else {
-          alert("Vous devez garder au moins un bloc.");
-        }
-      });
-
-      blockDiv.dataset.getPhoto = () => currentPhoto;
-      blocsContainer.appendChild(blockDiv);
+    function chargerFichier1(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          compresserImage(event.target.result, (imageCompressée) => {
+            imageCaptureeData1 = imageCompressée;
+            photoPreview1.src = imageCaptureeData1;
+            photoPreview1.style.display = 'block';
+          });
+        };
+        reader.readAsDataURL(file);
+      }
     }
+    fileGallery1.addEventListener('change', chargerFichier1);
+    fileCamera1.addEventListener('change', chargerFichier1);
 
-    btnAddBloc.addEventListener('click', () => {
-      ajouterBlocProduit();
-    });
+    btnGalerie2.addEventListener('click', () => fileGallery2.click());
+    btnPhotoDirecte2.addEventListener('click', () => fileCamera2.click());
 
-    btnNouvelleCommande.addEventListener('click', () => {
-      reinitialiserFormulaire();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    function chargerFichier2(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          compresserImage(event.target.result, (imageCompressée) => {
+            imageCaptureeData2 = imageCompressée;
+            photoPreview2.src = imageCaptureeData2;
+            photoPreview2.style.display = 'block';
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    fileGallery2.addEventListener('change', chargerFichier2);
+    fileCamera2.addEventListener('change', chargerFichier2);
 
-    // ENREGISTREMENT BLINDÉ
     btnEnregistrer.addEventListener('click', () => {
-      const blocks = blocsContainer.querySelectorAll('.photo-input-block');
-      const itemsData = [];
-      let hasAtLeastOne = false;
+      const numero = inputNumero.value.trim();
+      const notes = inputNotes.value.trim();
 
-      blocks.forEach(block => {
-        const num = block.querySelector('.input-num').value.trim();
-        const ref = block.querySelector('.input-ref').value.trim();
-        const photo = block.dataset.getPhoto();
-
-        if (photo || num || ref) {
-          hasAtLeastOne = true;
-        }
-        itemsData.push({ numero: num, ref: ref, photo: photo });
-      });
-
-      if (!hasAtLeastOne) {
-        alert("Veuillez remplir au moins un bloc complet.");
+      if (!numero || !imageCaptureeData1) {
+        alert("Veuillez renseigner un numéro de commande et au moins la Photo 1.");
         return;
       }
 
-      let principalNum = "Reliquat";
-      for (let item of itemsData) {
-        if (item.numero) {
-          principalNum = item.numero;
-          break;
-        }
-      }
-
       btnEnregistrer.disabled = true;
-      btnEnregistrer.textContent = "Enregistrement en cours...";
+      btnEnregistrer.textContent = "Enregistrement...";
 
-      const existingItem = modeEditionFirebaseKey ? commandes.find(c => c.firebaseKey === modeEditionFirebaseKey) : null;
-      
+      const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
       const commandeData = {
-        timestamp: existingItem ? existingItem.timestamp : Date.now(),
-        numero: principalNum,
-        items: itemsData,
-        notes: inputNotes.value.trim(),
-        date: existingItem ? existingItem.date : new Date().toLocaleString('fr-FR')
+        id: idObjet,
+        numero: numero,
+        photo: imageCaptureeData1,
+        photo2: imageCaptureeData2,
+        notes: notes,
+        date: modeEditionId !== null ? commandes.find(c => c.id === modeEditionId).date : new Date().toLocaleString('fr-FR')
       };
 
-      let saveRequest;
-      if (modeEditionFirebaseKey) {
-        saveRequest = db.ref('commandes/' + modeEditionFirebaseKey).set(commandeData);
-      } else {
-        saveRequest = db.ref('commandes').push(commandeData);
-      }
-
-      saveRequest
+      db.ref('commandes/' + idObjet).set(commandeData)
         .then(() => {
           reinitialiserFormulaire();
           btnEnregistrer.disabled = false;
-          btnEnregistrer.textContent = "Enregistrer les reliquats";
         })
         .catch((error) => {
           btnEnregistrer.disabled = false;
@@ -1072,55 +886,70 @@
     });
 
     function reinitialiserFormulaire() {
-      modeEditionFirebaseKey = null;
+      modeEditionId = null;
+      inputNumero.value = "";
+      imageCaptureeData1 = "";
+      imageCaptureeData2 = "";
+      photoPreview1.style.display = 'none';
+      photoPreview2.style.display = 'none';
       inputNotes.value = "";
-      blocsContainer.innerHTML = "";
-      ajouterBlocProduit();
-
+      fileGallery1.value = "";
+      fileCamera1.value = "";
+      fileGallery2.value = "";
+      fileCamera2.value = "";
       btnEnregistrer.textContent = "Enregistrer les reliquats";
       btnEnregistrer.disabled = false;
       btnAnnulerEdit.style.display = "none";
-      formTitle.textContent = "Reliquats Fleux";
+      formTitle.textContent = "Nvx reliquats";
     }
 
     btnAnnulerEdit.addEventListener('click', reinitialiserFormulaire);
 
-    window.editerCommande = function(firebaseKey, event) {
+    window.editerCommande = function(id, event) {
       if (event) event.stopPropagation();
-      const item = commandes.find(c => c.firebaseKey === firebaseKey);
+      const item = commandes.find(c => c.id === id);
       if (!item) return;
 
       inputRecherche.value = "";
       sectionPreparation.style.display = 'block';
 
-      modeEditionFirebaseKey = firebaseKey;
+      modeEditionId = id;
+      inputNumero.value = item.numero;
       inputNotes.value = item.notes || "";
-      blocsContainer.innerHTML = "";
-
-      if (item.items && Array.isArray(item.items) && item.items.length > 0) {
-        item.items.forEach(it => {
-          ajouterBlocProduit(it.photo || "", it.numero || "", it.ref || "");
-        });
+      
+      imageCaptureeData1 = item.photo || "";
+      imageCaptureeData2 = item.photo2 || "";
+      
+      if (imageCaptureeData1) {
+        photoPreview1.src = imageCaptureeData1;
+        photoPreview1.style.display = 'block';
       } else {
-        ajouterBlocProduit();
+        photoPreview1.style.display = 'none';
+      }
+
+      if (imageCaptureeData2) {
+        photoPreview2.src = imageCaptureeData2;
+        photoPreview2.style.display = 'block';
+      } else {
+        photoPreview2.style.display = 'none';
       }
 
       btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
       btnAnnulerEdit.style.display = "inline-block";
-      formTitle.textContent = "✏️ Modifier le reliquat";
+      formTitle.textContent = "✏️ Modifier le reliquat " + item.numero;
       
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    window.supprimerCommande = function(firebaseKey, event) {
+    window.supprimerCommande = function(id, event) {
       if (event) event.stopPropagation();
-      const item = commandes.find(c => c.firebaseKey === firebaseKey);
+      const item = commandes.find(c => c.id === id);
       if (!item) return;
 
-      if (confirm(`Voulez-vous vraiment supprimer cet enregistrement ?`)) {
-        db.ref('commandes/' + firebaseKey).remove()
+      if (confirm(`Voulez-vous vraiment supprimer le reliquat ${item.numero} ?`)) {
+        db.ref('commandes/' + id).remove()
           .then(() => {
-            if (modeEditionFirebaseKey === firebaseKey) reinitialiserFormulaire();
+            if (modeEditionId === id) reinitialiserFormulaire();
           });
       }
     };
@@ -1137,70 +966,50 @@
 
     function afficherGalerie(filtre = "") {
       galerieCommandes.innerHTML = "";
-      const liste = commandes.filter(c => {
-        if ((c.numero || "").toLowerCase().includes(filtre.toLowerCase())) return true;
-        if (c.items && Array.isArray(c.items)) {
-          return c.items.some(it => (it.numero || "").toLowerCase().includes(filtre.toLowerCase()) || (it.ref || "").toLowerCase().includes(filtre.toLowerCase()));
-        }
-        return false;
-      });
+      const liste = commandes.filter(c => c.numero.toLowerCase().includes(filtre.toLowerCase()));
 
       if (liste.length === 0) {
-        galerieCommandes.innerHTML = `<p style="text-align:center; color:#94a3b8; padding:1rem; font-size:0.85rem;">Aucun reliquat trouvé.</p>`;
+        galerieCommandes.innerHTML = `<p style="text-align:center; color:#94a3b8; padding:1rem;">Aucun reliquat trouvé.</p>`;
         return;
       }
 
       liste.forEach(cmd => {
         const item = document.createElement('div');
         item.className = 'commande-item-compact';
-        item.onclick = () => ouvrirModal(cmd);
+        item.onclick = () => ouvrirModal(cmd.photo, cmd.photo2, cmd.notes);
         
-        let countPhotos = 0;
-        if (cmd.items) {
-          countPhotos = cmd.items.filter(it => it.photo).length;
-        }
+        const nbPhotosText = cmd.photo2 ? "📷📷 (2 photos)" : "📷 (1 photo)";
 
         item.innerHTML = `
           <div class="commande-main-btn">
-            <span>📷 (${countPhotos})</span>
+            <span>${nbPhotosText}</span>
             <div>
-              <div class="commande-num-badge">N° ${cmd.numero}</div>
+              <div class="commande-num-badge">${cmd.numero}</div>
               <div class="commande-date-compact">${cmd.date}</div>
             </div>
           </div>
           <div class="commande-actions">
-            <button class="btn-edit-small" onclick="editerCommande('${cmd.firebaseKey}', event)">✏️</button>
-            <button class="btn-delete-small" onclick="supprimerCommande('${cmd.firebaseKey}', event)">❌</button>
+            <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">✏️ Modifier</button>
+            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)">❌</button>
           </div>
         `;
         galerieCommandes.appendChild(item);
       });
     }
 
-    window.ouvrirModal = function(cmd) {
+    window.ouvrirModal = function(src1, src2, notes) {
       modal.style.display = "flex";
-      modalImagesContainer.innerHTML = "";
-
-      if (cmd.items && Array.isArray(cmd.items)) {
-        cmd.items.forEach(it => {
-          if (it.photo) {
-            let badgeText = "";
-            if (it.numero) badgeText += `N°: ${it.numero} `;
-            if (it.ref) badgeText += `| Réf: ${it.ref}`;
-
-            const wrapper = document.createElement('div');
-            wrapper.className = 'modal-photo-wrapper';
-            wrapper.innerHTML = `
-              <img src="${it.photo}" alt="Photo zoom">
-              ${badgeText.trim() !== "" ? `<div class="modal-badge-info">${badgeText}</div>` : ''}
-            `;
-            modalImagesContainer.appendChild(wrapper);
-          }
-        });
+      modalImg1.src = src1 || "";
+      
+      if (src2) {
+        modalImg2.src = src2;
+        modalImg2.style.display = "block";
+      } else {
+        modalImg2.style.display = "none";
       }
 
-      if (cmd.notes && cmd.notes.trim() !== "") {
-        modalNotes.textContent = "💬 " + cmd.notes;
+      if (notes && notes.trim() !== "") {
+        modalNotes.textContent = "💬 " + notes;
         modalNotes.style.display = "block";
       } else {
         modalNotes.style.display = "none";
@@ -1238,7 +1047,7 @@
         const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
         
         listeAExporter = commandes.filter(cmd => cmd.date.startsWith(dateFormatee));
-        titreExport = `Historique Reliquats Fleux - Date : ${dateFormatee}`;
+        titreExport = `Historique Reliquats - Date : ${dateFormatee}`;
 
         if (listeAExporter.length === 0) {
           alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`);
@@ -1263,26 +1072,11 @@
       listeAExporter.forEach(cmd => {
         html += `
           <div class="print-card">
-            <h3>Reliquat global : ${cmd.numero}</h3>
+            <h3>Commande : ${cmd.numero}</h3>
             <div class="date">Date : ${cmd.date}</div>
             <div class="print-photos-flex">
-        `;
-
-        if (cmd.items && Array.isArray(cmd.items)) {
-          cmd.items.forEach(it => {
-            if (it.photo) {
-              html += `
-                <div class="print-photo-box-print">
-                  <img src="${it.photo}" alt="Photo">
-                  ${it.numero ? `<div class="print-ref-text">N°: ${it.numero}</div>` : ''}
-                  ${it.ref ? `<div class="print-ref-text">Réf: ${it.ref}</div>` : ''}
-                </div>
-              `;
-            }
-          });
-        }
-
-        html += `
+              <img src="${cmd.photo}" alt="Photo 1">
+              ${cmd.photo2 ? `<img src="${cmd.photo2}" alt="Photo 2">` : ''}
             </div>
             ${cmd.notes ? `<div class="notes">💬 ${cmd.notes}</div>` : ''}
           </div>
@@ -1293,11 +1087,6 @@
       printArea.innerHTML = html;
 
       window.print();
-    });
-
-    // Initialisation d'un bloc par défaut au démarrage
-    document.addEventListener('DOMContentLoaded', () => {
-      ajouterBlocProduit();
     });
   </script>
 </body>
