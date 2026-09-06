@@ -450,11 +450,27 @@
       max-width: 100%;
     }
 
+    .modal-photo-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
     .modal-images-row img {
-      max-width: 45vw;
-      max-height: 65vh;
+      max-width: 40vw;
+      max-height: 55vh;
       border-radius: 8px;
       object-fit: contain;
+    }
+
+    .modal-ref-badge {
+      background: var(--primary);
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
     }
 
     @media (max-width: 600px) {
@@ -463,7 +479,7 @@
       }
       .modal-images-row img {
         max-width: 90vw;
-        max-height: 40vh;
+        max-height: 35vh;
       }
     }
 
@@ -544,12 +560,27 @@
         display: flex;
         gap: 8px;
       }
-      .print-photos-flex img {
+      .print-photo-print-item {
         width: 50%;
-        height: 140px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .print-photos-flex img {
+        width: 100%;
+        height: 120px;
         object-fit: cover;
         border-radius: 6px;
         border: 1px solid #e2e8f0;
+      }
+      .print-ref-label {
+        font-size: 10px;
+        font-weight: bold;
+        color: #ff6b00;
+        background: #f8fafc;
+        padding: 2px;
+        border-radius: 4px;
+        text-align: center;
       }
       .print-card .notes {
         font-size: 12px;
@@ -626,11 +657,16 @@
           <button type="button" class="btn-secondary" id="btnGalerie1">📁 Galerie 1</button>
           <button type="button" class="btn-secondary" id="btnPhotoDirecte1">📸 Photo 1</button>
         </div>
+
+        <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0;">
+          <label for="ref1">Référence article (Photo 1)</label>
+          <input type="text" id="ref1" placeholder="Ex: Xdc-3468" autocomplete="off">
+        </div>
       </div>
 
       <!-- PHOTO 2 -->
       <div class="photo-box-container">
-        <label>📸 Photo 2 (Référence / Autre angle) - Optionnelle</label>
+        <label>📸 Photo 2 (Autre angle / Étiquette) - Optionnelle</label>
         <img id="photoPreview2" class="photo-preview" alt="Aperçu Photo 2">
         
         <input type="file" id="fileGallery2" accept="image/*" style="display: none;">
@@ -639,6 +675,11 @@
         <div class="camera-controls">
           <button type="button" class="btn-secondary" id="btnGalerie2">📁 Galerie 2</button>
           <button type="button" class="btn-secondary" id="btnPhotoDirecte2">📸 Photo 2</button>
+        </div>
+
+        <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0;">
+          <label for="ref2">Référence article (Photo 2)</label>
+          <input type="text" id="ref2" placeholder="Ex: Ytr-9812" autocomplete="off">
         </div>
       </div>
 
@@ -677,10 +718,7 @@
   <div id="imageModal" class="modal">
     <span class="modal-close" id="closeModal">&times;</span>
     <div class="modal-content-container">
-      <div class="modal-images-row">
-        <img id="modalImg1" src="" alt="Zoom photo 1">
-        <img id="modalImg2" src="" alt="Zoom photo 2" style="display:none;">
-      </div>
+      <div class="modal-images-row" id="modalImagesRow"></div>
       <div id="modalNotes" class="modal-notes" style="display: none;"></div>
     </div>
   </div>
@@ -742,6 +780,8 @@
     let modeEditionId = null;
 
     const inputNumero = document.getElementById('numeroCommande');
+    const inputRef1 = document.getElementById('ref1');
+    const inputRef2 = document.getElementById('ref2');
     const inputNotes = document.getElementById('notes');
     const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
     
@@ -768,8 +808,7 @@
     const dateFiltreExport = document.getElementById('dateFiltreExport');
 
     const modal = document.getElementById('imageModal');
-    const modalImg1 = document.getElementById('modalImg1');
-    const modalImg2 = document.getElementById('modalImg2');
+    const modalImagesRow = document.getElementById('modalImagesRow');
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
 
@@ -855,6 +894,8 @@
 
     btnEnregistrer.addEventListener('click', () => {
       const numero = inputNumero.value.trim();
+      const ref1 = inputRef1.value.trim();
+      const ref2 = inputRef2.value.trim();
       const notes = inputNotes.value.trim();
 
       if (!numero || !imageCaptureeData1) {
@@ -870,7 +911,9 @@
         id: idObjet,
         numero: numero,
         photo: imageCaptureeData1,
+        ref1: ref1,
         photo2: imageCaptureeData2,
+        ref2: ref2,
         notes: notes,
         date: modeEditionId !== null ? commandes.find(c => c.id === modeEditionId).date : new Date().toLocaleString('fr-FR')
       };
@@ -890,6 +933,8 @@
     function reinitialiserFormulaire() {
       modeEditionId = null;
       inputNumero.value = "";
+      inputRef1.value = "";
+      inputRef2.value = "";
       imageCaptureeData1 = "";
       imageCaptureeData2 = "";
       photoPreview1.style.display = 'none';
@@ -922,6 +967,8 @@
 
       modeEditionId = id;
       inputNumero.value = item.numero;
+      inputRef1.value = item.ref1 || "";
+      inputRef2.value = item.ref2 || "";
       inputNotes.value = item.notes || "";
       
       imageCaptureeData1 = item.photo || "";
@@ -973,7 +1020,12 @@
 
     function afficherGalerie(filtre = "") {
       galerieCommandes.innerHTML = "";
-      const liste = commandes.filter(c => c.numero.toLowerCase().includes(filtre.toLowerCase()));
+      const liste = commandes.filter(c => {
+        const numMatch = c.numero.toLowerCase().includes(filtre.toLowerCase());
+        const ref1Match = c.ref1 && c.ref1.toLowerCase().includes(filtre.toLowerCase());
+        const ref2Match = c.ref2 && c.ref2.toLowerCase().includes(filtre.toLowerCase());
+        return numMatch || ref1Match || ref2Match;
+      });
 
       if (liste.length === 0) {
         galerieCommandes.innerHTML = `<p style="text-align:center; color:#94a3b8; padding:1rem;">Aucun reliquat trouvé.</p>`;
@@ -983,15 +1035,16 @@
       liste.forEach(cmd => {
         const item = document.createElement('div');
         item.className = 'commande-item-compact';
-        item.onclick = () => ouvrirModal(cmd.photo, cmd.photo2, cmd.notes);
+        item.onclick = () => ouvrirModal(cmd);
         
-        const nbPhotosText = cmd.photo2 ? "📷📷 (2 photos)" : "📷 (1 photo)";
+        let count = cmd.photo2 ? 2 : 1;
+        const nbPhotosText = count === 2 ? "📷📷 (2 photos)" : "📷 (1 photo)";
 
         item.innerHTML = `
           <div class="commande-main-btn">
             <span>${nbPhotosText}</span>
             <div>
-              <div class="commande-num-badge">${cmd.numero}</div>
+              <div class="commande-num-badge">N° ${cmd.numero}</div>
               <div class="commande-date-compact">${cmd.date}</div>
             </div>
           </div>
@@ -1004,19 +1057,32 @@
       });
     }
 
-    window.ouvrirModal = function(src1, src2, notes) {
+    window.ouvrirModal = function(cmd) {
       modal.style.display = "flex";
-      modalImg1.src = src1 || "";
-      
-      if (src2) {
-        modalImg2.src = src2;
-        modalImg2.style.display = "block";
-      } else {
-        modalImg2.style.display = "none";
+      modalImagesRow.innerHTML = "";
+
+      if (cmd.photo) {
+        const box1 = document.createElement('div');
+        box1.className = 'modal-photo-box';
+        box1.innerHTML = `
+          <img src="${cmd.photo}" alt="Photo 1">
+          ${cmd.ref1 ? `<div class="modal-ref-badge">Réf: ${cmd.ref1}</div>` : ''}
+        `;
+        modalImagesRow.appendChild(box1);
       }
 
-      if (notes && notes.trim() !== "") {
-        modalNotes.textContent = "💬 " + notes;
+      if (cmd.photo2) {
+        const box2 = document.createElement('div');
+        box2.className = 'modal-photo-box';
+        box2.innerHTML = `
+          <img src="${cmd.photo2}" alt="Photo 2">
+          ${cmd.ref2 ? `<div class="modal-ref-badge">Réf: ${cmd.ref2}</div>` : ''}
+        `;
+        modalImagesRow.appendChild(box2);
+      }
+
+      if (cmd.notes && cmd.notes.trim() !== "") {
+        modalNotes.textContent = "💬 " + cmd.notes;
         modalNotes.style.display = "block";
       } else {
         modalNotes.style.display = "none";
@@ -1082,8 +1148,16 @@
             <h3>Commande : ${cmd.numero}</h3>
             <div class="date">Date : ${cmd.date}</div>
             <div class="print-photos-flex">
-              <img src="${cmd.photo}" alt="Photo 1">
-              ${cmd.photo2 ? `<img src="${cmd.photo2}" alt="Photo 2">` : ''}
+              <div class="print-photo-print-item">
+                <img src="${cmd.photo}" alt="Photo 1">
+                ${cmd.ref1 ? `<div class="print-ref-label">Réf: ${cmd.ref1}</div>` : ''}
+              </div>
+              ${cmd.photo2 ? `
+                <div class="print-photo-print-item">
+                  <img src="${cmd.photo2}" alt="Photo 2">
+                  ${cmd.ref2 ? `<div class="print-ref-label">Réf: ${cmd.ref2}</div>` : ''}
+                </div>
+              ` : ''}
             </div>
             ${cmd.notes ? `<div class="notes">💬 ${cmd.notes}</div>` : ''}
           </div>
