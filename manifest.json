@@ -8,6 +8,11 @@
   "icons": [
     {
       "src": "https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg?v=2",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg?v=2",
       "sizes": "512x512",
       "type": "image/jpeg"
     }
