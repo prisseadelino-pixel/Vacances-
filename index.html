@@ -108,20 +108,30 @@
       align-items: center;
       flex: 1;
       margin-right: 1rem;
+      background: white;
+      padding: 0.4rem 0.75rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
     .header-brand a {
       display: flex;
+      align-items: center;
+      text-decoration: none;
       width: 100%;
+      justify-content: space-between;
     }
 
-    .header-brand img {
-      width: 100% !important;
-      max-height: 65px !important;
-      height: 65px !important;
-      object-fit: cover; /* Remplit tout l'espace disponible en largeur et hauteur */
-      object-position: center;
-      filter: drop-shadow(0 2px 8px rgba(255,255,255,0.1));
+    .header-title-text {
+      font-weight: 900;
+      font-size: 1.3rem;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+      color: #000;
+    }
+
+    .header-title-text span {
+      color: var(--primary);
     }
 
     .header-controls {
@@ -637,7 +647,10 @@
     <header>
       <div class="header-brand">
         <a href="https://servimg.com/view/11318970/309" target="_blank">
-          <img src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" style="border:0;" alt="Reliquats Fleux Logo" />
+          <div class="header-title-text">
+            Reliquats<br><span>Fleux</span>
+          </div>
+          <img src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" style="border:0; height: 35px; width: auto; object-fit: contain;" alt="Logo" />
         </a>
       </div>
       
