@@ -119,7 +119,7 @@
       width: 100% !important;
       max-height: 65px !important;
       height: 65px !important;
-      object-fit: fill; /* Étire l'image pour occuper tout l'espace demandé */
+      object-fit: fill;
       filter: drop-shadow(0 2px 8px rgba(255,255,255,0.1));
     }
 
@@ -242,6 +242,7 @@
       border-radius: 10px;
       border: 1px dashed var(--border);
       margin-bottom: 1rem;
+      position: relative;
     }
 
     label {
@@ -267,14 +268,34 @@
       border-color: var(--primary);
     }
 
+    .photo-preview-wrapper {
+      position: relative;
+      margin-bottom: 0.75rem;
+      display: none;
+    }
+
     .photo-preview {
       width: 100%;
       max-height: 200px;
       object-fit: cover;
       border-radius: 8px;
-      display: none;
-      margin-bottom: 0.75rem;
       border: 1px solid var(--border);
+      display: block;
+    }
+
+    .btn-suppr-photo-interne {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(244, 63, 94, 0.9);
+      color: white;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
 
     .camera-controls {
@@ -654,7 +675,10 @@
       <!-- PHOTO 1 -->
       <div class="photo-box-container">
         <label>📸 Photo 1 (Article manquant)</label>
-        <img id="photoPreview1" class="photo-preview" alt="Aperçu Photo 1">
+        <div id="previewWrapper1" class="photo-preview-wrapper">
+          <img id="photoPreview1" class="photo-preview" alt="Aperçu Photo 1">
+          <button type="button" id="btnSupprPhoto1" class="btn-suppr-photo-interne">❌ Supprimer cette photo</button>
+        </div>
         
         <input type="file" id="fileGallery1" accept="image/*" style="display: none;">
         <input type="file" id="fileCamera1" accept="image/*" capture="environment" style="display: none;">
@@ -673,7 +697,10 @@
       <!-- PHOTO 2 -->
       <div class="photo-box-container">
         <label>📸 Photo 2 (Autre angle / Étiquette) - Optionnelle</label>
-        <img id="photoPreview2" class="photo-preview" alt="Aperçu Photo 2">
+        <div id="previewWrapper2" class="photo-preview-wrapper">
+          <img id="photoPreview2" class="photo-preview" alt="Aperçu Photo 2">
+          <button type="button" id="btnSupprPhoto2" class="btn-suppr-photo-interne">❌ Supprimer cette photo</button>
+        </div>
         
         <input type="file" id="fileGallery2" accept="image/*" style="display: none;">
         <input type="file" id="fileCamera2" accept="image/*" capture="environment" style="display: none;">
@@ -792,12 +819,16 @@
     const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
     
     const photoPreview1 = document.getElementById('photoPreview1');
+    const previewWrapper1 = document.getElementById('previewWrapper1');
+    const btnSupprPhoto1 = document.getElementById('btnSupprPhoto1');
     const fileGallery1 = document.getElementById('fileGallery1');
     const fileCamera1 = document.getElementById('fileCamera1');
     const btnGalerie1 = document.getElementById('btnGalerie1');
     const btnPhotoDirecte1 = document.getElementById('btnPhotoDirecte1');
 
     const photoPreview2 = document.getElementById('photoPreview2');
+    const previewWrapper2 = document.getElementById('previewWrapper2');
+    const btnSupprPhoto2 = document.getElementById('btnSupprPhoto2');
     const fileGallery2 = document.getElementById('fileGallery2');
     const fileCamera2 = document.getElementById('fileCamera2');
     const btnGalerie2 = document.getElementById('btnGalerie2');
@@ -869,7 +900,7 @@
           compresserImage(event.target.result, (imageCompressée) => {
             imageCaptureeData1 = imageCompressée;
             photoPreview1.src = imageCaptureeData1;
-            photoPreview1.style.display = 'block';
+            previewWrapper1.style.display = 'block';
           });
         };
         reader.readAsDataURL(file);
@@ -877,6 +908,14 @@
     }
     fileGallery1.addEventListener('change', chargerFichier1);
     fileCamera1.addEventListener('change', chargerFichier1);
+
+    btnSupprPhoto1.addEventListener('click', () => {
+      imageCaptureeData1 = "";
+      photoPreview1.src = "";
+      previewWrapper1.style.display = 'none';
+      fileGallery1.value = "";
+      fileCamera1.value = "";
+    });
 
     btnGalerie2.addEventListener('click', () => fileGallery2.click());
     btnPhotoDirecte2.addEventListener('click', () => fileCamera2.click());
@@ -889,7 +928,7 @@
           compresserImage(event.target.result, (imageCompressée) => {
             imageCaptureeData2 = imageCompressée;
             photoPreview2.src = imageCaptureeData2;
-            photoPreview2.style.display = 'block';
+            previewWrapper2.style.display = 'block';
           });
         };
         reader.readAsDataURL(file);
@@ -897,6 +936,14 @@
     }
     fileGallery2.addEventListener('change', chargerFichier2);
     fileCamera2.addEventListener('change', chargerFichier2);
+
+    btnSupprPhoto2.addEventListener('click', () => {
+      imageCaptureeData2 = "";
+      photoPreview2.src = "";
+      previewWrapper2.style.display = 'none';
+      fileGallery2.value = "";
+      fileCamera2.value = "";
+    });
 
     btnEnregistrer.addEventListener('click', () => {
       const numero = inputNumero.value.trim();
@@ -943,8 +990,8 @@
       inputRef2.value = "";
       imageCaptureeData1 = "";
       imageCaptureeData2 = "";
-      photoPreview1.style.display = 'none';
-      photoPreview2.style.display = 'none';
+      previewWrapper1.style.display = 'none';
+      previewWrapper2.style.display = 'none';
       inputNotes.value = "";
       fileGallery1.value = "";
       fileCamera1.value = "";
@@ -982,16 +1029,16 @@
       
       if (imageCaptureeData1) {
         photoPreview1.src = imageCaptureeData1;
-        photoPreview1.style.display = 'block';
+        previewWrapper1.style.display = 'block';
       } else {
-        photoPreview1.style.display = 'none';
+        previewWrapper1.style.display = 'none';
       }
 
       if (imageCaptureeData2) {
         photoPreview2.src = imageCaptureeData2;
-        photoPreview2.style.display = 'block';
+        previewWrapper2.style.display = 'block';
       } else {
-        photoPreview2.style.display = 'none';
+        previewWrapper2.style.display = 'none';
       }
 
       btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
@@ -1043,7 +1090,9 @@
         item.className = 'commande-item-compact';
         item.onclick = () => ouvrirModal(cmd);
         
-        let count = cmd.photo2 ? 2 : 1;
+        let count = 0;
+        if (cmd.photo) count++;
+        if (cmd.photo2) count++;
         const nbPhotosText = count === 2 ? "📷📷 (2 photos)" : "📷 (1 photo)";
 
         item.innerHTML = `
@@ -1154,10 +1203,12 @@
             <h3>Commande : ${cmd.numero}</h3>
             <div class="date">Date : ${cmd.date}</div>
             <div class="print-photos-flex">
-              <div class="print-photo-print-item">
-                <img src="${cmd.photo}" alt="Photo 1">
-                ${cmd.ref1 ? `<div class="print-ref-label">Réf: ${cmd.ref1}</div>` : ''}
-              </div>
+              ${cmd.photo ? `
+                <div class="print-photo-print-item">
+                  <img src="${cmd.photo}" alt="Photo 1">
+                  ${cmd.ref1 ? `<div class="print-ref-label">Réf: ${cmd.ref1}</div>` : ''}
+                </div>
+              ` : ''}
               ${cmd.photo2 ? `
                 <div class="print-photo-print-item">
                   <img src="${cmd.photo2}" alt="Photo 2">
