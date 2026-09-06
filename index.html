@@ -11,39 +11,44 @@
 
   <style>
     :root {
-      --primary: #ea580c;
-      --primary-hover: #c2410c;
-      --secondary: #1e293b;
+      --primary: #f97316;
+      --primary-hover: #ea580c;
+      --primary-light: #fff7ed;
+      --accent-border: #ffedd5;
+      --secondary: #0f172a;
       --bg: #f8fafc;
       --card-bg: #ffffff;
-      --text: #0f172a;
-      --border: #cbd5e1;
-      --radius: 16px;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 14px;
+      --shadow: 0 10.1px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     body {
       background-color: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* --- ACCUEIL --- */
+    /* --- ACCUEIL DESIGN PRO --- */
     #home-screen {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 1rem;
+      padding: 2rem 1rem;
       text-align: center;
-      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      background: radial-gradient(circle at center, #ffffff 0%, #fef3e2 100%);
     }
 
     .logo-container {
@@ -51,47 +56,54 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
 
     .home-logo-img {
-      width: 80vw !important;
-      max-width: 500px !important;
+      width: 85vw !important;
+      max-width: 480px !important;
       height: auto !important;
-      max-height: 220px !important;
+      max-height: 200px !important;
       object-fit: contain;
-      filter: contrast(135%) brightness(112%);
+      filter: contrast(130%) brightness(105%);
       mix-blend-mode: multiply;
       display: block;
     }
 
     .app-subtitle {
       font-size: 1.05rem;
-      color: #64748b;
-      max-width: 480px;
-      margin-bottom: 1.5rem;
-      line-height: 1.4;
+      color: var(--text-muted);
+      max-width: 420px;
+      margin-bottom: 2.5rem;
+      line-height: 1.5;
+      font-weight: 400;
     }
 
     .btn-start {
-      background-color: var(--primary);
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
       color: white;
       border: none;
-      padding: 1rem 2rem;
-      border-radius: 30px;
-      font-size: 1.2rem;
-      font-weight: 700;
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
-      transition: all 0.2s ease;
+      box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);
+      transition: all 0.25s ease;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-start:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px -5px rgba(249, 115, 22, 0.5);
     }
 
     /* --- APPLICATION --- */
     #app-screen {
       display: none;
-      max-width: 900px;
+      max-width: 850px;
       margin: 0 auto;
-      padding: 1rem;
+      padding: 1.5rem 1rem;
     }
 
     header {
@@ -100,7 +112,7 @@
       justify-content: space-between;
       margin-bottom: 1.5rem;
       padding-bottom: 1rem;
-      border-bottom: 2px solid var(--border);
+      border-bottom: 1px solid var(--border);
       gap: 0.5rem;
     }
 
@@ -112,11 +124,11 @@
     }
 
     .header-brand img {
-      max-height: 55px !important;
+      max-height: 48px !important;
       width: auto !important;
       object-fit: contain;
       flex-shrink: 0;
-      filter: contrast(135%) brightness(112%);
+      filter: contrast(130%) brightness(105%);
       mix-blend-mode: multiply;
     }
 
@@ -129,28 +141,36 @@
     }
 
     .btn-nav-home {
-      background: transparent;
+      background: #ffffff;
       border: 1px solid var(--border);
-      color: #64748b;
-      padding: 0.5rem 0.75rem;
-      border-radius: 8px;
+      color: var(--text-muted);
+      padding: 0.45rem 0.85rem;
+      border-radius: 10px;
       cursor: pointer;
       font-weight: 600;
-      flex-shrink: 0;
+      font-size: 0.85rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      transition: all 0.2s ease;
+    }
+
+    .btn-nav-home:hover {
+      background: #f1f5f9;
+      color: var(--text);
     }
 
     .btn-menu-hamburger {
-      background: transparent;
+      background: #ffffff;
       border: 1px solid var(--border);
       color: var(--secondary);
-      padding: 0.25rem 0.6rem;
+      padding: 0.3rem 0.6rem;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
       width: fit-content;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
 
     .dropdown-menu {
@@ -160,10 +180,10 @@
       right: 0;
       background: white;
       border: 1px solid var(--border);
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
       z-index: 100;
-      min-width: 200px;
+      min-width: 210px;
       overflow: hidden;
       margin-top: 0.4rem;
     }
@@ -174,34 +194,34 @@
 
     .dropdown-item {
       width: 100%;
-      padding: 0.75rem 1rem;
+      padding: 0.8rem 1rem;
       text-align: left;
       background: none;
       border: none;
-      font-size: 0.95rem;
-      font-weight: 600;
+      font-size: 0.9rem;
+      font-weight: 500;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      transition: background 0.2s ease;
+      transition: background 0.15s ease;
     }
 
     .dropdown-item.danger {
-      color: #ef4444;
+      color: #dc2626;
     }
 
     .dropdown-item:hover {
-      background: #f1f5f9;
+      background: #f8fafc;
     }
 
     .card {
       background: var(--card-bg);
       border-radius: var(--radius);
-      padding: 1.25rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
       border: 1px solid var(--border);
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
     .search-box {
@@ -212,22 +232,24 @@
 
     .search-box input {
       flex: 1;
+      background: #f8fafc;
     }
 
     .btn-search {
-      background-color: var(--primary);
+      background-color: var(--secondary);
       color: white;
       border: none;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
+      padding: 0.65rem 1.1rem;
+      border-radius: 10px;
       font-weight: 600;
+      font-size: 0.9rem;
       cursor: pointer;
       white-space: nowrap;
       transition: background 0.2s ease;
     }
 
     .btn-search:hover {
-      background-color: var(--primary-hover);
+      background-color: #1e293b;
     }
 
     .form-group {
@@ -237,17 +259,29 @@
     label {
       display: block;
       font-weight: 600;
-      margin-bottom: 0.1rem;
+      margin-bottom: 0.15rem;
       font-size: 0.75rem;
-      color: var(--secondary);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
     input, textarea {
       width: 100%;
-      padding: 0.5rem;
+      padding: 0.6rem 0.75rem;
       border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.85rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      background: #fdfdfd;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+      background: #ffffff;
     }
 
     /* BARRE D'ACTION HAUT DE FORMULAIRE */
@@ -255,11 +289,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.75rem;
-      background: #fff7ed;
-      padding: 0.6rem 0.75rem;
-      border-radius: 10px;
-      border: 1px solid #fed7aa;
+      margin-bottom: 1rem;
+      background: var(--primary-light);
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--accent-border);
       gap: 0.5rem;
       flex-wrap: wrap;
     }
@@ -268,10 +302,10 @@
       background-color: var(--primary);
       color: white;
       border: none;
-      padding: 0.4rem 0.8rem;
+      padding: 0.45rem 0.9rem;
       border-radius: 8px;
       font-size: 0.85rem;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       transition: background 0.2s ease;
     }
@@ -284,46 +318,47 @@
     .blocs-container {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
     }
 
     .photo-input-block {
       background: #f8fafc;
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.75rem;
+      border-radius: 12px;
+      padding: 0.85rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.6rem;
       position: relative;
     }
 
     .btn-remove-block {
       position: absolute;
-      top: 8px;
-      right: 8px;
-      background: #fee2e2;
-      color: #ef4444;
-      border: 1px solid #fca5a5;
+      top: 10px;
+      right: 10px;
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
       border-radius: 6px;
-      padding: 0.15rem 0.45rem;
-      font-size: 0.75rem;
-      font-weight: bold;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 600;
       cursor: pointer;
+      transition: background 0.15s ease;
     }
 
     .btn-remove-block:hover {
-      background: #fecaca;
+      background: #fee2e2;
     }
 
     /* BOITE PHOTO ET RÉFÉRENCE INTERNE */
     .photo-add-box {
       width: 100%;
-      height: 95px;
-      background: #f1f5f9;
+      height: 100px;
+      background: #ffffff;
       border: 2px dashed var(--border);
-      border-radius: 8px;
+      border-radius: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -336,7 +371,7 @@
 
     .photo-add-box:hover {
       border-color: var(--primary);
-      background: #fff7ed;
+      background: var(--primary-light);
     }
 
     .plus-icon {
@@ -347,20 +382,21 @@
     }
 
     .plus-label {
-      font-size: 0.7rem;
-      color: #64748b;
-      margin-top: 2px;
-      font-weight: 600;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+      font-weight: 500;
     }
 
     .photo-preview-container {
       position: relative;
       width: 100%;
-      height: 110px;
+      height: 120px;
       display: none;
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
       border: 1px solid var(--border);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
     .photo-preview {
@@ -371,93 +407,111 @@
 
     .btn-remove-photo {
       position: absolute;
-      top: 4px;
-      right: 4px;
-      background: rgba(239, 68, 68, 0.9);
+      top: 6px;
+      right: 6px;
+      background: rgba(15, 23, 42, 0.75);
       color: white;
       border: none;
       border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      font-size: 0.7rem;
+      width: 24px;
+      height: 24px;
+      font-size: 0.75rem;
       font-weight: bold;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .btn-add-more {
-      background-color: #f1f5f9;
-      color: var(--primary);
-      border: 2px dashed var(--primary);
-      padding: 0.6rem;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
-      font-size: 0.9rem;
-      margin-bottom: 0.75rem;
       transition: background 0.2s ease;
     }
 
-    .btn-add-more:hover {
-      background-color: #fff7ed;
+    .btn-remove-photo:hover {
+      background: rgba(220, 38, 38, 0.9);
     }
 
-    button.btn-main {
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
+    .btn-add-more {
+      background-color: #ffffff;
+      color: var(--primary);
+      border: 2px dashed var(--primary);
+      padding: 0.7rem;
+      border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
       width: 100%;
-      font-size: 1rem;
+      font-size: 0.9rem;
+      margin-bottom: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-add-more:hover {
+      background-color: var(--primary-light);
+    }
+
+    button.btn-main {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    button.btn-main:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
     }
 
     button.btn-secondary {
       background-color: #64748b;
       color: white;
       border: none;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
+      padding: 0.8rem 1.2rem;
+      border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
       width: 100%;
+      font-size: 0.95rem;
+      transition: background 0.2s ease;
+    }
+
+    button.btn-secondary:hover {
+      background-color: #475569;
     }
 
     .export-filter-container {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
-      margin-top: 0.5rem;
-      background: #f1f5f9;
-      padding: 0.6rem;
-      border-radius: 10px;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      background: #f8fafc;
+      padding: 0.75rem;
+      border-radius: 12px;
       border: 1px solid var(--border);
     }
 
     .export-filter-label {
       font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--secondary);
+      font-weight: 600;
+      color: var(--text-muted);
     }
 
     .export-actions-row {
       display: flex;
-      gap: 0.4rem;
+      gap: 0.5rem;
       align-items: center;
       flex-wrap: wrap;
     }
 
     .input-date-custom {
       flex: 1;
-      min-width: 130px;
+      min-width: 140px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 0.4rem;
+      padding: 0.5rem;
       font-size: 0.85rem;
       color: var(--text);
       outline: none;
@@ -468,7 +522,7 @@
       background-color: #0284c7;
       color: white;
       border: none;
-      padding: 0.5rem 0.75rem;
+      padding: 0.55rem 0.9rem;
       border-radius: 8px;
       font-size: 0.85rem;
       font-weight: 600;
@@ -481,15 +535,18 @@
       background-color: #0369a1;
     }
 
-    .section-header {
-      margin-bottom: 0.4rem;
+    .section-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--secondary);
+      letter-spacing: -0.01em;
     }
 
     .liste-commandes {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
-      margin-top: 0.75rem;
+      gap: 0.5rem;
+      margin-top: 0.85rem;
     }
 
     .commande-item-compact {
@@ -498,64 +555,68 @@
       justify-content: space-between;
       background: #f8fafc;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.6rem 0.8rem;
+      border-radius: 10px;
+      padding: 0.7rem 0.9rem;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: all 0.2s ease;
     }
 
     .commande-item-compact:hover {
       background: #f1f5f9;
+      border-color: #cbd5e1;
+      transform: translateX(2px);
     }
 
     .commande-main-btn {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.8rem;
       flex-grow: 1;
     }
 
     .commande-num-badge {
-      font-weight: bold;
+      font-weight: 700;
       font-size: 0.95rem;
       color: var(--primary);
     }
 
     .commande-date-compact {
-      font-size: 0.7rem;
-      color: #64748b;
+      font-size: 0.75rem;
+      color: var(--text-muted);
     }
 
     .commande-actions {
       display: flex;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.4rem;
     }
 
     .btn-edit-small {
       background: #ffffff;
       border: 1px solid var(--border);
       color: var(--secondary);
-      padding: 0.3rem 0.5rem;
+      padding: 0.35rem 0.6rem;
       border-radius: 6px;
       font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
+      transition: background 0.15s ease;
     }
 
     .btn-edit-small:hover {
-      background: var(--border);
+      background: #e2e8f0;
     }
 
     .btn-delete-small {
       background: #fef2f2;
-      border: 1px solid #fca5a5;
-      color: #ef4444;
-      padding: 0.3rem 0.4rem;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 0.35rem 0.5rem;
       border-radius: 6px;
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
+      transition: background 0.15s ease;
     }
 
     .btn-delete-small:hover {
@@ -571,7 +632,8 @@
       top: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.88);
+      background-color: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(4px);
       align-items: center;
       justify-content: center;
       padding: 1rem;
@@ -600,47 +662,47 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.4rem;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 0.75rem;
-      border-radius: 10px;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.85rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .modal-images-row img {
       max-width: 25vw;
       max-height: 40vh;
       border-radius: 8px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.5);
       object-fit: contain;
     }
 
     .modal-badge-info {
       color: white;
-      background: rgba(234, 88, 12, 0.9);
-      padding: 0.3rem 0.6rem;
+      background: rgba(249, 115, 22, 0.95);
+      padding: 0.35rem 0.7rem;
       border-radius: 6px;
       font-size: 0.8rem;
-      font-weight: bold;
+      font-weight: 600;
       text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     @media (max-width: 600px) {
       .modal-images-row img {
-        max-width: 80vw;
-        max-height: 25vh;
+        max-width: 85vw;
+        max-height: 28vh;
       }
     }
 
     .modal-notes {
       color: white;
-      background: rgba(15, 23, 42, 0.8);
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 0.85rem 1.2rem;
+      border-radius: 10px;
       max-width: 500px;
       text-align: center;
       font-size: 0.95rem;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .modal-close {
@@ -652,6 +714,12 @@
       font-weight: bold;
       cursor: pointer;
       z-index: 1001;
+      opacity: 0.8;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-close:hover {
+      opacity: 1;
     }
 
     @media print {
@@ -670,7 +738,7 @@
       }
       .print-title {
         font-size: 22px;
-        color: #ea580c;
+        color: #f97316;
         margin-bottom: 5px;
         font-weight: bold;
       }
@@ -678,7 +746,7 @@
         font-size: 12px;
         color: #64748b;
         margin-bottom: 20px;
-        border-bottom: 2px solid #ea580c;
+        border-bottom: 2px solid #f97316;
         padding-bottom: 10px;
       }
       .print-grid {
@@ -724,8 +792,8 @@
       .print-ref-text {
         font-size: 9px;
         font-weight: bold;
-        color: #ea580c;
-        background: #f1f5f9;
+        color: #f97316;
+        background: #f8fafc;
         padding: 2px;
         border-radius: 3px;
         text-align: center;
@@ -774,7 +842,7 @@
     </header>
 
     <!-- SECTION RECHERCHE -->
-    <section class="card" style="padding: 0.75rem;">
+    <section class="card" style="padding: 1rem;">
       <div class="search-box">
         <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro de commande..." autocomplete="off">
         <button type="button" class="btn-search" id="btnLancerRecherche">Rechercher</button>
@@ -784,7 +852,7 @@
     <!-- FORMULAIRE DE PRÉPARATION -->
     <section class="card" id="sectionPreparation">
       <div class="form-header-actions">
-        <h2 id="formTitle" style="font-size: 1rem; color:var(--primary);">Reliquats Fleux</h2>
+        <h2 id="formTitle" style="font-size: 0.95rem; font-weight: 700; color:var(--primary);">Reliquats Fleux</h2>
         <button type="button" class="btn-new-cmd" id="btnNouvelleCommande">➕ Nouvelle commande</button>
       </div>
 
@@ -794,12 +862,12 @@
       <!-- BOUTON POUR RAJOUTER UN PRODUIT -->
       <button type="button" class="btn-add-more" id="btnAddBloc">➕ Ajouter un autre produit manquant sur cette commande</button>
 
-      <div class="form-group" style="margin-top: 0.5rem;">
+      <div class="form-group" style="margin-top: 0.6rem;">
         <label for="notes">Remarques globales (optionnel)</label>
         <textarea id="notes" rows="1" placeholder="Ex: Produit fragile..." autocomplete="off"></textarea>
       </div>
 
-      <div style="display:flex; gap:0.5rem; margin-top: 0.75rem;">
+      <div style="display:flex; gap:0.5rem; margin-top: 0.85rem;">
         <button class="btn-main" id="btnEnregistrer">Enregistrer les reliquats</button>
         <button class="btn-secondary" id="btnAnnulerEdit" style="display:none; width:auto;">Annuler</button>
       </div>
@@ -948,13 +1016,13 @@
       img.src = dataUrl;
     }
 
-    // FONCTION POUR AJOUTER UN BLOC (Numéro au-dessus, Photo + Référence à l'intérieur)
+    // FONCTION POUR AJOUTER UN BLOC
     function ajouterBlocProduit(photoData = "", numVal = "", refVal = "") {
       const blockDiv = document.createElement('div');
       blockDiv.className = 'photo-input-block';
 
       blockDiv.innerHTML = `
-        <button type="button" class="btn-remove-block" title="Supprimer ce bloc">✕</button>
+        <button type="button" class="btn-remove-block" title="Supprimer ce bloc">✕ Supprimer</button>
         
         <div class="form-group" style="margin-bottom: 0.3rem;">
           <label>N° de Commande</label>
@@ -963,7 +1031,7 @@
 
         <div class="photo-add-box" style="${photoData ? 'display:none;' : 'display:flex;'}">
           <span class="plus-icon">+</span>
-          <span class="plus-label">Photo</span>
+          <span class="plus-label">Ajouter une photo</span>
         </div>
 
         <div class="photo-preview-container" style="${photoData ? 'display:block;' : 'display:none;'}">
@@ -1067,7 +1135,7 @@
       }
 
       btnEnregistrer.disabled = true;
-      btnEnregistrer.textContent = "Enregistrement...";
+      btnEnregistrer.textContent = "Enregistrement en cours...";
 
       const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
       const commandeData = {
@@ -1165,7 +1233,7 @@
       });
 
       if (liste.length === 0) {
-        galerieCommandes.innerHTML = `<p style="text-align:center; color:#64748b; padding:0.75rem;">Aucun reliquat trouvé.</p>`;
+        galerieCommandes.innerHTML = `<p style="text-align:center; color:#64748b; padding:1rem; font-size:0.9rem;">Aucun reliquat trouvé.</p>`;
         return;
       }
 
