@@ -856,7 +856,7 @@
     });
 
     let commandes = [];
-    let modeEditionId = null;
+    let modeEditionFirebaseKey = null;
 
     const blocsContainer = document.getElementById('blocsContainer');
     const btnAddBloc = document.getElementById('btnAddBloc');
@@ -877,17 +877,18 @@
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
 
-    // ÉCOUTE FIREBASE
+    // ÉCOUTE FIREBASE (Mappage propre des clés uniques)
     db.ref('commandes').on('value', (snapshot) => {
       const data = snapshot.val();
       commandes = [];
       if (data) {
         Object.keys(data).forEach(key => {
           let item = data[key];
-          item.firebaseKey = key; // Assure la liaison sécurisée avec sa clé unique Firebase
+          item.firebaseKey = key; // Clé unique Firebase vitale pour éviter les écrasements
           commandes.push(item);
         });
-        commandes.sort((a, b) => b.id - a.id);
+        // Tri par date inverse (du plus récent au plus ancien) basé sur l'horodatage interne ou l'ordre
+        commandes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
       }
       afficherGalerie(inputRecherche.value);
     }, (error) => {
@@ -1008,7 +1009,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ENREGISTREMENT INFaillible FIREBASE
+    // ENREGISTREMENT BLINDÉ (Empêche l'écrasement global de la base)
     btnEnregistrer.addEventListener('click', () => {
       const blocks = blocsContainer.querySelectorAll('.photo-input-block');
       const itemsData = [];
@@ -1041,28 +1042,26 @@
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement en cours...";
 
-      const existingItem = modeEditionId !== null ? commandes.find(c => c.id === modeEditionId) : null;
-      const idObjet = existingItem ? existingItem.id : Date.now();
-      const firebaseKey = existingItem ? existingItem.firebaseKey : null;
-
+      const existingItem = modeEditionFirebaseKey ? commandes.find(c => c.firebaseKey === modeEditionFirebaseKey) : null;
+      
       const commandeData = {
-        id: idObjet,
+        timestamp: existingItem ? existingItem.timestamp : Date.now(),
         numero: principalNum,
         items: itemsData,
         notes: inputNotes.value.trim(),
         date: existingItem ? existingItem.date : new Date().toLocaleString('fr-FR')
       };
 
-      let savePromise;
-      if (firebaseKey) {
-        // Mise à jour ciblée par clé Firebase unique
-        savePromise = db.ref('commandes/' + firebaseKey).set(commandeData);
+      let saveRequest;
+      if (modeEditionFirebaseKey) {
+        // Mise à jour de l'élément existant précis
+        saveRequest = db.ref('commandes/' + modeEditionFirebaseKey).set(commandeData);
       } else {
-        // Nouvelle insertion propre sans écraser les autres
-        savePromise = db.ref('commandes').push(commandeData);
+        // Création d'un nouvel enregistrement isolé sans toucher aux autres
+        saveRequest = db.ref('commandes').push(commandeData);
       }
 
-      savePromise
+      saveRequest
         .then(() => {
           reinitialiserFormulaire();
           btnEnregistrer.disabled = false;
@@ -1076,7 +1075,7 @@
     });
 
     function reinitialiserFormulaire() {
-      modeEditionId = null;
+      modeEditionFirebaseKey = null;
       inputNotes.value = "";
       blocsContainer.innerHTML = "";
       ajouterBlocProduit();
@@ -1089,15 +1088,15 @@
 
     btnAnnulerEdit.addEventListener('click', reinitialiserFormulaire);
 
-    window.editerCommande = function(id, event) {
+    window.editerCommande = function(firebaseKey, event) {
       if (event) event.stopPropagation();
-      const item = commandes.find(c => c.id === id);
+      const item = commandes.find(c => c.firebaseKey === firebaseKey);
       if (!item) return;
 
       inputRecherche.value = "";
       sectionPreparation.style.display = 'block';
 
-      modeEditionId = id;
+      modeEditionFirebaseKey = firebaseKey;
       inputNotes.value = item.notes || "";
       blocsContainer.innerHTML = "";
 
@@ -1116,15 +1115,15 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    window.supprimerCommande = function(id, event) {
+    window.supprimerCommande = function(firebaseKey, event) {
       if (event) event.stopPropagation();
-      const item = commandes.find(c => c.id === id);
+      const item = commandes.find(c => c.firebaseKey === firebaseKey);
       if (!item) return;
 
       if (confirm(`Voulez-vous vraiment supprimer cet enregistrement ?`)) {
-        db.ref('commandes/' + item.firebaseKey).remove()
+        db.ref('commandes/' + firebaseKey).remove()
           .then(() => {
-            if (modeEditionId === id) reinitialiserFormulaire();
+            if (modeEditionFirebaseKey === firebaseKey) reinitialiserFormulaire();
           });
       }
     };
@@ -1173,8 +1172,8 @@
             </div>
           </div>
           <div class="commande-actions">
-            <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">✏️</button>
-            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)">❌</button>
+            <button class="btn-edit-small" onclick="editerCommande('${cmd.firebaseKey}', event)">✏️</button>
+            <button class="btn-delete-small" onclick="supprimerCommande('${cmd.firebaseKey}', event)">❌</button>
           </div>
         `;
         galerieCommandes.appendChild(item);
