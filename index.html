@@ -804,20 +804,20 @@
     </div>
   </div>
 
-  <!-- SDK FIREBASE COMPAT -->
+  <!-- SDK FIREBASE COMPAT (PROJET RELIQUATS-FLEUX) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyAsYfXgNnrskxOwgX081lv",
-      authDomain: "ad-controle.firebaseapp.com",
-      databaseURL: "https://ad-controle-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "ad-controle",
-      storageBucket: "ad-controle.firebaseapp.com",
-      messagingSenderId: "745097117764",
-      appId: "1:745097117764:web:59feae933",
-      measurementId: "G-RZ3Q22WDH6"
+      apiKey: "AIzaSyABQ02OsMbEwLMl7k1hUMdQOCQQi1RdDVE",
+      authDomain: "reliquats-fleux.firebaseapp.com",
+      databaseURL: "https://reliquats-fleux-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "reliquats-fleux",
+      storageBucket: "reliquats-fleux.firebasestorage.app",
+      messagingSenderId: "591953313777",
+      appId: "1:591953313777:web:c95b2e8aab6c9492f7ce50",
+      measurementId: "G-Z8VKEX2MPV"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -877,17 +877,16 @@
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
 
-    // ÉCOUTE FIREBASE (Mappage propre des clés uniques)
+    // ÉCOUTE FIREBASE SÉCURISÉE
     db.ref('commandes').on('value', (snapshot) => {
       const data = snapshot.val();
       commandes = [];
       if (data) {
         Object.keys(data).forEach(key => {
           let item = data[key];
-          item.firebaseKey = key; // Clé unique Firebase vitale pour éviter les écrasements
+          item.firebaseKey = key;
           commandes.push(item);
         });
-        // Tri par date inverse (du plus récent au plus ancien) basé sur l'horodatage interne ou l'ordre
         commandes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
       }
       afficherGalerie(inputRecherche.value);
@@ -1009,7 +1008,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ENREGISTREMENT BLINDÉ (Empêche l'écrasement global de la base)
+    // ENREGISTREMENT BLINDÉ
     btnEnregistrer.addEventListener('click', () => {
       const blocks = blocsContainer.querySelectorAll('.photo-input-block');
       const itemsData = [];
@@ -1054,10 +1053,8 @@
 
       let saveRequest;
       if (modeEditionFirebaseKey) {
-        // Mise à jour de l'élément existant précis
         saveRequest = db.ref('commandes/' + modeEditionFirebaseKey).set(commandeData);
       } else {
-        // Création d'un nouvel enregistrement isolé sans toucher aux autres
         saveRequest = db.ref('commandes').push(commandeData);
       }
 
