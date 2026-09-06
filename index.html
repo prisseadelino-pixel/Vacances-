@@ -606,6 +606,7 @@
     <section class="card" id="sectionPreparation">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
         <h2 id="formTitle" style="font-size: 1.1rem; color:var(--primary);">Nvx reliquats</h2>
+        <button type="button" id="btnNouvelleCommande" style="background:var(--primary); color:white; border:none; padding:0.4rem 0.8rem; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.85rem;">➕ Nvx reliquats</button>
       </div>
 
       <div class="form-group">
@@ -724,7 +725,7 @@
     btnCommencer.addEventListener('click', () => {
       homeScreen.style.display = 'none';
       appScreen.style.display = 'block';
-      document.getElementById('numeroCommande').value = "";
+      reinitialiserFormulaire();
     });
 
     btnRetourAccueil.addEventListener('click', () => {
@@ -742,6 +743,7 @@
 
     const inputNumero = document.getElementById('numeroCommande');
     const inputNotes = document.getElementById('notes');
+    const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
     
     const photoPreview1 = document.getElementById('photoPreview1');
     const fileGallery1 = document.getElementById('fileGallery1');
@@ -902,6 +904,11 @@
       btnAnnulerEdit.style.display = "none";
       formTitle.textContent = "Nvx reliquats";
     }
+
+    btnNouvelleCommande.addEventListener('click', () => {
+      reinitialiserFormulaire();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 
     btnAnnulerEdit.addEventListener('click', reinitialiserFormulaire);
 
