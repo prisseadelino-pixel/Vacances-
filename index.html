@@ -37,7 +37,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* --- ÉCRAN D'ACCUEIL IMMERSIF --- */
+    /* --- ÉCRAN D'ACCUEIL --- */
     #home-screen {
       display: flex;
       flex-direction: column;
@@ -196,7 +196,6 @@
       background: rgba(255,255,255,0.05);
     }
 
-    /* CARTES DESIGN */
     .card {
       background: var(--card-bg);
       border-radius: var(--radius);
@@ -227,11 +226,6 @@
       font-size: 0.85rem;
       cursor: pointer;
       white-space: nowrap;
-      transition: opacity 0.2s;
-    }
-
-    .btn-search:hover {
-      opacity: 0.9;
     }
 
     .form-group {
@@ -257,7 +251,6 @@
       background: rgba(255, 255, 255, 0.03);
       color: var(--text-main);
       outline: none;
-      transition: all 0.2s;
     }
 
     input:focus, textarea:focus {
@@ -265,7 +258,6 @@
       box-shadow: 0 0 0 3px var(--primary-glow);
     }
 
-    /* EN-TÊTE FORMULAIRE */
     .form-header-actions {
       display: flex;
       justify-content: space-between;
@@ -288,7 +280,6 @@
       cursor: pointer;
     }
 
-    /* BLOCS PRODUITS */
     .blocs-container {
       display: flex;
       flex-direction: column;
@@ -332,7 +323,6 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s;
     }
 
     .photo-add-box:hover {
@@ -397,7 +387,6 @@
       width: 100%;
       font-size: 0.85rem;
       margin-bottom: 0.85rem;
-      transition: background 0.2s;
     }
 
     .btn-add-more:hover {
@@ -544,7 +533,6 @@
       cursor: pointer;
     }
 
-    /* MODAL DE ZOOM */
     .modal {
       display: none;
       position: fixed;
@@ -895,7 +883,9 @@
       commandes = [];
       if (data) {
         Object.keys(data).forEach(key => {
-          commandes.push(data[key]);
+          let item = data[key];
+          item.firebaseKey = key; // Assure la liaison sécurisée avec sa clé unique Firebase
+          commandes.push(item);
         });
         commandes.sort((a, b) => b.id - a.id);
       }
@@ -1018,7 +1008,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ENREGISTREMENT SÉCURISÉ (Empêche l'écrasement global)
+    // ENREGISTREMENT INFaillible FIREBASE
     btnEnregistrer.addEventListener('click', () => {
       const blocks = blocsContainer.querySelectorAll('.photo-input-block');
       const itemsData = [];
@@ -1051,9 +1041,10 @@
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement en cours...";
 
-      const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
       const existingItem = modeEditionId !== null ? commandes.find(c => c.id === modeEditionId) : null;
-      
+      const idObjet = existingItem ? existingItem.id : Date.now();
+      const firebaseKey = existingItem ? existingItem.firebaseKey : null;
+
       const commandeData = {
         id: idObjet,
         numero: principalNum,
@@ -1062,7 +1053,16 @@
         date: existingItem ? existingItem.date : new Date().toLocaleString('fr-FR')
       };
 
-      db.ref('commandes/' + idObjet).set(commandeData)
+      let savePromise;
+      if (firebaseKey) {
+        // Mise à jour ciblée par clé Firebase unique
+        savePromise = db.ref('commandes/' + firebaseKey).set(commandeData);
+      } else {
+        // Nouvelle insertion propre sans écraser les autres
+        savePromise = db.ref('commandes').push(commandeData);
+      }
+
+      savePromise
         .then(() => {
           reinitialiserFormulaire();
           btnEnregistrer.disabled = false;
@@ -1122,7 +1122,7 @@
       if (!item) return;
 
       if (confirm(`Voulez-vous vraiment supprimer cet enregistrement ?`)) {
-        db.ref('commandes/' + id).remove()
+        db.ref('commandes/' + item.firebaseKey).remove()
           .then(() => {
             if (modeEditionId === id) reinitialiserFormulaire();
           });
