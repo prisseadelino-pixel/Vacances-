@@ -106,15 +106,20 @@
     .header-brand {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
       flex: 1;
     }
 
+    .header-brand a {
+      display: flex;
+      width: 100%;
+    }
+
     .header-brand img {
+      width: 100% !important;
       max-height: 75px !important;
-      width: auto !important;
+      height: auto !important;
       object-fit: contain;
-      flex-shrink: 0;
+      object-position: left;
       filter: drop-shadow(0 2px 8px rgba(255,255,255,0.1));
     }
 
@@ -124,6 +129,7 @@
       align-items: flex-end;
       position: relative;
       gap: 0.3rem;
+      flex-shrink: 0;
     }
 
     .btn-nav-home {
