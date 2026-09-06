@@ -1018,7 +1018,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ENREGISTREMENT
+    // ENREGISTREMENT SÉCURISÉ (Empêche l'écrasement global)
     btnEnregistrer.addEventListener('click', () => {
       const blocks = blocsContainer.querySelectorAll('.photo-input-block');
       const itemsData = [];
@@ -1052,18 +1052,21 @@
       btnEnregistrer.textContent = "Enregistrement en cours...";
 
       const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
+      const existingItem = modeEditionId !== null ? commandes.find(c => c.id === modeEditionId) : null;
+      
       const commandeData = {
         id: idObjet,
         numero: principalNum,
         items: itemsData,
         notes: inputNotes.value.trim(),
-        date: modeEditionId !== null ? commandes.find(c => c.id === modeEditionId).date : new Date().toLocaleString('fr-FR')
+        date: existingItem ? existingItem.date : new Date().toLocaleString('fr-FR')
       };
 
       db.ref('commandes/' + idObjet).set(commandeData)
         .then(() => {
           reinitialiserFormulaire();
           btnEnregistrer.disabled = false;
+          btnEnregistrer.textContent = "Enregistrer les reliquats";
         })
         .catch((error) => {
           btnEnregistrer.disabled = false;
