@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reliquats Flex</title>
+  <title>Reliquats Fleux</title>
 
   <!-- ICÔNE DE L'APPLICATION -->
-  <link rel="icon" type="image/png" href="https://i49.servimg.com/u/f49/11/31/89/70/17848310.png">
+  <link rel="icon" type="image/png" href="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg">
   <link rel="manifest" href="manifest.json">
 
   <style>
@@ -744,8 +744,8 @@
   <!-- ACCUEIL -->
   <div id="home-screen">
     <div class="logo-container">
-      <a href="https://servimg.com/view/11318970/307" target="_blank">
-        <img class="home-logo-img" src="https://i49.servimg.com/u/f49/11/31/89/70/17848310.png" style="border:0;" alt="Reliquats Flex Logo" />
+      <a href="https://servimg.com/view/11318970/309" target="_blank">
+        <img class="home-logo-img" src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" style="border:0;" alt="Reliquats Fleux Logo" />
       </a>
     </div>
     <p class="app-subtitle">Prenez en photo vos reliquats et gardez une preuve visuelle incontestable.</p>
@@ -756,8 +756,8 @@
   <div id="app-screen">
     <header>
       <div class="header-brand">
-        <a href="https://servimg.com/view/11318970/307" target="_blank">
-          <img src="https://i49.servimg.com/u/f49/11/31/89/70/17848310.png" style="border:0;" alt="Reliquats Flex Logo" />
+        <a href="https://servimg.com/view/11318970/309" target="_blank">
+          <img src="https://i49.servimg.com/u/f49/11/31/89/70/img_2010.jpg" style="border:0;" alt="Reliquats Fleux Logo" />
         </a>
       </div>
       
@@ -784,7 +784,7 @@
     <!-- FORMULAIRE DE PRÉPARATION -->
     <section class="card" id="sectionPreparation">
       <div class="form-header-actions">
-        <h2 id="formTitle" style="font-size: 1rem; color:var(--primary);">Reliquats Flex</h2>
+        <h2 id="formTitle" style="font-size: 1rem; color:var(--primary);">Reliquats Fleux</h2>
         <button type="button" class="btn-new-cmd" id="btnNouvelleCommande">➕ Nouvelle commande</button>
       </div>
 
@@ -1099,7 +1099,7 @@
       btnEnregistrer.textContent = "Enregistrer les reliquats";
       btnEnregistrer.disabled = false;
       btnAnnulerEdit.style.display = "none";
-      formTitle.textContent = "Reliquats Flex";
+      formTitle.textContent = "Reliquats Fleux";
     }
 
     btnAnnulerEdit.addEventListener('click', reinitialiserFormulaire);
@@ -1257,7 +1257,7 @@
         const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
         
         listeAExporter = commandes.filter(cmd => cmd.date.startsWith(dateFormatee));
-        titreExport = `Historique Reliquats Flex - Date : ${dateFormatee}`;
+        titreExport = `Historique Reliquats Fleux - Date : ${dateFormatee}`;
 
         if (listeAExporter.length === 0) {
           alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`);
