@@ -1249,7 +1249,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION EXPORT GOOGLE SHEETS (CSV COMPATIBLE)
+    // FONCTION EXPORT GOOGLE SHEETS (COLONNES UNIFIÉES)
     btnExportSheets.addEventListener('click', () => {
       const dateSelect = dateFiltreExport.value;
       let listeAExporter = commandes;
@@ -1270,20 +1270,28 @@
         }
       }
 
-      // Construction du CSV avec séparateur point-virgule (parfait pour Excel / Google Sheets en français)
+      // En-têtes CSV unifiés : Une seule colonne Fournisseur et une seule colonne Référence
       let csvContent = "\uFEFF"; // BOM UTF-8 pour les accents
-      csvContent += "Date;Numero de Commande;Fournisseur 1;Reference 1;Fournisseur 2;Reference 2;Remarques\r\n";
+      csvContent += "Date;Numero de Commande;Fournisseur;Reference;Remarques\r\n";
 
       listeAExporter.forEach(cmd => {
         const date = `"${(cmd.date || "").replace(/"/g, '""')}"`;
         const numero = `"${(cmd.numero || "").replace(/"/g, '""')}"`;
-        const f1 = `"${(cmd.fournisseur1 || "").replace(/"/g, '""')}"`;
-        const r1 = `"${(cmd.ref1 || "").replace(/"/g, '""')}"`;
-        const f2 = `"${(cmd.fournisseur2 || "").replace(/"/g, '""')}"`;
-        const r2 = `"${(cmd.ref2 || "").replace(/"/g, '""')}"`;
         const notes = `"${(cmd.notes || "").replace(/"/g, '""')}"`;
 
-        csvContent += `${date};${numero};${f1};${r1};${f2};${r2};${notes}\r\n`;
+        // Ligne pour la Photo 1 (si renseignée)
+        if (cmd.photo && (cmd.fournisseur1 || cmd.ref1)) {
+          const f1 = `"${(cmd.fournisseur1 || "").replace(/"/g, '""')}"`;
+          const r1 = `"${(cmd.ref1 || "").replace(/"/g, '""')}"`;
+          csvContent += `${date};${numero};${f1};${r1};${notes}\r\n`;
+        }
+
+        // Ligne pour la Photo 2 (si renseignée, sur une nouvelle ligne de la même commande pour garder les mêmes colonnes)
+        if (cmd.photo2 && (cmd.fournisseur2 || cmd.ref2)) {
+          const f2 = `"${(cmd.fournisseur2 || "").replace(/"/g, '""')}"`;
+          const r2 = `"${(cmd.ref2 || "").replace(/"/g, '""')}"`;
+          csvContent += `${date};${numero};${f2};${r2};${notes}\r\n`;
+        }
       });
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
