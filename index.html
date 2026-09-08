@@ -815,7 +815,7 @@
           <input type="date" id="dateFiltreExport" class="input-date-custom">
           <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
           <button class="btn-sheets" id="btnExportSheets">🟢 Google Sheets</button>
-          <input type="file" id="fileImportCSV" accept=".csv" style="display: none;">
+          <input type="file" id="fileImportCSV" accept=".csv,.txt" style="display: none;">
           <button class="btn-import" id="btnImportSheets">📥 Importer CSV</button>
         </div>
       </div>
@@ -1265,7 +1265,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION IMPORTATION CSV (GOOGLE SHEETS)
+    // FONCTION IMPORTATION CSV (ADAPTÉE À TON FORMAT DE FICHIER)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1281,27 +1281,26 @@
         
         if (lines.length < 2) {
           alert("Le fichier CSV est vide ou invalide.");
+          fileImportCSV.value = "";
           return;
         }
 
         let importedCount = 0;
-        // On regroupe par numéro de commande si le fichier comporte plusieurs lignes pour la même commande (format unifié)
         let groupCommandes = {};
+        const currentDate = new Date().toLocaleString('fr-FR');
 
-        // On saute la première ligne (en-têtes)
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!line) continue;
 
-          // Découpage en gérant les guillemets du CSV séparé par point-virgule
-          const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"'));
+          // Découpage en gérant les guillemets séparés par des virgules
+          const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
           
           if (cols.length >= 4) {
-            const date = cols[0] || new Date().toLocaleString('fr-FR');
-            const numero = cols[1];
-            const fournisseur = cols[2];
-            const ref = cols[3];
-            const notes = cols[4] || "";
+            const numero = cols[0];      // Référence interne doc. (N° de commande)
+            const fournisseur = cols[1]; // Fournisseur en contremarque
+            const ref = cols[2];         // Code article (Référence)
+            const designation = cols[3]; // Désignation (Remarques)
 
             if (!numero) continue;
 
@@ -1309,31 +1308,32 @@
               groupCommandes[numero] = {
                 id: Date.now() + i,
                 numero: numero,
-                date: date,
+                date: currentDate,
                 photo: "",
                 fournisseur1: fournisseur,
                 ref1: ref,
                 photo2: "",
                 fournisseur2: "",
                 ref2: "",
-                notes: notes
+                notes: designation
               };
             } else {
-              // Si la commande existe déjà dans le lot (ex: ligne 2 pour la même commande)
+              // Si la commande a un deuxième article dans le fichier CSV
               groupCommandes[numero].fournisseur2 = fournisseur;
               groupCommandes[numero].ref2 = ref;
-              if (notes) groupCommandes[numero].notes = notes;
+              if (designation) groupCommandes[numero].notes += " / " + designation;
             }
           }
         }
 
         const keys = Object.keys(groupCommandes);
         if (keys.length === 0) {
-          alert("Aucune donnée valide trouvée dans le fichier.");
+          alert("Aucune donnée valide n'a pu être lue dans ce fichier.");
+          fileImportCSV.value = "";
           return;
         }
 
-        if (confirm(`Voulez-vous importer ${keys.length} commande(s) dans l'historique ?`)) {
+        if (confirm(`Voulez-vous importer ${keys.length} commande(s) depuis votre fichier ?`)) {
           let updates = {};
           keys.forEach(num => {
             const cmd = groupCommandes[num];
@@ -1348,13 +1348,15 @@
             })
             .catch(err => {
               alert("Erreur lors de l'enregistrement Firebase : " + err.message);
+              fileImportCSV.value = "";
             });
+        } else {
+          fileImportCSV.value = "";
         }
       };
       reader.readAsText(file, 'UTF-8');
     });
 
-    // FONCTION EXPORT GOOGLE SHEETS (COLONNES UNIFIÉES)
     btnExportSheets.addEventListener('click', () => {
       const dateSelect = dateFiltreExport.value;
       let listeAExporter = commandes;
@@ -1375,7 +1377,7 @@
         }
       }
 
-      let csvContent = "\uFEFF"; // BOM UTF-8 pour les accents
+      let csvContent = "\uFEFF";
       csvContent += "Date;Numero de Commande;Fournisseur;Reference;Remarques\r\n";
 
       listeAExporter.forEach(cmd => {
