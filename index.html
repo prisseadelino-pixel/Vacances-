@@ -502,6 +502,13 @@
       object-fit: contain;
     }
 
+    .modal-ref-badges {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
     .modal-ref-badge {
       background: var(--primary);
       color: white;
@@ -509,6 +516,15 @@
       border-radius: 6px;
       font-size: 0.8rem;
       font-weight: 700;
+    }
+
+    .modal-fournisseur-badge {
+      background: #334155;
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
     }
 
     @media (max-width: 600px) {
@@ -617,6 +633,15 @@
         border-radius: 6px;
         border: 1px solid #e2e8f0;
       }
+      .print-fournisseur-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #334155;
+        background: #f1f5f9;
+        padding: 2px;
+        border-radius: 4px;
+        text-align: center;
+      }
       .print-ref-label {
         font-size: 10px;
         font-weight: bold;
@@ -672,7 +697,7 @@
     <!-- SECTION RECHERCHE -->
     <section class="card" style="padding: 1rem;">
       <div class="search-box">
-        <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro..." autocomplete="off">
+        <input type="text" id="recherche" placeholder="🔍 Rechercher par numéro, fournisseur..." autocomplete="off">
         <button type="button" class="btn-search" id="btnLancerRecherche">Rechercher</button>
       </div>
     </section>
@@ -705,7 +730,12 @@
           <button type="button" class="btn-secondary" id="btnPhotoDirecte1">📸 Photo 1</button>
         </div>
 
-        <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0;">
+        <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0.75rem;">
+          <label for="fournisseur1">Fournisseur (Photo 1)</label>
+          <input type="text" id="fournisseur1" placeholder="Ex: Nom du fournisseur" autocomplete="off">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
           <label for="ref1">Référence article (Photo 1)</label>
           <input type="text" id="ref1" placeholder="Ex: Xdc-3468" autocomplete="off">
         </div>
@@ -727,7 +757,12 @@
           <button type="button" class="btn-secondary" id="btnPhotoDirecte2">📸 Photo 2</button>
         </div>
 
-        <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0;">
+        <div class="form-group" style="margin-top: 0.75rem; margin-bottom: 0.75rem;">
+          <label for="fournisseur2">Fournisseur (Photo 2)</label>
+          <input type="text" id="fournisseur2" placeholder="Ex: Nom du fournisseur" autocomplete="off">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
           <label for="ref2">Référence article (Photo 2)</label>
           <input type="text" id="ref2" placeholder="Ex: Ytr-9812" autocomplete="off">
         </div>
@@ -830,7 +865,9 @@
     let modeEditionId = null;
 
     const inputNumero = document.getElementById('numeroCommande');
+    const inputFournisseur1 = document.getElementById('fournisseur1');
     const inputRef1 = document.getElementById('ref1');
+    const inputFournisseur2 = document.getElementById('fournisseur2');
     const inputRef2 = document.getElementById('ref2');
     const inputNotes = document.getElementById('notes');
     const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
@@ -887,7 +924,7 @@
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-        const maxDimension = 900; // Réduit à 900px pour alléger fortement le poids tout en gardant une excellente netteté
+        const maxDimension = 900;
 
         if (width > height && width > maxDimension) {
           height *= maxDimension / width;
@@ -901,7 +938,6 @@
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        // Qualité JPEG abaissée à 0.65 pour un poids minimal sans perte visuelle gênante (idéal pour Firebase)
         callback(canvas.toDataURL('image/jpeg', 0.65));
       };
       img.src = dataUrl;
@@ -965,7 +1001,9 @@
 
     btnEnregistrer.addEventListener('click', () => {
       const numero = inputNumero.value.trim();
+      const fournisseur1 = inputFournisseur1.value.trim();
       const ref1 = inputRef1.value.trim();
+      const fournisseur2 = inputFournisseur2.value.trim();
       const ref2 = inputRef2.value.trim();
       const notes = inputNotes.value.trim();
 
@@ -982,8 +1020,10 @@
         id: idObjet,
         numero: numero,
         photo: imageCaptureeData1,
+        fournisseur1: fournisseur1,
         ref1: ref1,
         photo2: imageCaptureeData2,
+        fournisseur2: fournisseur2,
         ref2: ref2,
         notes: notes,
         date: modeEditionId !== null ? commandes.find(c => c.id === modeEditionId).date : new Date().toLocaleString('fr-FR')
@@ -1004,7 +1044,9 @@
     function reinitialiserFormulaire() {
       modeEditionId = null;
       inputNumero.value = "";
+      inputFournisseur1.value = "";
       inputRef1.value = "";
+      inputFournisseur2.value = "";
       inputRef2.value = "";
       imageCaptureeData1 = "";
       imageCaptureeData2 = "";
@@ -1038,7 +1080,9 @@
 
       modeEditionId = id;
       inputNumero.value = item.numero;
+      inputFournisseur1.value = item.fournisseur1 || "";
       inputRef1.value = item.ref1 || "";
+      inputFournisseur2.value = item.fournisseur2 || "";
       inputRef2.value = item.ref2 || "";
       inputNotes.value = item.notes || "";
       
@@ -1093,9 +1137,11 @@
       galerieCommandes.innerHTML = "";
       const liste = commandes.filter(c => {
         const numMatch = c.numero.toLowerCase().includes(filtre.toLowerCase());
+        const f1Match = c.fournisseur1 && c.fournisseur1.toLowerCase().includes(filtre.toLowerCase());
         const ref1Match = c.ref1 && c.ref1.toLowerCase().includes(filtre.toLowerCase());
+        const f2Match = c.fournisseur2 && c.fournisseur2.toLowerCase().includes(filtre.toLowerCase());
         const ref2Match = c.ref2 && c.ref2.toLowerCase().includes(filtre.toLowerCase());
-        return numMatch || ref1Match || ref2Match;
+        return numMatch || f1Match || ref1Match || f2Match || ref2Match;
       });
 
       if (liste.length === 0) {
@@ -1139,7 +1185,10 @@
         box1.className = 'modal-photo-box';
         box1.innerHTML = `
           <img src="${cmd.photo}" alt="Photo 1">
-          ${cmd.ref1 ? `<div class="modal-ref-badge">Réf: ${cmd.ref1}</div>` : ''}
+          <div class="modal-ref-badges">
+            ${cmd.fournisseur1 ? `<div class="modal-fournisseur-badge">Fournisseur: ${cmd.fournisseur1}</div>` : ''}
+            ${cmd.ref1 ? `<div class="modal-ref-badge">Réf: ${cmd.ref1}</div>` : ''}
+          </div>
         `;
         modalImagesRow.appendChild(box1);
       }
@@ -1149,7 +1198,10 @@
         box2.className = 'modal-photo-box';
         box2.innerHTML = `
           <img src="${cmd.photo2}" alt="Photo 2">
-          ${cmd.ref2 ? `<div class="modal-ref-badge">Réf: ${cmd.ref2}</div>` : ''}
+          <div class="modal-ref-badges">
+            ${cmd.fournisseur2 ? `<div class="modal-fournisseur-badge">Fournisseur: ${cmd.fournisseur2}</div>` : ''}
+            ${cmd.ref2 ? `<div class="modal-ref-badge">Réf: ${cmd.ref2}</div>` : ''}
+          </div>
         `;
         modalImagesRow.appendChild(box2);
       }
@@ -1224,12 +1276,14 @@
               ${cmd.photo ? `
                 <div class="print-photo-print-item">
                   <img src="${cmd.photo}" alt="Photo 1">
+                  ${cmd.fournisseur1 ? `<div class="print-fournisseur-label">Fournisseur: ${cmd.fournisseur1}</div>` : ''}
                   ${cmd.ref1 ? `<div class="print-ref-label">Réf: ${cmd.ref1}</div>` : ''}
                 </div>
               ` : ''}
               ${cmd.photo2 ? `
                 <div class="print-photo-print-item">
                   <img src="${cmd.photo2}" alt="Photo 2">
+                  ${cmd.fournisseur2 ? `<div class="print-fournisseur-label">Fournisseur: ${cmd.fournisseur2}</div>` : ''}
                   ${cmd.ref2 ? `<div class="print-ref-label">Réf: ${cmd.ref2}</div>` : ''}
                 </div>
               ` : ''}
