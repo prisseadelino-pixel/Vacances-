@@ -397,6 +397,18 @@
       white-space: nowrap;
     }
 
+    button.btn-import {
+      background-color: #8b5cf6;
+      color: white;
+      border: none;
+      padding: 0.6rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
     .liste-commandes {
       display: flex;
       flex-direction: column;
@@ -803,6 +815,8 @@
           <input type="date" id="dateFiltreExport" class="input-date-custom">
           <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
           <button class="btn-sheets" id="btnExportSheets">🟢 Google Sheets</button>
+          <input type="file" id="fileImportCSV" accept=".csv" style="display: none;">
+          <button class="btn-import" id="btnImportSheets">📥 Importer CSV</button>
         </div>
       </div>
 
@@ -910,6 +924,8 @@
     const btnViderHistorique = document.getElementById('btnViderHistorique');
     const btnExportPDF = document.getElementById('btnExportPDF');
     const btnExportSheets = document.getElementById('btnExportSheets');
+    const btnImportSheets = document.getElementById('btnImportSheets');
+    const fileImportCSV = document.getElementById('fileImportCSV');
     const dateFiltreExport = document.getElementById('dateFiltreExport');
 
     const modal = document.getElementById('imageModal');
@@ -1249,6 +1265,95 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
+    // FONCTION IMPORTATION CSV (GOOGLE SHEETS)
+    btnImportSheets.addEventListener('click', () => {
+      fileImportCSV.click();
+    });
+
+    fileImportCSV.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const text = event.target.result;
+        const lines = text.split(/\r\n|\n/);
+        
+        if (lines.length < 2) {
+          alert("Le fichier CSV est vide ou invalide.");
+          return;
+        }
+
+        let importedCount = 0;
+        // On regroupe par numéro de commande si le fichier comporte plusieurs lignes pour la même commande (format unifié)
+        let groupCommandes = {};
+
+        // On saute la première ligne (en-têtes)
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+
+          // Découpage en gérant les guillemets du CSV séparé par point-virgule
+          const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"'));
+          
+          if (cols.length >= 4) {
+            const date = cols[0] || new Date().toLocaleString('fr-FR');
+            const numero = cols[1];
+            const fournisseur = cols[2];
+            const ref = cols[3];
+            const notes = cols[4] || "";
+
+            if (!numero) continue;
+
+            if (!groupCommandes[numero]) {
+              groupCommandes[numero] = {
+                id: Date.now() + i,
+                numero: numero,
+                date: date,
+                photo: "",
+                fournisseur1: fournisseur,
+                ref1: ref,
+                photo2: "",
+                fournisseur2: "",
+                ref2: "",
+                notes: notes
+              };
+            } else {
+              // Si la commande existe déjà dans le lot (ex: ligne 2 pour la même commande)
+              groupCommandes[numero].fournisseur2 = fournisseur;
+              groupCommandes[numero].ref2 = ref;
+              if (notes) groupCommandes[numero].notes = notes;
+            }
+          }
+        }
+
+        const keys = Object.keys(groupCommandes);
+        if (keys.length === 0) {
+          alert("Aucune donnée valide trouvée dans le fichier.");
+          return;
+        }
+
+        if (confirm(`Voulez-vous importer ${keys.length} commande(s) dans l'historique ?`)) {
+          let updates = {};
+          keys.forEach(num => {
+            const cmd = groupCommandes[num];
+            updates[cmd.id] = cmd;
+            importedCount++;
+          });
+
+          db.ref('commandes').update(updates)
+            .then(() => {
+              alert(`Importation réussie : ${importedCount} élément(s) ajoutés !`);
+              fileImportCSV.value = "";
+            })
+            .catch(err => {
+              alert("Erreur lors de l'enregistrement Firebase : " + err.message);
+            });
+        }
+      };
+      reader.readAsText(file, 'UTF-8');
+    });
+
     // FONCTION EXPORT GOOGLE SHEETS (COLONNES UNIFIÉES)
     btnExportSheets.addEventListener('click', () => {
       const dateSelect = dateFiltreExport.value;
@@ -1270,7 +1375,6 @@
         }
       }
 
-      // En-têtes CSV unifiés : Une seule colonne Fournisseur et une seule colonne Référence
       let csvContent = "\uFEFF"; // BOM UTF-8 pour les accents
       csvContent += "Date;Numero de Commande;Fournisseur;Reference;Remarques\r\n";
 
@@ -1279,14 +1383,12 @@
         const numero = `"${(cmd.numero || "").replace(/"/g, '""')}"`;
         const notes = `"${(cmd.notes || "").replace(/"/g, '""')}"`;
 
-        // Ligne pour la Photo 1 (si renseignée)
         if (cmd.photo && (cmd.fournisseur1 || cmd.ref1)) {
           const f1 = `"${(cmd.fournisseur1 || "").replace(/"/g, '""')}"`;
           const r1 = `"${(cmd.ref1 || "").replace(/"/g, '""')}"`;
           csvContent += `${date};${numero};${f1};${r1};${notes}\r\n`;
         }
 
-        // Ligne pour la Photo 2 (si renseignée, sur une nouvelle ligne de la même commande pour garder les mêmes colonnes)
         if (cmd.photo2 && (cmd.fournisseur2 || cmd.ref2)) {
           const f2 = `"${(cmd.fournisseur2 || "").replace(/"/g, '""')}"`;
           const r2 = `"${(cmd.ref2 || "").replace(/"/g, '""')}"`;
