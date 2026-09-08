@@ -1265,7 +1265,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION IMPORTATION CSV (AVEC REGROUPEMENT DES ARTICLES POUR LA MÊME COMMANDE)
+    // FONCTION IMPORTATION CSV (FUSION INTELLIGENTE SUR UNE SEULE LIGNE PAR COMMANDE)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1285,76 +1285,98 @@
           return;
         }
 
-        let importedCount = 0;
         let groupCommandes = {};
         const currentDate = new Date().toLocaleString('fr-FR');
 
-        for (let i = 1; i < lines.length; i++) {
-          const line = lines[i].trim();
-          if (!line) continue;
-
-          const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+        // 1. On charge d'abord les commandes existantes dans Firebase pour fusionner proprement si besoin
+        db.ref('commandes').once('value').then(snapshot => {
+          const existingData = snapshot.val() || {};
           
-          if (cols.length >= 4) {
-            const numero = cols[0];      // Référence interne doc. (N° de commande)
-            const fournisseur = cols[1]; // Fournisseur en contremarque
-            const ref = cols[2];         // Code article (Référence)
-            const designation = cols[3]; // Désignation (Remarques)
+          // On convertit les données existantes pour les retrouver par numéro
+          Object.keys(existingData).forEach(key => {
+            const item = existingData[key];
+            if (item && item.numero) {
+              groupCommandes[item.numero] = item;
+            }
+          });
 
-            if (!numero) continue;
+          let importedCount = 0;
 
-            if (!groupCommandes[numero]) {
-              // Premier article de la commande (Article 1)
-              groupCommandes[numero] = {
-                id: Date.now() + i,
-                numero: numero,
-                date: currentDate,
-                photo: "",
-                fournisseur1: fournisseur,
-                ref1: ref,
-                photo2: "",
-                fournisseur2: "",
-                ref2: "",
-                notes: designation
-              };
-            } else {
-              // Deuxième article pour la même commande (Article 2 regroupé automatiquement)
-              groupCommandes[numero].fournisseur2 = fournisseur;
-              groupCommandes[numero].ref2 = ref;
-              if (designation) {
-                groupCommandes[numero].notes += " / " + designation;
+          // 2. On lit le fichier CSV ligne par ligne
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            
+            if (cols.length >= 4) {
+              const numero = cols[0];      // Référence interne doc. (N° de commande)
+              const fournisseur = cols[1]; // Fournisseur en contremarque
+              const ref = cols[2];         // Code article (Référence)
+              const designation = cols[3]; // Désignation (Remarques)
+
+              if (!numero) continue;
+
+              if (!groupCommandes[numero]) {
+                // Nouvelle commande complète (Article 1)
+                groupCommandes[numero] = {
+                  id: Date.now() + i,
+                  numero: numero,
+                  date: currentDate,
+                  photo: "",
+                  fournisseur1: fournisseur,
+                  ref1: ref,
+                  photo2: "",
+                  fournisseur2: "",
+                  ref2: "",
+                  notes: designation
+                };
+                importedCount++;
+              } else {
+                // La commande existe déjà (soit dans l'app, soit déjà un 1er article dans le CSV)
+                // On remplit le slot 2 s'il est vide
+                if (!groupCommandes[numero].ref1) {
+                  groupCommandes[numero].fournisseur1 = fournisseur;
+                  groupCommandes[numero].ref1 = ref;
+                  if (designation) groupCommandes[numero].notes = designation;
+                } else if (!groupCommandes[numero].ref2 && groupCommandes[numero].ref1 !== ref) {
+                  groupCommandes[numero].fournisseur2 = fournisseur;
+                  groupCommandes[numero].ref2 = ref;
+                  if (designation) {
+                    groupCommandes[numero].notes = groupCommandes[numero].notes ? groupCommandes[numero].notes + " / " + designation : designation;
+                  }
+                }
               }
             }
           }
-        }
 
-        const keys = Object.keys(groupCommandes);
-        if (keys.length === 0) {
-          alert("Aucune donnée valide n'a pu être lue dans ce fichier.");
-          fileImportCSV.value = "";
-          return;
-        }
+          const keys = Object.keys(groupCommandes);
+          if (keys.length === 0) {
+            alert("Aucune donnée valide n'a pu être lue dans ce fichier.");
+            fileImportCSV.value = "";
+            return;
+          }
 
-        if (confirm(`Voulez-vous importer ${keys.length} commande(s) unique(s) depuis votre fichier ?`)) {
-          let updates = {};
-          keys.forEach(num => {
-            const cmd = groupCommandes[num];
-            updates[cmd.id] = cmd;
-            importedCount++;
-          });
-
-          db.ref('commandes').update(updates)
-            .then(() => {
-              alert(`Importation réussie : ${importedCount} commande(s) regroupée(s) ajoutée(s) !`);
-              fileImportCSV.value = "";
-            })
-            .catch(err => {
-              alert("Erreur lors de l'enregistrement Firebase : " + err.message);
-              fileImportCSV.value = "";
+          if (confirm(`Voulez-vous importer et fusionner les données du fichier ?`)) {
+            let updates = {};
+            keys.forEach(num => {
+              const cmd = groupCommandes[num];
+              updates[cmd.id] = cmd;
             });
-        } else {
-          fileImportCSV.value = "";
-        }
+
+            db.ref('commandes').set(updates)
+              .then(() => {
+                alert(`Importation réussie : les articles de la même commande ont été regroupés sur une seule ligne !`);
+                fileImportCSV.value = "";
+              })
+              .catch(err => {
+                alert("Erreur lors de l'enregistrement Firebase : " + err.message);
+                fileImportCSV.value = "";
+              });
+          } else {
+            fileImportCSV.value = "";
+          }
+        });
       };
       reader.readAsText(file, 'UTF-8');
     });
