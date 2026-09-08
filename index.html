@@ -865,6 +865,19 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // 🔑 MOT DE PASSE ADMIN (Tu peux le changer ici si tu veux)
+    const ADMIN_PASSWORD = "1234";
+
+    function verifierAdmin() {
+      const mdp = prompt("🔒 Action protégée. Entrez le mot de passe administrateur :");
+      if (mdp === ADMIN_PASSWORD) {
+        return true;
+      } else if (mdp !== null) {
+        alert("❌ Mot de passe incorrect !");
+      }
+      return false;
+    }
+
     const homeScreen = document.getElementById('home-screen');
     const appScreen = document.getElementById('app-screen');
     const btnCommencer = document.getElementById('btnCommencer');
@@ -1187,10 +1200,13 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    // 🔒 SUPPRESSION PROTÉGÉE PAR MOT DE PASSE
     window.supprimerCommande = function(id, event) {
       if (event) event.stopPropagation();
       const item = commandes.find(c => c.id === id);
       if (!item) return;
+
+      if (!verifierAdmin()) return;
 
       if (confirm(`Voulez-vous vraiment supprimer le reliquat ${item.numero} ?`)) {
         db.ref('commandes/' + id).remove()
@@ -1200,8 +1216,12 @@
       }
     };
 
+    // 🔒 VIDAGE HISTORIQUE PROTÉGÉ PAR MOT DE PASSE
     btnViderHistorique.addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
+      
+      if (!verifierAdmin()) return;
+
       if (confirm("Voulez-vous vraiment effacer TOUT l'historique de la base de données ?")) {
         db.ref('commandes').remove()
           .then(() => {
@@ -1246,7 +1266,7 @@
           </div>
           <div class="commande-actions">
             <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">✏️ Modifier</button>
-            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)">❌</button>
+            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)" title="🔒 Protégé">❌</button>
           </div>
         `;
         galerieCommandes.appendChild(item);
@@ -1338,7 +1358,6 @@
           const existingData = snapshot.val() || {};
           let groupCommandes = {};
 
-          // On récupère l'existant en conservant bien les photos et données déjà présentes
           Object.keys(existingData).forEach(key => {
             const item = existingData[key];
             if (item && item.numero) {
@@ -1363,7 +1382,6 @@
               if (!numero) continue;
 
               if (!groupCommandes[numero]) {
-                // Nouvelle commande (pas d'existant)
                 const newId = Date.now() + i;
                 groupCommandes[numero] = {
                   id: newId,
@@ -1379,7 +1397,6 @@
                 };
                 importedCount++;
               } else {
-                // La commande existe déjà dans Firebase : on met à jour les textes MAIS on garde .photo et .photo2 intactes !
                 const cmd = groupCommandes[numero];
                 
                 if (!cmd.ref1) {
