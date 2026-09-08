@@ -779,10 +779,10 @@
       </div>
     </section>
 
-    <!-- HISTORIQUE DES PREUVES -->
+    <!-- HISTORIQUE DES RELIQUATS -->
     <section class="card">
       <div class="section-header">
-        <h2>Historique des Preuves</h2>
+        <h2>Historique Reliquats</h2>
       </div>
 
       <div class="export-filter-container">
@@ -1238,7 +1238,7 @@
     btnExportPDF.addEventListener('click', () => {
       const dateSelect = dateFiltreExport.value;
       let listeAExporter = commandes;
-      let titreExport = "Historique Complet des Reliquats";
+      let titreExport = "Historique Reliquats";
 
       if (dateSelect) {
         const parts = dateSelect.split('-');
