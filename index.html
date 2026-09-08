@@ -1037,8 +1037,8 @@
       const ref2 = inputRef2.value.trim();
       const notes = inputNotes.value.trim();
 
-      if (!numero || !imageCaptureeData1) {
-        alert("Veuillez renseigner un numéro de commande et au moins la Photo 1.");
+      if (!numero || (!ref1 && !ref2)) {
+        alert("Veuillez renseigner un numéro de commande et au moins une référence article.");
         return;
       }
 
@@ -1185,9 +1185,9 @@
         item.onclick = () => ouvrirModal(cmd);
         
         let count = 0;
-        if (cmd.photo) count++;
-        if (cmd.photo2) count++;
-        const nbPhotosText = count === 2 ? "📷📷 (2 photos)" : "📷 (1 photo)";
+        if (cmd.photo || cmd.ref1) count++;
+        if (cmd.photo2 || cmd.ref2) count++;
+        const nbPhotosText = count === 2 ? "📦📦 (2 articles)" : "📦 (1 article)";
 
         item.innerHTML = `
           <div class="commande-main-btn">
@@ -1210,11 +1210,11 @@
       modal.style.display = "flex";
       modalImagesRow.innerHTML = "";
 
-      if (cmd.photo) {
+      if (cmd.photo || cmd.ref1 || cmd.fournisseur1) {
         const box1 = document.createElement('div');
         box1.className = 'modal-photo-box';
         box1.innerHTML = `
-          <img src="${cmd.photo}" alt="Photo 1">
+          ${cmd.photo ? `<img src="${cmd.photo}" alt="Article 1">` : ''}
           <div class="modal-ref-badges">
             ${cmd.fournisseur1 ? `<div class="modal-fournisseur-badge">Fournisseur: ${cmd.fournisseur1}</div>` : ''}
             ${cmd.ref1 ? `<div class="modal-ref-badge">Réf: ${cmd.ref1}</div>` : ''}
@@ -1223,11 +1223,11 @@
         modalImagesRow.appendChild(box1);
       }
 
-      if (cmd.photo2) {
+      if (cmd.photo2 || cmd.ref2 || cmd.fournisseur2) {
         const box2 = document.createElement('div');
         box2.className = 'modal-photo-box';
         box2.innerHTML = `
-          <img src="${cmd.photo2}" alt="Photo 2">
+          ${cmd.photo2 ? `<img src="${cmd.photo2}" alt="Article 2">` : ''}
           <div class="modal-ref-badges">
             ${cmd.fournisseur2 ? `<div class="modal-fournisseur-badge">Fournisseur: ${cmd.fournisseur2}</div>` : ''}
             ${cmd.ref2 ? `<div class="modal-ref-badge">Réf: ${cmd.ref2}</div>` : ''}
@@ -1265,7 +1265,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION IMPORTATION CSV (FUSION STRICTE PAR NUMÉRO DE COMMANDE)
+    // FONCTION IMPORTATION CSV (DISPATCH ARTICLE 1 ET ARTICLE 2 DANS LE FORMULAIRE)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1287,24 +1287,19 @@
 
         const currentDate = new Date().toLocaleString('fr-FR');
 
-        // On récupère d'abord les données existantes de Firebase pour tout regrouper proprement
         db.ref('commandes').once('value').then(snapshot => {
           const existingData = snapshot.val() || {};
           let groupCommandes = {};
-          let uniqueIdMap = {};
 
-          // On indexe par numéro de commande
           Object.keys(existingData).forEach(key => {
             const item = existingData[key];
             if (item && item.numero) {
               groupCommandes[item.numero] = item;
-              uniqueIdMap[item.numero] = item.id;
             }
           });
 
           let importedCount = 0;
 
-          // On lit chaque ligne du CSV
           for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
@@ -1314,15 +1309,14 @@
             if (cols.length >= 4) {
               const numero = cols[0];      // Référence interne doc. (N° de commande)
               const fournisseur = cols[1]; // Fournisseur en contremarque
-              const ref = cols[2];         // Code article
-              const designation = cols[3]; // Désignation
+              const ref = cols[2];         // Code article (Référence)
+              const designation = cols[3]; // Désignation (Remarques)
 
               if (!numero) continue;
 
               if (!groupCommandes[numero]) {
-                // Première fois qu'on voit ce numéro de commande dans le fichier
+                // Première occurrence : remplit l'Article 1 (bloc du haut)
                 const newId = Date.now() + i;
-                uniqueIdMap[numero] = newId;
                 groupCommandes[numero] = {
                   id: newId,
                   numero: numero,
@@ -1337,7 +1331,7 @@
                 };
                 importedCount++;
               } else {
-                // Ce numéro de commande existe déjà, on remplit l'emplacement 2 si vide et que ce n'est pas le même article
+                // Deuxième occurrence (ou plus) : remplit l'Article 2 (bloc du bas) sur la même ligne !
                 const cmd = groupCommandes[numero];
                 if (!cmd.ref1) {
                   cmd.fournisseur1 = fournisseur;
@@ -1361,7 +1355,7 @@
             return;
           }
 
-          if (confirm(`Voulez-vous importer et fusionner ces commandes ? (Les articles multiples d'une même commande seront fusionnés sur une seule ligne)`)) {
+          if (confirm(`Voulez-vous importer et fusionner ces commandes ? (Les articles se rangeront automatiquement dans le Bloc 1 et le Bloc 2)`)) {
             let updates = {};
             keys.forEach(num => {
               const cmd = groupCommandes[num];
@@ -1370,7 +1364,7 @@
 
             db.ref('commandes').set(updates)
               .then(() => {
-                alert(`Importation réussie : les articles multiples ont été fusionnés sur une seule ligne par commande !`);
+                alert(`Importation réussie : les articles sont répartis par blocs dans chaque commande !`);
                 fileImportCSV.value = "";
               })
               .catch(err => {
@@ -1476,14 +1470,14 @@
             <div class="print-photos-flex">
               ${(cmd.photo || cmd.fournisseur1 || cmd.ref1) ? `
                 <div class="print-photo-print-item">
-                  ${cmd.photo ? `<img src="${cmd.photo}" alt="Photo 1">` : ''}
+                  ${cmd.photo ? `<img src="${cmd.photo}" alt="Article 1">` : ''}
                   ${cmd.fournisseur1 ? `<div class="print-fournisseur-label">Fournisseur: ${cmd.fournisseur1}</div>` : ''}
                   ${cmd.ref1 ? `<div class="print-ref-label">Réf: ${cmd.ref1}</div>` : ''}
                 </div>
               ` : ''}
               ${(cmd.photo2 || cmd.fournisseur2 || cmd.ref2) ? `
                 <div class="print-photo-print-item">
-                  ${cmd.photo2 ? `<img src="${cmd.photo2}" alt="Photo 2">` : ''}
+                  ${cmd.photo2 ? `<img src="${cmd.photo2}" alt="Article 2">` : ''}
                   ${cmd.fournisseur2 ? `<div class="print-fournisseur-label">Fournisseur: ${cmd.fournisseur2}</div>` : ''}
                   ${cmd.ref2 ? `<div class="print-ref-label">Réf: ${cmd.ref2}</div>` : ''}
                 </div>
