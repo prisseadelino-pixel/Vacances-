@@ -543,6 +543,11 @@
       z-index: 1001;
     }
 
+    /* ZONE D'IMPRESSION CACHÉE SUR L'ÉCRAN */
+    #print-area {
+      display: none;
+    }
+
     @media print {
       body * {
         visibility: hidden;
@@ -551,6 +556,7 @@
         visibility: visible;
       }
       #print-area {
+        display: block !important;
         position: absolute;
         left: 0;
         top: 0;
@@ -881,7 +887,7 @@
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-        const maxDimension = 1200;
+        const maxDimension = 900; // Réduit à 900px pour alléger fortement le poids tout en gardant une excellente netteté
 
         if (width > height && width > maxDimension) {
           height *= maxDimension / width;
@@ -895,7 +901,8 @@
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        callback(canvas.toDataURL('image/jpeg', 0.75));
+        // Qualité JPEG abaissée à 0.65 pour un poids minimal sans perte visuelle gênante (idéal pour Firebase)
+        callback(canvas.toDataURL('image/jpeg', 0.65));
       };
       img.src = dataUrl;
     }
