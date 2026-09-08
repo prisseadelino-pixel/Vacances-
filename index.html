@@ -385,6 +385,18 @@
       white-space: nowrap;
     }
 
+    button.btn-sheets {
+      background-color: #16a34a;
+      color: white;
+      border: none;
+      padding: 0.6rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
     .liste-commandes {
       display: flex;
       flex-direction: column;
@@ -790,6 +802,7 @@
         <div class="export-actions-row">
           <input type="date" id="dateFiltreExport" class="input-date-custom">
           <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
+          <button class="btn-sheets" id="btnExportSheets">🟢 Google Sheets</button>
         </div>
       </div>
 
@@ -896,6 +909,7 @@
     const btnLancerRecherche = document.getElementById('btnLancerRecherche');
     const btnViderHistorique = document.getElementById('btnViderHistorique');
     const btnExportPDF = document.getElementById('btnExportPDF');
+    const btnExportSheets = document.getElementById('btnExportSheets');
     const dateFiltreExport = document.getElementById('dateFiltreExport');
 
     const modal = document.getElementById('imageModal');
@@ -1233,6 +1247,53 @@
     inputRecherche.addEventListener('input', executerRecherche);
     inputRecherche.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') executerRecherche();
+    });
+
+    // FONCTION EXPORT GOOGLE SHEETS (CSV COMPATIBLE)
+    btnExportSheets.addEventListener('click', () => {
+      const dateSelect = dateFiltreExport.value;
+      let listeAExporter = commandes;
+
+      if (dateSelect) {
+        const parts = dateSelect.split('-');
+        const dateFormatee = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        listeAExporter = commandes.filter(cmd => cmd.date.startsWith(dateFormatee));
+
+        if (listeAExporter.length === 0) {
+          alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`);
+          return;
+        }
+      } else {
+        if (commandes.length === 0) {
+          alert("L'historique est vide, aucun document à exporter.");
+          return;
+        }
+      }
+
+      // Construction du CSV avec séparateur point-virgule (parfait pour Excel / Google Sheets en français)
+      let csvContent = "\uFEFF"; // BOM UTF-8 pour les accents
+      csvContent += "Date;Numero de Commande;Fournisseur 1;Reference 1;Fournisseur 2;Reference 2;Remarques\r\n";
+
+      listeAExporter.forEach(cmd => {
+        const date = `"${(cmd.date || "").replace(/"/g, '""')}"`;
+        const numero = `"${(cmd.numero || "").replace(/"/g, '""')}"`;
+        const f1 = `"${(cmd.fournisseur1 || "").replace(/"/g, '""')}"`;
+        const r1 = `"${(cmd.ref1 || "").replace(/"/g, '""')}"`;
+        const f2 = `"${(cmd.fournisseur2 || "").replace(/"/g, '""')}"`;
+        const r2 = `"${(cmd.ref2 || "").replace(/"/g, '""')}"`;
+        const notes = `"${(cmd.notes || "").replace(/"/g, '""')}"`;
+
+        csvContent += `${date};${numero};${f1};${r1};${f2};${r2};${notes}\r\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `reliquats_export_${dateSelect || 'complet'}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     });
 
     btnExportPDF.addEventListener('click', () => {
