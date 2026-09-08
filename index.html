@@ -738,7 +738,7 @@
         <input type="text" id="numeroCommande" name="no_autofill_cmd" autocomplete="off" placeholder="Ex: S-103567">
       </div>
 
-      <!-- PHOTO 1 -->
+      <!-- PHOTO 1 (TOUJOURS PRÉSENTE) -->
       <div class="photo-box-container">
         <label>📸 Photo 1 (Article manquant)</label>
         <div id="previewWrapper1" class="photo-preview-wrapper">
@@ -765,9 +765,20 @@
         </div>
       </div>
 
-      <!-- PHOTO 2 -->
-      <div class="photo-box-container">
-        <label>📸 Photo 2 (Autre angle / Étiquette) - Optionnelle</label>
+      <!-- BOUTON AJOUTER UN DEUXIÈME ARTICLE (MASQUÉ PAR DÉFAUT) -->
+      <div id="containerBtnAjoutArticle" style="margin-bottom: 1rem; text-align: center;">
+        <button type="button" id="btnAfficherArticle2" style="background: transparent; border: 2px dashed var(--border); color: var(--primary); padding: 0.75rem; border-radius: 10px; font-weight: 700; width: 100%; cursor: pointer; transition: all 0.2s;">
+          ➕ Ajouter un deuxième article pour cette commande
+        </button>
+      </div>
+
+      <!-- PHOTO 2 (MASQUÉE PAR DÉFAUT, S'ACTIVE AVEC LE BOUTON +) -->
+      <div class="photo-box-container" id="blocArticle2" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <label style="margin-bottom: 0;">📸 Photo 2 (Deuxième article)</label>
+          <button type="button" id="btnRetirerArticle2" style="background: rgba(244, 63, 94, 0.2); border: none; color: #f43f5e; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">🗑️ Retirer cet article</button>
+        </div>
+
         <div id="previewWrapper2" class="photo-preview-wrapper">
           <img id="photoPreview2" class="photo-preview" alt="Aperçu Photo 2">
           <button type="button" id="btnSupprPhoto2" class="btn-suppr-photo-interne">❌ Supprimer cette photo</button>
@@ -899,6 +910,11 @@
     const inputNotes = document.getElementById('notes');
     const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
     
+    const blocArticle2 = document.getElementById('blocArticle2');
+    const btnAfficherArticle2 = document.getElementById('btnAfficherArticle2');
+    const btnRetirerArticle2 = document.getElementById('btnRetirerArticle2');
+    const containerBtnAjoutArticle = document.getElementById('containerBtnAjoutArticle');
+
     const photoPreview1 = document.getElementById('photoPreview1');
     const previewWrapper1 = document.getElementById('previewWrapper1');
     const btnSupprPhoto1 = document.getElementById('btnSupprPhoto1');
@@ -932,6 +948,26 @@
     const modalImagesRow = document.getElementById('modalImagesRow');
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
+
+    // GESTION DU BOUTON "+" POUR AFFICHER LE 2ÈME ARTICLE
+    btnAfficherArticle2.addEventListener('click', () => {
+      blocArticle2.style.display = 'block';
+      containerBtnAjoutArticle.style.display = 'none';
+    });
+
+    btnRetirerArticle2.addEventListener('click', () => {
+      // On vide les champs du 2e article et on le masque
+      imageCaptureeData2 = "";
+      photoPreview2.src = "";
+      previewWrapper2.style.display = 'none';
+      fileGallery2.value = "";
+      fileCamera2.value = "";
+      inputFournisseur2.value = "";
+      inputRef2.value = "";
+
+      blocArticle2.style.display = 'none';
+      containerBtnAjoutArticle.style.display = 'block';
+    });
 
     // ÉCOUTE FIREBASE FIABLE
     db.ref('commandes').on('value', (snapshot) => {
@@ -1087,6 +1123,11 @@
       fileCamera1.value = "";
       fileGallery2.value = "";
       fileCamera2.value = "";
+      
+      // Réinitialiser l'affichage du bloc 2 à l'état masqué
+      blocArticle2.style.display = 'none';
+      containerBtnAjoutArticle.style.display = 'block';
+
       btnEnregistrer.textContent = "Enregistrer les reliquats";
       btnEnregistrer.disabled = false;
       btnAnnulerEdit.style.display = "none";
@@ -1126,10 +1167,19 @@
         previewWrapper1.style.display = 'none';
       }
 
-      if (imageCaptureeData2) {
-        photoPreview2.src = imageCaptureeData2;
-        previewWrapper2.style.display = 'block';
+      // Si le deuxième article existe, on l'affiche automatiquement en mode édition
+      if (imageCaptureeData2 || item.ref2 || item.fournisseur2) {
+        blocArticle2.style.display = 'block';
+        containerBtnAjoutArticle.style.display = 'none';
+        if (imageCaptureeData2) {
+          photoPreview2.src = imageCaptureeData2;
+          previewWrapper2.style.display = 'block';
+        } else {
+          previewWrapper2.style.display = 'none';
+        }
       } else {
+        blocArticle2.style.display = 'none';
+        containerBtnAjoutArticle.style.display = 'block';
         previewWrapper2.style.display = 'none';
       }
 
@@ -1355,7 +1405,7 @@
             return;
           }
 
-          if (confirm(`Voulez-vous importer et fusionner ces commandes ? (Les articles se rangeront automatiquement dans le Bloc 1 et le Bloc 2)`)) {
+          if (confirm(`Voulez-vous importer et fusionner ces commandes ?`)) {
             let updates = {};
             keys.forEach(num => {
               const cmd = groupCommandes[num];
@@ -1364,7 +1414,7 @@
 
             db.ref('commandes').set(updates)
               .then(() => {
-                alert(`Importation réussie : les articles sont répartis par blocs dans chaque commande !`);
+                alert(`Importation réussie !`);
                 fileImportCSV.value = "";
               })
               .catch(err => {
