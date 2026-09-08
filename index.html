@@ -1265,7 +1265,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION IMPORTATION CSV (ADAPTÉE À TON FORMAT DE FICHIER)
+    // FONCTION IMPORTATION CSV (AVEC REGROUPEMENT DES ARTICLES POUR LA MÊME COMMANDE)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1293,7 +1293,6 @@
           const line = lines[i].trim();
           if (!line) continue;
 
-          // Découpage en gérant les guillemets séparés par des virgules
           const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
           
           if (cols.length >= 4) {
@@ -1305,6 +1304,7 @@
             if (!numero) continue;
 
             if (!groupCommandes[numero]) {
+              // Premier article de la commande (Article 1)
               groupCommandes[numero] = {
                 id: Date.now() + i,
                 numero: numero,
@@ -1318,10 +1318,12 @@
                 notes: designation
               };
             } else {
-              // Si la commande a un deuxième article dans le fichier CSV
+              // Deuxième article pour la même commande (Article 2 regroupé automatiquement)
               groupCommandes[numero].fournisseur2 = fournisseur;
               groupCommandes[numero].ref2 = ref;
-              if (designation) groupCommandes[numero].notes += " / " + designation;
+              if (designation) {
+                groupCommandes[numero].notes += " / " + designation;
+              }
             }
           }
         }
@@ -1333,7 +1335,7 @@
           return;
         }
 
-        if (confirm(`Voulez-vous importer ${keys.length} commande(s) depuis votre fichier ?`)) {
+        if (confirm(`Voulez-vous importer ${keys.length} commande(s) unique(s) depuis votre fichier ?`)) {
           let updates = {};
           keys.forEach(num => {
             const cmd = groupCommandes[num];
@@ -1343,7 +1345,7 @@
 
           db.ref('commandes').update(updates)
             .then(() => {
-              alert(`Importation réussie : ${importedCount} élément(s) ajoutés !`);
+              alert(`Importation réussie : ${importedCount} commande(s) regroupée(s) ajoutée(s) !`);
               fileImportCSV.value = "";
             })
             .catch(err => {
@@ -1385,13 +1387,13 @@
         const numero = `"${(cmd.numero || "").replace(/"/g, '""')}"`;
         const notes = `"${(cmd.notes || "").replace(/"/g, '""')}"`;
 
-        if (cmd.photo && (cmd.fournisseur1 || cmd.ref1)) {
+        if (cmd.photo || cmd.fournisseur1 || cmd.ref1) {
           const f1 = `"${(cmd.fournisseur1 || "").replace(/"/g, '""')}"`;
           const r1 = `"${(cmd.ref1 || "").replace(/"/g, '""')}"`;
           csvContent += `${date};${numero};${f1};${r1};${notes}\r\n`;
         }
 
-        if (cmd.photo2 && (cmd.fournisseur2 || cmd.ref2)) {
+        if (cmd.photo2 || cmd.fournisseur2 || cmd.ref2) {
           const f2 = `"${(cmd.fournisseur2 || "").replace(/"/g, '""')}"`;
           const r2 = `"${(cmd.ref2 || "").replace(/"/g, '""')}"`;
           csvContent += `${date};${numero};${f2};${r2};${notes}\r\n`;
@@ -1446,16 +1448,16 @@
             <h3>Commande : ${cmd.numero}</h3>
             <div class="date">Date : ${cmd.date}</div>
             <div class="print-photos-flex">
-              ${cmd.photo ? `
+              ${(cmd.photo || cmd.fournisseur1 || cmd.ref1) ? `
                 <div class="print-photo-print-item">
-                  <img src="${cmd.photo}" alt="Photo 1">
+                  ${cmd.photo ? `<img src="${cmd.photo}" alt="Photo 1">` : ''}
                   ${cmd.fournisseur1 ? `<div class="print-fournisseur-label">Fournisseur: ${cmd.fournisseur1}</div>` : ''}
                   ${cmd.ref1 ? `<div class="print-ref-label">Réf: ${cmd.ref1}</div>` : ''}
                 </div>
               ` : ''}
-              ${cmd.photo2 ? `
+              ${(cmd.photo2 || cmd.fournisseur2 || cmd.ref2) ? `
                 <div class="print-photo-print-item">
-                  <img src="${cmd.photo2}" alt="Photo 2">
+                  ${cmd.photo2 ? `<img src="${cmd.photo2}" alt="Photo 2">` : ''}
                   ${cmd.fournisseur2 ? `<div class="print-fournisseur-label">Fournisseur: ${cmd.fournisseur2}</div>` : ''}
                   ${cmd.ref2 ? `<div class="print-ref-label">Réf: ${cmd.ref2}</div>` : ''}
                 </div>
