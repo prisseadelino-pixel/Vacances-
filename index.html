@@ -956,7 +956,6 @@
     });
 
     btnRetirerArticle2.addEventListener('click', () => {
-      // On vide les champs du 2e article et on le masque
       imageCaptureeData2 = "";
       photoPreview2.src = "";
       previewWrapper2.style.display = 'none';
@@ -1124,7 +1123,6 @@
       fileGallery2.value = "";
       fileCamera2.value = "";
       
-      // Réinitialiser l'affichage du bloc 2 à l'état masqué
       blocArticle2.style.display = 'none';
       containerBtnAjoutArticle.style.display = 'block';
 
@@ -1167,7 +1165,6 @@
         previewWrapper1.style.display = 'none';
       }
 
-      // Si le deuxième article existe, on l'affiche automatiquement en mode édition
       if (imageCaptureeData2 || item.ref2 || item.fournisseur2) {
         blocArticle2.style.display = 'block';
         containerBtnAjoutArticle.style.display = 'none';
@@ -1315,7 +1312,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION IMPORTATION CSV (DISPATCH ARTICLE 1 ET ARTICLE 2 DANS LE FORMULAIRE)
+    // FONCTION IMPORTATION CSV (PRÉSERVE LES PHOTOS EXISTANTES DE FIREBASE)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1341,6 +1338,7 @@
           const existingData = snapshot.val() || {};
           let groupCommandes = {};
 
+          // On récupère l'existant en conservant bien les photos et données déjà présentes
           Object.keys(existingData).forEach(key => {
             const item = existingData[key];
             if (item && item.numero) {
@@ -1357,15 +1355,15 @@
             const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             
             if (cols.length >= 4) {
-              const numero = cols[0];      // Référence interne doc. (N° de commande)
-              const fournisseur = cols[1]; // Fournisseur en contremarque
-              const ref = cols[2];         // Code article (Référence)
-              const designation = cols[3]; // Désignation (Remarques)
+              const numero = cols[0];      
+              const fournisseur = cols[1]; 
+              const ref = cols[2];         
+              const designation = cols[3]; 
 
               if (!numero) continue;
 
               if (!groupCommandes[numero]) {
-                // Première occurrence : remplit l'Article 1 (bloc du haut)
+                // Nouvelle commande (pas d'existant)
                 const newId = Date.now() + i;
                 groupCommandes[numero] = {
                   id: newId,
@@ -1381,17 +1379,18 @@
                 };
                 importedCount++;
               } else {
-                // Deuxième occurrence (ou plus) : remplit l'Article 2 (bloc du bas) sur la même ligne !
+                // La commande existe déjà dans Firebase : on met à jour les textes MAIS on garde .photo et .photo2 intactes !
                 const cmd = groupCommandes[numero];
+                
                 if (!cmd.ref1) {
                   cmd.fournisseur1 = fournisseur;
                   cmd.ref1 = ref;
-                  if (designation) cmd.notes = designation;
+                  if (designation && !cmd.notes) cmd.notes = designation;
                 } else if (!cmd.ref2 && cmd.ref1 !== ref) {
                   cmd.fournisseur2 = fournisseur;
                   cmd.ref2 = ref;
-                  if (designation) {
-                    cmd.notes = cmd.notes ? cmd.notes + " / " + designation : designation;
+                  if (designation && cmd.notes && !cmd.notes.includes(designation)) {
+                    cmd.notes = cmd.notes + " / " + designation;
                   }
                 }
               }
@@ -1405,7 +1404,7 @@
             return;
           }
 
-          if (confirm(`Voulez-vous importer et fusionner ces commandes ?`)) {
+          if (confirm(`Voulez-vous importer et fusionner ces commandes ? (Vos photos enregistrées seront conservées)`)) {
             let updates = {};
             keys.forEach(num => {
               const cmd = groupCommandes[num];
@@ -1414,7 +1413,7 @@
 
             db.ref('commandes').set(updates)
               .then(() => {
-                alert(`Importation réussie !`);
+                alert(`Importation réussie avec conservation des photos existantes !`);
                 fileImportCSV.value = "";
               })
               .catch(err => {
