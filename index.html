@@ -523,6 +523,20 @@
       margin: auto;
     }
 
+    .modal-title-badge {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: white;
+      background: var(--card-bg);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
     .modal-images-row {
       display: flex;
       gap: 1rem;
@@ -540,7 +554,7 @@
 
     .modal-images-row img {
       max-width: 40vw;
-      max-height: 55vh;
+      max-height: 50vh;
       border-radius: 8px;
       object-fit: contain;
     }
@@ -860,6 +874,7 @@
   <div id="imageModal" class="modal">
     <span class="modal-close" id="closeModal">&times;</span>
     <div class="modal-content-container">
+      <div id="modalTitleBadge" class="modal-title-badge"></div>
       <div class="modal-images-row" id="modalImagesRow"></div>
       <div id="modalNotes" class="modal-notes" style="display: none;"></div>
     </div>
@@ -977,6 +992,7 @@
     const dateFiltreExport = document.getElementById('dateFiltreExport');
 
     const modal = document.getElementById('imageModal');
+    const modalTitleBadge = document.getElementById('modalTitleBadge');
     const modalImagesRow = document.getElementById('modalImagesRow');
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
@@ -1126,7 +1142,7 @@
         ref2: ref2,
         notes: notes,
         date: modeEditionId !== null ? existingCmd.date : new Date().toLocaleString('fr-FR'),
-        isNew: false // Dès qu'on l'enregistre/modifie, le badge "NEW" disparaît
+        isNew: false 
       };
 
       db.ref('commandes/' + idObjet).set(commandeData)
@@ -1276,7 +1292,6 @@
         if (cmd.photo2 || cmd.ref2) count++;
         const nbPhotosText = count === 2 ? "📦📦 (2 articles)" : "📦 (1 article)";
         
-        // Badge NEW si la commande vient d'être importée et n'a pas encore été modifiée
         const newBadgeHtml = cmd.isNew ? `<span class="badge-news">🔥 NEW</span>` : '';
 
         item.innerHTML = `
@@ -1298,6 +1313,7 @@
 
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex";
+      modalTitleBadge.innerHTML = `📦 N° ${cmd.numero} ${cmd.isNew ? '<span class="badge-news">🔥 NEW</span>' : ''}`;
       modalImagesRow.innerHTML = "";
 
       if (cmd.photo || cmd.ref1 || cmd.fournisseur1) {
@@ -1405,7 +1421,6 @@
               if (!numero) continue;
 
               if (!groupCommandes[numero]) {
-                // Vraie nouvelle commande dans l'historique
                 const newId = Date.now() + i;
                 groupCommandes[numero] = {
                   id: newId,
@@ -1418,7 +1433,7 @@
                   fournisseur2: "",
                   ref2: "",
                   notes: designation || "",
-                  isNew: true // 👈 Marquée comme nouvelle !
+                  isNew: true 
                 };
                 newAddedCount++;
               } else {
