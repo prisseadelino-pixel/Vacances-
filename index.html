@@ -1027,7 +1027,6 @@
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
 
-    // GESTION DU BOUTON "+" POUR AFFICHER LE 2ÈME ARTICLE
     btnAfficherArticle2.addEventListener('click', () => {
       blocArticle2.style.display = 'block';
       containerBtnAjoutArticle.style.display = 'none';
@@ -1047,7 +1046,6 @@
       containerBtnAjoutArticle.style.display = 'block';
     });
 
-    // ÉCOUTE FIREBASE FIABLE
     db.ref('commandes').on('value', (snapshot) => {
       const data = snapshot.val();
       commandes = [];
@@ -1236,7 +1234,7 @@
       sectionPreparation.style.display = 'block';
 
       modeEditionId = id;
-      inputNumero.value = item.numero;
+      inputNumero.value = item.numero.split(',')[0].trim();
       inputFournisseur1.value = item.fournisseur1 || "";
       inputRef1.value = item.ref1 || "";
       inputQte1.value = item.qte1 || "";
@@ -1272,7 +1270,7 @@
 
       btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
       btnAnnulerEdit.style.display = "inline-block";
-      formTitle.textContent = "✏️ Modifier le reliquat " + item.numero;
+      formTitle.textContent = "✏️ Modifier le reliquat " + item.numero.split(',')[0].trim();
       
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -1284,7 +1282,7 @@
 
       if (!verifierAdmin()) return;
 
-      if (confirm(`Voulez-vous vraiment supprimer le reliquat ${item.numero} ?`)) {
+      if (confirm(`Voulez-vous vraiment supprimer le reliquat ${item.numero.split(',')[0].trim()} ?`)) {
         db.ref('commandes/' + id).remove()
           .then(() => {
             if (modeEditionId === id) reinitialiserFormulaire();
@@ -1308,12 +1306,14 @@
     function afficherGalerie(filtre = "") {
       galerieCommandes.innerHTML = "";
       const liste = commandes.filter(c => {
-        const numMatch = c.numero.toLowerCase().includes(filtre.toLowerCase());
+        const cleanNum = c.numero.split(',')[0].trim().toLowerCase();
+        const numMatch = cleanNum.includes(filtre.toLowerCase());
         const f1Match = c.fournisseur1 && c.fournisseur1.toLowerCase().includes(filtre.toLowerCase());
         const ref1Match = c.ref1 && c.ref1.toLowerCase().includes(filtre.toLowerCase());
         const f2Match = c.fournisseur2 && c.fournisseur2.toLowerCase().includes(filtre.toLowerCase());
         const ref2Match = c.ref2 && c.ref2.toLowerCase().includes(filtre.toLowerCase());
-        return numMatch || f1Match || ref1Match || f2Match || ref2Match;
+        const notesMatch = c.notes && c.notes.toLowerCase().includes(filtre.toLowerCase());
+        return numMatch || f1Match || ref1Match || f2Match || ref2Match || notesMatch;
       });
 
       if (liste.length === 0) {
@@ -1331,13 +1331,15 @@
         if (cmd.photo2 || cmd.ref2) count++;
         const nbPhotosText = count === 2 ? "📦📦 (2 articles)" : "📦 (1 article)";
         
+        // On isole strictement le numéro de commande avant la virgule
+        const numeroPropre = cmd.numero ? cmd.numero.split(',')[0].trim() : "";
         const newBadgeHtml = cmd.isNew ? `<span class="badge-news">🔥 NEW</span>` : '';
 
         item.innerHTML = `
           <div class="commande-main-btn">
             <span>${nbPhotosText}</span>
             <div>
-              <div class="commande-num-badge">N° ${cmd.numero} ${newBadgeHtml}</div>
+              <div class="commande-num-badge">N° ${numeroPropre} ${newBadgeHtml}</div>
               <div class="commande-date-compact">${cmd.date}</div>
             </div>
           </div>
@@ -1352,7 +1354,8 @@
 
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex";
-      modalTitleBadge.innerHTML = `📦 N° ${cmd.numero} ${cmd.isNew ? '<span class="badge-news">🔥 NEW</span>' : ''}`;
+      const numeroPropre = cmd.numero ? cmd.numero.split(',')[0].trim() : "";
+      modalTitleBadge.innerHTML = `📦 N° ${numeroPropre} ${cmd.isNew ? '<span class="badge-news">🔥 NEW</span>' : ''}`;
       modalImagesRow.innerHTML = "";
 
       if (cmd.photo || cmd.ref1 || cmd.fournisseur1 || cmd.qte1) {
@@ -1412,7 +1415,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // IMPORTATION CSV ROBUSTE (Cible exactement les 4 colonnes d'origine du fichier Excel)
+    // IMPORTATION CSV CORRIGÉE : isole bien le numéro et place la désignation dans notes
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1441,7 +1444,8 @@
           Object.keys(existingData).forEach(key => {
             const item = existingData[key];
             if (item && item.numero) {
-              groupCommandes[item.numero] = item;
+              const cleanNum = item.numero.split(',')[0].trim();
+              groupCommandes[cleanNum] = item;
             }
           });
 
@@ -1481,17 +1485,13 @@
 
             if (cols.length < 4) continue;
 
-            // Structure exacte des 4 colonnes de votre fichier brut :
-            // 0 : Référence interne doc. (N° de commande, ex: S-103164)
-            // 1 : Fournisseur en contremarque (ex: 24 BOTTLES)
-            // 2 : Code article (ex: 002378)
-            // 3 : Désignation (ex: CLIMA BOTTLE...)
+            let numeroBrut = cols[0] || "";      
+            let fournisseur = cols[1] || ""; 
+            let ref = cols[2] || "";         
+            let designation = cols[3] || ""; 
 
-            const numero = cols[0] || "";      
-            const fournisseur = cols[1] || ""; 
-            const ref = cols[2] || "";         
-            const designation = cols[3] || ""; 
-
+            // Extraction propre du numéro (ex: S-96713)
+            let numero = numeroBrut.split(',')[0].trim();
             if (!numero || !numero.toUpperCase().startsWith("S-")) continue;
 
             const refKey = ref ? ref.toLowerCase() : "";
@@ -1592,7 +1592,7 @@
 
       listeAExporter.forEach(cmd => {
         const date = `"${(cmd.date || "").replace(/"/g, '""')}"`;
-        const numero = `"${(cmd.numero || "").replace(/"/g, '""')}"`;
+        const numero = `"${(cmd.numero ? cmd.numero.split(',')[0].trim() : "").replace(/"/g, '""')}"`;
         const notes = `"${(cmd.notes || "").replace(/"/g, '""')}"`;
 
         if (cmd.photo || cmd.fournisseur1 || cmd.ref1 || cmd.qte1) {
@@ -1653,9 +1653,10 @@
       `;
 
       listeAExporter.forEach(cmd => {
+        const numeroPropre = cmd.numero ? cmd.numero.split(',')[0].trim() : "";
         html += `
           <div class="print-card">
-            <h3>Commande : ${cmd.numero}</h3>
+            <h3>Commande : ${numeroPropre}</h3>
             <div class="date">Date : ${cmd.date}</div>
             <div class="print-photos-flex">
               ${(cmd.photo || cmd.fournisseur1 || cmd.ref1 || cmd.qte1) ? `
