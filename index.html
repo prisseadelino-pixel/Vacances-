@@ -1416,7 +1416,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // IMPORTATION CSV ULTRA-SÉCURISÉE : Recherche spécifiquement la colonne contenant le vrai numéro de commande (ex: S-XXXX)
+    // IMPORTATION CSV PARFAITE : Commence à la ligne 1 (ignore les en-têtes) et extrait les bons index
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1463,22 +1463,7 @@
 
           let newAddedCount = 0;
 
-          // Analyse des en-têtes (ligne 0) pour trouver la bonne colonne de commande
-          let headerCols = lines[0].split(/[,;\t]/).map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
-          let idxNumero = 0;
-          let idxFournisseur = 1;
-          let idxRef = 2;
-          let idxDesignation = 3;
-          let idxQte = 4;
-
-          headerCols.forEach((col, idx) => {
-            if (col.includes('référence interne') || col.includes('commande') || col.includes('doc')) idxNumero = idx;
-            if (col.includes('fournisseur')) idxFournisseur = idx;
-            if (col.includes('code article') || col.includes('référence')) idxRef = idx;
-            if (col.includes('désignation')) idxDesignation = idx;
-            if (col.includes('quantité')) idxQte = idx;
-          });
-
+          // On commence obligatoirement à i = 1 pour sauter la ligne d'en-tête (Référence interne doc., etc.)
           for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
@@ -1503,26 +1488,23 @@
             }
             cols.push(currentVal.trim().replace(/^"|"$/g, ''));
 
-            if (cols.length < 3) continue;
+            if (cols.length < 5) continue;
 
-            let numeroBrut = cols[idxNumero] || cols[0] || "";      
-            let fournisseur = cols[idxFournisseur] || cols[1] || ""; 
-            let ref = cols[idxRef] || cols[2] || "";         
-            let designation = cols[idxDesignation] || cols[3] || ""; 
-            let quantite = cols[idxQte] || cols[4] || "1";   
+            // Colonnes exactes de 09_09.csv :
+            // 0 : Référence interne doc. (N° commande, ex: S-103246)
+            // 1 : Fournisseur en contremarque (ex: ECLECTIC LIFESTYLE)
+            // 2 : Code article (ex: MAWB04)
+            // 3 : Désignation (ex: BOL TISSE MAEGEN...)
+            // 4 : Quantité restante (ex: 1)
 
-            // Sécurité : si la valeur ressemble à une date ou un nombre simple, on cherche dans les autres colonnes celle qui commence par 'S-' ou contient des lettres et chiffres (ex: S-103246)
+            let numeroBrut = cols[0] || "";      
+            let fournisseur = cols[1] || ""; 
+            let ref = cols[2] || "";         
+            let designation = cols[3] || ""; 
+            let quantite = cols[4] || "1";   
+
             let numero = numeroBrut.split(',')[0].trim();
-            if (numero.includes('/') || !isNaN(numero)) {
-              for (let c of cols) {
-                if (c && (c.toUpperCase().startsWith('S-') || c.length > 4)) {
-                  numero = c.split(',')[0].trim();
-                  break;
-                }
-              }
-            }
-
-            if (!numero) continue;
+            if (!numero || numero.toLowerCase() === 'référence interne doc.' || numero.toLowerCase().includes('fooweb')) continue;
 
             const refKey = ref ? ref.toLowerCase() : "";
             const photoTrouvee = photoParReference[refKey] || photoParReference2[refKey] || "";
