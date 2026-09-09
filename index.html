@@ -887,8 +887,7 @@
           <input type="date" id="dateFiltreExport" class="input-date-custom">
           <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
           <button class="btn-sheets" id="btnExportSheets">🟢 Google Sheets</button>
-          <!-- accept étendu pour accepter tous types de fichiers texte/csv/excel enregistrés en csv -->
-          <input type="file" id="fileImportCSV" accept=".csv, .txt, .tsv, .xlsx" style="display: none;">
+          <input type="file" id="fileImportCSV" accept=".csv, .txt, .tsv" style="display: none;">
           <button class="btn-import" id="btnImportSheets">📥 Importer CSV</button>
         </div>
       </div>
@@ -1417,7 +1416,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // IMPORTATION UNIVERSELLE CORRIGÉE : Gère CSV, tabulations, séparateurs multiples et remplit chaque champ à sa place
+    // IMPORTATION CSV INTÉGRALE : Lit la quantité (5ème colonne) en plus du reste
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1468,7 +1467,6 @@
             const line = lines[i].trim();
             if (!line) continue;
 
-            // Détection automatique du séparateur (; ou , ou tabulation)
             let separator = ';';
             if (line.includes('\t')) separator = '\t';
             else if (!line.includes(';') && line.includes(',')) separator = ',';
@@ -1489,18 +1487,20 @@
             }
             cols.push(currentVal.trim().replace(/^"|"$/g, ''));
 
-            if (cols.length < 3) continue;
+            if (cols.length < 4) continue;
 
-            // Colonnes attendues :
-            // 0 : N° commande (ex: S-96713)
-            // 1 : Fournisseur (ex: OPJET)
-            // 2 : Référence / Code article (ex: 017899)
-            // 3 : Désignation (ex: SET 4 ASSIETTES...)
+            // Colonnes du CSV (09_09.csv) :
+            // 0 : Référence interne doc. (N° commande)
+            // 1 : Fournisseur en contremarque
+            // 2 : Code article
+            // 3 : Désignation
+            // 4 : Quantité restante
 
             let numeroBrut = cols[0] || "";      
             let fournisseur = cols[1] || ""; 
             let ref = cols[2] || "";         
             let designation = cols[3] || ""; 
+            let quantite = cols[4] || "1";   
 
             let numero = numeroBrut.split(',')[0].trim();
             if (!numero) continue;
@@ -1517,7 +1517,7 @@
                 photo: photoTrouvee,
                 fournisseur1: fournisseur,
                 ref1: ref,
-                qte1: "1",
+                qte1: quantite,
                 photo2: "",
                 fournisseur2: "",
                 ref2: "",
@@ -1532,15 +1532,16 @@
               if (!cmd.ref1) {
                 cmd.fournisseur1 = fournisseur || cmd.fournisseur1;
                 cmd.ref1 = ref;
-                cmd.qte1 = "1";
+                cmd.qte1 = quantite;
                 if (!cmd.photo) cmd.photo = photoTrouvee;
                 if (designation && !cmd.notes) cmd.notes = designation;
               } else if (cmd.ref1 === ref) {
+                cmd.qte1 = quantite;
                 if (designation && !cmd.notes) cmd.notes = designation;
               } else if (!cmd.ref2 && cmd.ref1 !== ref) {
                 cmd.fournisseur2 = fournisseur;
                 cmd.ref2 = ref;
-                cmd.qte2 = "1";
+                cmd.qte2 = quantite;
                 if (!cmd.photo2) cmd.photo2 = photoTrouvee;
                 if (designation && cmd.notes && !cmd.notes.includes(designation)) {
                   cmd.notes = cmd.notes + " / " + designation;
@@ -1551,7 +1552,7 @@
 
           const keys = Object.keys(groupCommandes);
           if (keys.length === 0) {
-            alert("Aucune donnée valide n'a pu être lue dans ce fichier. Vérifiez son format.");
+            alert("Aucune donnée valide n'a pu être lue dans ce fichier.");
             fileImportCSV.value = "";
             return;
           }
