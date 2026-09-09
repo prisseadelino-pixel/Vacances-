@@ -888,7 +888,7 @@
           <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
           <button class="btn-sheets" id="btnExportSheets">🟢 Google Sheets</button>
           <input type="file" id="fileImportCSV" accept=".csv, .txt, .tsv" style="display: none;">
-          <button class="btn-import" id="btnImportSheets">📥 Importer Fichier</button>
+          <button class="btn-import" id="btnImportSheets">📥 Importer Tableau</button>
         </div>
       </div>
 
@@ -1416,7 +1416,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // IMPORTATION UNIVERSELLE (CSV, TXT, MARKDOWN TABLE)
+    // IMPORTATION DIRECTE AVEC ORDRE STRICT DES COLONNES DU TABLEAU
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1467,16 +1467,13 @@
             const line = lines[i].trim();
             if (!line) continue;
 
-            // Ignore les lignes de séparation Markdown (|:---|:---| etc.)
+            // Ignore les lignes de séparation Markdown
             if (line.includes('---') || line.includes(':--')) continue;
 
             let cols = [];
-
-            // Si c'est une ligne de tableau Markdown (commence et contient des |)
             if (line.includes('|')) {
               cols = line.split('|').map(c => c.trim()).filter(c => c !== '');
             } else {
-              // Sinon séparateur classique (virgule, point-virgule ou tabulation)
               let separator = ';';
               if (line.includes('\t')) separator = '\t';
               else if (!line.includes(';') && line.includes(',')) separator = ',';
@@ -1496,37 +1493,21 @@
               cols.push(currentVal.trim().replace(/^"|"$/g, ''));
             }
 
-            if (cols.length < 4) continue;
+            if (cols.length < 5) continue;
 
-            // On cherche le numéro de commande (qui commence par S- ou s-)
-            let numero = "";
-            let fournisseur = "";
-            let ref = "";
-            let designation = "";
-            let quantite = "1";
-
-            for (let c of cols) {
-              if (c && /^s-?\d+/i.test(c)) {
-                numero = c.toUpperCase().trim();
-                break;
-              }
-            }
+            // ORDRE STRICT DES COLONNES DU TABLEAU :
+            // 0: Référence interne doc. (Numéro de commande)
+            // 1: Fournisseur en contremarque
+            // 2: Code article (Référence)
+            // 3: Désignation (Remarques)
+            // 4: Quantité restante
+            let numero = cols[0] ? cols[0].replace(/^"|"$/g, '').trim() : "";
+            let fournisseur = cols[1] ? cols[1].replace(/^"|"$/g, '').trim() : "";
+            let ref = cols[2] ? cols[2].replace(/^"|"$/g, '').trim() : "";
+            let designation = cols[3] ? cols[3].replace(/^"|"$/g, '').trim() : "";
+            let quantite = cols[4] ? cols[4].replace(/^"|"$/g, '').trim() : "1";
 
             if (!numero || numero.includes('/') || numero.toLowerCase().includes('référence')) continue;
-
-            // Récupération intelligente des autres colonnes par rapport au numéro trouvé
-            let numIndex = cols.indexOf(numero);
-            if (numIndex === -1) {
-              // Si le numéro a été trouvé par regex, on prend sa position
-              numIndex = cols.findIndex(c => c.toUpperCase().includes(numero));
-            }
-
-            // Extraction des champs adjacents
-            let remainingCols = cols.filter(c => c !== numero);
-            fournisseur = remainingCols[0] ? remainingCols[0].replace(/^"|"$/g, '').trim() : "";
-            ref = remainingCols[1] ? remainingCols[1].replace(/^"|"$/g, '').trim() : "";
-            designation = remainingCols[2] ? remainingCols[2].replace(/^"|"$/g, '').trim() : "";
-            quantite = remainingCols[3] ? remainingCols[3].replace(/^"|"$/g, '').trim() : "1";
 
             const refKey = ref ? ref.toLowerCase() : "";
             const photoTrouvee = photoParReference[refKey] || photoParReference2[refKey] || "";
