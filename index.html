@@ -888,7 +888,7 @@
           <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
           <button class="btn-sheets" id="btnExportSheets">🟢 Google Sheets</button>
           <input type="file" id="fileImportCSV" accept=".csv, .txt, .tsv" style="display: none;">
-          <button class="btn-import" id="btnImportSheets">📥 Importer CSV</button>
+          <button class="btn-import" id="btnImportSheets">📥 Importer Fichier</button>
         </div>
       </div>
 
@@ -1416,7 +1416,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // IMPORTATION CSV INTELLIGENTE ET SÉCURISÉE
+    // IMPORTATION UNIVERSELLE (CSV, TXT, MARKDOWN TABLE)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1437,43 +1437,6 @@
         }
 
         const currentDate = new Date().toLocaleString('fr-FR');
-
-        const headerLine = lines[0].trim();
-        let separator = ';';
-        if (headerLine.includes('\t')) separator = '\t';
-        else if (!headerLine.includes(';') && headerLine.includes(',')) separator = ',';
-
-        function parseLine(line) {
-          let cols = [];
-          let inQuotes = false;
-          let currentVal = "";
-          for (let char of line) {
-            if (char === '"') {
-              inQuotes = !inQuotes;
-            } else if (char === separator && !inQuotes) {
-              cols.push(currentVal.trim().replace(/^"|"$/g, ''));
-              currentVal = "";
-            } else {
-              currentVal += char;
-            }
-          }
-          cols.push(currentVal.trim().replace(/^"|"$/g, ''));
-          return cols;
-        }
-
-        const headers = parseLine(headerLine).map(h => h.toLowerCase());
-        
-        let idxRefDoc = headers.findIndex(h => h.includes('référence interne') || h.includes('interne doc') || h.includes('commande'));
-        let idxFourn = headers.findIndex(h => h.includes('fournisseur') || h.includes('contremarque'));
-        let idxCodeArt = headers.findIndex(h => h.includes('code article') || h.includes('référence article') || h.includes('ref'));
-        let idxDesig = headers.findIndex(h => h.includes('désignation') || h.includes('designation'));
-        let idxQte = headers.findIndex(h => h.includes('quantité') || h.includes('qte') || h.includes('restante'));
-
-        if (idxRefDoc === -1) idxRefDoc = 0;
-        if (idxFourn === -1) idxFourn = 1;
-        if (idxCodeArt === -1) idxCodeArt = 2;
-        if (idxDesig === -1) idxDesig = 3;
-        if (idxQte === -1) idxQte = 4;
 
         db.ref('commandes').once('value').then(snapshot => {
           const existingData = snapshot.val() || {};
@@ -1500,29 +1463,70 @@
 
           let newAddedCount = 0;
 
-          for (let i = 1; i < lines.length; i++) {
+          for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
 
-            const cols = parseLine(line);
-            if (cols.length < 2) continue;
+            // Ignore les lignes de séparation Markdown (|:---|:---| etc.)
+            if (line.includes('---') || line.includes(':--')) continue;
 
-            let numero = cols[idxRefDoc] ? cols[idxRefDoc].replace(/^"|"$/g, '').trim() : "";
-            let fournisseur = cols[idxFourn] ? cols[idxFourn].replace(/^"|"$/g, '').trim() : "";
-            let ref = cols[idxCodeArt] ? cols[idxCodeArt].replace(/^"|"$/g, '').trim() : "";
-            let designation = cols[idxDesig] ? cols[idxDesig].replace(/^"|"$/g, '').trim() : "";
-            let quantite = cols[idxQte] ? cols[idxQte].replace(/^"|"$/g, '').trim() : "1";
+            let cols = [];
 
-            if (!numero || numero.includes('/') || numero.toLowerCase().includes('référence')) {
-              for (let c of cols) {
-                if (c && /^s-?\d+/i.test(c)) {
-                  numero = c.toUpperCase().trim();
-                  break;
+            // Si c'est une ligne de tableau Markdown (commence et contient des |)
+            if (line.includes('|')) {
+              cols = line.split('|').map(c => c.trim()).filter(c => c !== '');
+            } else {
+              // Sinon séparateur classique (virgule, point-virgule ou tabulation)
+              let separator = ';';
+              if (line.includes('\t')) separator = '\t';
+              else if (!line.includes(';') && line.includes(',')) separator = ',';
+
+              let inQuotes = false;
+              let currentVal = "";
+              for (let char of line) {
+                if (char === '"') {
+                  inQuotes = !inQuotes;
+                } else if (char === separator && !inQuotes) {
+                  cols.push(currentVal.trim().replace(/^"|"$/g, ''));
+                  currentVal = "";
+                } else {
+                  currentVal += char;
                 }
+              }
+              cols.push(currentVal.trim().replace(/^"|"$/g, ''));
+            }
+
+            if (cols.length < 4) continue;
+
+            // On cherche le numéro de commande (qui commence par S- ou s-)
+            let numero = "";
+            let fournisseur = "";
+            let ref = "";
+            let designation = "";
+            let quantite = "1";
+
+            for (let c of cols) {
+              if (c && /^s-?\d+/i.test(c)) {
+                numero = c.toUpperCase().trim();
+                break;
               }
             }
 
             if (!numero || numero.includes('/') || numero.toLowerCase().includes('référence')) continue;
+
+            // Récupération intelligente des autres colonnes par rapport au numéro trouvé
+            let numIndex = cols.indexOf(numero);
+            if (numIndex === -1) {
+              // Si le numéro a été trouvé par regex, on prend sa position
+              numIndex = cols.findIndex(c => c.toUpperCase().includes(numero));
+            }
+
+            // Extraction des champs adjacents
+            let remainingCols = cols.filter(c => c !== numero);
+            fournisseur = remainingCols[0] ? remainingCols[0].replace(/^"|"$/g, '').trim() : "";
+            ref = remainingCols[1] ? remainingCols[1].replace(/^"|"$/g, '').trim() : "";
+            designation = remainingCols[2] ? remainingCols[2].replace(/^"|"$/g, '').trim() : "";
+            quantite = remainingCols[3] ? remainingCols[3].replace(/^"|"$/g, '').trim() : "1";
 
             const refKey = ref ? ref.toLowerCase() : "";
             const photoTrouvee = photoParReference[refKey] || photoParReference2[refKey] || "";
