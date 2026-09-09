@@ -887,7 +887,8 @@
           <input type="date" id="dateFiltreExport" class="input-date-custom">
           <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
           <button class="btn-sheets" id="btnExportSheets">🟢 Google Sheets</button>
-          <input type="file" id="fileImportCSV" accept=".csv,.txt" style="display: none;">
+          <!-- accept étendu pour accepter tous types de fichiers texte/csv/excel enregistrés en csv -->
+          <input type="file" id="fileImportCSV" accept=".csv, .txt, .tsv, .xlsx" style="display: none;">
           <button class="btn-import" id="btnImportSheets">📥 Importer CSV</button>
         </div>
       </div>
@@ -1416,7 +1417,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // IMPORTATION CSV CORRIGÉE : Remplit proprement tous les champs du formulaire (Fournisseur, Référence, Désignation/Remarques)
+    // IMPORTATION UNIVERSELLE CORRIGÉE : Gère CSV, tabulations, séparateurs multiples et remplit chaque champ à sa place
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1431,7 +1432,7 @@
         const lines = text.split(/\r\n|\n/);
         
         if (lines.length < 2) {
-          alert("Le fichier CSV est vide ou invalide.");
+          alert("Le fichier est vide ou illisible.");
           fileImportCSV.value = "";
           return;
         }
@@ -1467,10 +1468,14 @@
             const line = lines[i].trim();
             if (!line) continue;
 
+            // Détection automatique du séparateur (; ou , ou tabulation)
+            let separator = ';';
+            if (line.includes('\t')) separator = '\t';
+            else if (!line.includes(';') && line.includes(',')) separator = ',';
+
             let cols = [];
             let inQuotes = false;
             let currentVal = "";
-            const separator = line.includes(';') ? ';' : ',';
 
             for (let char of line) {
               if (char === '"') {
@@ -1484,7 +1489,13 @@
             }
             cols.push(currentVal.trim().replace(/^"|"$/g, ''));
 
-            if (cols.length < 4) continue;
+            if (cols.length < 3) continue;
+
+            // Colonnes attendues :
+            // 0 : N° commande (ex: S-96713)
+            // 1 : Fournisseur (ex: OPJET)
+            // 2 : Référence / Code article (ex: 017899)
+            // 3 : Désignation (ex: SET 4 ASSIETTES...)
 
             let numeroBrut = cols[0] || "";      
             let fournisseur = cols[1] || ""; 
@@ -1492,7 +1503,7 @@
             let designation = cols[3] || ""; 
 
             let numero = numeroBrut.split(',')[0].trim();
-            if (!numero || !numero.toUpperCase().startsWith("S-")) continue;
+            if (!numero) continue;
 
             const refKey = ref ? ref.toLowerCase() : "";
             const photoTrouvee = photoParReference[refKey] || photoParReference2[refKey] || "";
@@ -1540,7 +1551,7 @@
 
           const keys = Object.keys(groupCommandes);
           if (keys.length === 0) {
-            alert("Aucune donnée valide n'a pu être lue dans ce fichier.");
+            alert("Aucune donnée valide n'a pu être lue dans ce fichier. Vérifiez son format.");
             fileImportCSV.value = "";
             return;
           }
@@ -1554,7 +1565,7 @@
 
             db.ref('commandes').set(updates)
               .then(() => {
-                alert(`Importation réussie : ${newAddedCount} nouvelle(s) commande(s) traitée(s) !`);
+                alert(`Importation réussie : ${newAddedCount} commande(s) mise(s) à jour !`);
                 fileImportCSV.value = "";
               })
               .catch(err => {
