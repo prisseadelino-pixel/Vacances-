@@ -1412,7 +1412,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION IMPORTATION CSV (PRÉSERVE LES PHOTOS EXISTANTES ET GÈRE LA QUANTITÉ)
+    // FONCTION IMPORTATION CSV (RÉCUPÈRE AUTOMATIQUEMENT LES PHOTOS PAR RÉFÉRENCE EXISTANTE)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1438,10 +1438,22 @@
           const existingData = snapshot.val() || {};
           let groupCommandes = {};
 
+          // 1. Indexer les commandes existantes par numéro
           Object.keys(existingData).forEach(key => {
             const item = existingData[key];
             if (item && item.numero) {
               groupCommandes[item.numero] = item;
+            }
+          });
+
+          // 2. Créer un dictionnaire global des photos déjà enregistrées par référence (pour les réutiliser)
+          let photoParReference = {};
+          Object.values(existingData).forEach(item => {
+            if (item.ref1 && item.photo) {
+              photoParReference[item.ref1.trim().toLowerCase()] = item.photo;
+            }
+            if (item.ref2 && item.photo2) {
+              photoParReference[item.ref2.trim().toLowerCase()] = item.photo2;
             }
           });
 
@@ -1458,9 +1470,13 @@
               const fournisseur = cols[1]; 
               const ref = cols[2];         
               const designation = cols[3]; 
-              const qte = cols[4] || ""; // Optionnel si présent dans la 5ème colonne du CSV
+              const qte = cols[4] || ""; 
 
               if (!numero) continue;
+
+              // Recherche automatique d'une photo existante pour cette référence dans Firebase
+              const refKey = ref.toLowerCase();
+              const photoTrouvee = photoParReference[refKey] || "";
 
               if (!groupCommandes[numero]) {
                 const newId = Date.now() + i;
@@ -1468,7 +1484,7 @@
                   id: newId,
                   numero: numero,
                   date: currentDate,
-                  photo: "",
+                  photo: photoTrouvee, // 👈 Photo récupérée automatiquement si elle existe !
                   fournisseur1: fournisseur,
                   ref1: ref,
                   qte1: qte,
@@ -1487,11 +1503,13 @@
                   cmd.fournisseur1 = fournisseur;
                   cmd.ref1 = ref;
                   cmd.qte1 = qte;
+                  if (!cmd.photo) cmd.photo = photoTrouvee; // 👈 Récupération auto si vide
                   if (designation && !cmd.notes) cmd.notes = designation;
                 } else if (!cmd.ref2 && cmd.ref1 !== ref) {
                   cmd.fournisseur2 = fournisseur;
                   cmd.ref2 = ref;
                   cmd.qte2 = qte;
+                  if (!cmd.photo2) cmd.photo2 = photoTrouvee; // 👈 Récupération auto si vide
                   if (designation && cmd.notes && !cmd.notes.includes(designation)) {
                     cmd.notes = cmd.notes + " / " + designation;
                   }
@@ -1516,7 +1534,7 @@
 
             db.ref('commandes').set(updates)
               .then(() => {
-                alert(`Importation réussie : ${newAddedCount} nouvelle(s) commande(s) marquée(s) "NEW" !`);
+                alert(`Importation réussie : ${newAddedCount} nouvelle(s) commande(s) traitée(s) (photos associées automatiquement si existantes) !`);
                 fileImportCSV.value = "";
               })
               .catch(err => {
