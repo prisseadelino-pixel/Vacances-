@@ -1412,7 +1412,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION IMPORTATION CSV (5 COLONNES : Référence, Fournisseur, Code article, Quantité, Désignation)
+    // FONCTION IMPORTATION CSV (GÈRE VIRGULES / POINTS-VIRGULES ET DEUX ARTICLES PAR COMMANDE)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1446,12 +1446,13 @@
           });
 
           let photoParReference = {};
+          let photoParReference2 = {};
           Object.values(existingData).forEach(item => {
             if (item.ref1 && item.photo) {
               photoParReference[item.ref1.trim().toLowerCase()] = item.photo;
             }
             if (item.ref2 && item.photo2) {
-              photoParReference[item.ref2.trim().toLowerCase()] = item.photo2;
+              photoParReference2[item.ref2.trim().toLowerCase()] = item.photo2;
             }
           });
 
@@ -1461,15 +1462,25 @@
             const line = lines[i].trim();
             if (!line) continue;
 
-            const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-            
-            // Ordre exact des 5 colonnes :
-            // 0 : Référence interne doc. (N° de commande, ex: S-103164)
-            // 1 : Fournisseur en contremarque (ex: 24 BOTTLES)
-            // 2 : Code article (ex: 002378)
-            // 3 : Quantité (ex: 2)
-            // 4 : Désignation (ex: CLIMA BOTTLE...)
-            
+            let cols = [];
+            let inQuotes = false;
+            let currentVal = "";
+            const separator = line.includes(';') ? ';' : ',';
+
+            for (let char of line) {
+              if (char === '"') {
+                inQuotes = !inQuotes;
+              } else if (char === separator && !inQuotes) {
+                cols.push(currentVal.trim().replace(/^"|"$/g, ''));
+                currentVal = "";
+              } else {
+                currentVal += char;
+              }
+            }
+            cols.push(currentVal.trim().replace(/^"|"$/g, ''));
+
+            if (cols.length < 4) continue;
+
             const numero = cols[0] || "";      
             const fournisseur = cols[1] || ""; 
             const ref = cols[2] || "";         
@@ -1479,7 +1490,7 @@
             if (!numero || !numero.toUpperCase().startsWith("S-")) continue;
 
             const refKey = ref ? ref.toLowerCase() : "";
-            const photoTrouvee = photoParReference[refKey] || "";
+            const photoTrouvee = photoParReference[refKey] || photoParReference2[refKey] || "";
 
             if (!groupCommandes[numero]) {
               const newId = Date.now() + i;
@@ -1508,6 +1519,8 @@
                 cmd.qte1 = qte;
                 if (!cmd.photo) cmd.photo = photoTrouvee;
                 if (designation && !cmd.notes) cmd.notes = designation;
+              } else if (cmd.ref1 === ref) {
+                if (qte && !cmd.qte1) cmd.qte1 = qte;
               } else if (!cmd.ref2 && cmd.ref1 !== ref) {
                 cmd.fournisseur2 = fournisseur;
                 cmd.ref2 = ref;
@@ -1516,6 +1529,8 @@
                 if (designation && cmd.notes && !cmd.notes.includes(designation)) {
                   cmd.notes = cmd.notes + " / " + designation;
                 }
+              } else if (cmd.ref2 === ref) {
+                if (qte && !cmd.qte2) cmd.qte2 = qte;
               }
             }
           }
