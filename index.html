@@ -1416,7 +1416,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // IMPORTATION CSV INTÉGRALE : Lit la quantité (5ème colonne) en plus du reste
+    // IMPORTATION CSV CORRIGÉE : Respecte exactement l'ordre des colonnes de 09_09.csv
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1489,12 +1489,12 @@
 
             if (cols.length < 4) continue;
 
-            // Colonnes du CSV (09_09.csv) :
-            // 0 : Référence interne doc. (N° commande)
-            // 1 : Fournisseur en contremarque
-            // 2 : Code article
-            // 3 : Désignation
-            // 4 : Quantité restante
+            // Ordre exact des colonnes dans 09_09.csv :
+            // 0 : Référence interne doc. (N° commande, ex: S-103246)
+            // 1 : Fournisseur en contremarque (ex: ECLECTIC LIFESTYLE)
+            // 2 : Code article (ex: MAWB04)
+            // 3 : Désignation (ex: BOL TISSE MAEGEN...)
+            // 4 : Quantité restante (ex: 1)
 
             let numeroBrut = cols[0] || "";      
             let fournisseur = cols[1] || ""; 
