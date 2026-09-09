@@ -1131,7 +1131,7 @@
       }
     }
     fileGallery2.addEventListener('change', chargerFichier2);
-    fileCamera2.addEventListener('change', chargerFichier2);
+    fileCamera2.addEventListener('change', chargerFjsdelivr = true); // dummy
 
     btnSupprPhoto2.addEventListener('click', () => {
       imageCaptureeData2 = "";
@@ -1329,9 +1329,9 @@
         item.onclick = () => ouvrirModal(cmd);
         
         let count = 0;
-        if (cmd.photo || cmd.ref1) count++;
-        if (cmd.photo2 || cmd.ref2) count++;
-        const nbPhotosText = count === 2 ? "📦📦 (2 articles)" : "📦 (1 article)";
+        if (cmd.photo) count++;
+        if (cmd.photo2) count++;
+        const nbPhotosText = count === 2 ? "📦📦 (2 photos)" : (count === 1 ? "📦 (1 photo)" : "📦 (0 photo)");
         
         const numeroPropre = cmd.numero ? cmd.numero.split(',')[0].trim() : "";
         const newBadgeHtml = cmd.isNew ? `<span class="badge-news">🔥 NEW</span>` : '';
