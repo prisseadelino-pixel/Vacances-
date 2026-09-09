@@ -1416,7 +1416,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // IMPORTATION CSV INTELLIGENTE AVEC DÉTECTION AUTOMATIQUE DES COLONNES
+    // IMPORTATION CSV INTELLIGENTE ET SÉCURISÉE
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1438,7 +1438,6 @@
 
         const currentDate = new Date().toLocaleString('fr-FR');
 
-        // Analyse de la première ligne pour trouver l'index exact de chaque colonne
         const headerLine = lines[0].trim();
         let separator = ';';
         if (headerLine.includes('\t')) separator = '\t';
@@ -1470,7 +1469,6 @@
         let idxDesig = headers.findIndex(h => h.includes('désignation') || h.includes('designation'));
         let idxQte = headers.findIndex(h => h.includes('quantité') || h.includes('qte') || h.includes('restante'));
 
-        // Valeurs par défaut si non trouvées
         if (idxRefDoc === -1) idxRefDoc = 0;
         if (idxFourn === -1) idxFourn = 1;
         if (idxCodeArt === -1) idxCodeArt = 2;
@@ -1515,7 +1513,6 @@
             let designation = cols[idxDesig] ? cols[idxDesig].replace(/^"|"$/g, '').trim() : "";
             let quantite = cols[idxQte] ? cols[idxQte].replace(/^"|"$/g, '').trim() : "1";
 
-            // Si le numéro détecté n'a pas l'air d'un numéro de commande, on cherche une colonne qui commence par S-
             if (!numero || numero.includes('/') || numero.toLowerCase().includes('référence')) {
               for (let c of cols) {
                 if (c && /^s-?\d+/i.test(c)) {
@@ -1669,7 +1666,7 @@
         titreExport = `Historique Reliquats - Date : ${dateFormatee}`;
 
         if (listeAExporter.length === 0) {
-          alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`;
+          alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`);
           return;
         }
       } else {
