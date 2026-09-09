@@ -1,4 +1,3 @@
-Si, le code complet était présent dans la première réponse, mais avec le correctif appliqué au-dessus pour l'import CSV, voici le code complet, final et mis à jour de votre application que vous pouvez copier-coller directement :
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -1413,7 +1412,7 @@ Si, le code complet était présent dans la première réponse, mais avec le cor
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION IMPORTATION CSV CORRIGÉE
+    // FONCTION IMPORTATION CSV (ANALYSE INTELLIGENTE DES COLONNES)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1464,53 +1463,72 @@ Si, le code complet était présent dans la première réponse, mais avec le cor
 
             const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             
-            if (cols.length >= 4) {
-              const numero = cols[1] || cols[0];      
-              const fournisseur = cols[2] || ""; 
-              const ref = cols[3] || cols[2];         
-              const designation = cols[5] || cols[4] || ""; 
-              const qte = cols[4] || ""; 
+            let numero = "";
+            let fournisseur = "";
+            let ref = "";
+            let designation = "";
+            let qte = "";
 
-              if (!numero || numero.match(/^\d{2}\/\d{2}\/\d{4}$/)) continue;
-
-              const refKey = ref.toLowerCase();
-              const photoTrouvee = photoParReference[refKey] || "";
-
-              if (!groupCommandes[numero]) {
-                const newId = Date.now() + i;
-                groupCommandes[numero] = {
-                  id: newId,
-                  numero: numero,
-                  date: currentDate,
-                  photo: photoTrouvee,
-                  fournisseur1: fournisseur,
-                  ref1: ref,
-                  qte1: qte,
-                  photo2: "",
-                  fournisseur2: "",
-                  ref2: "",
-                  qte2: "",
-                  notes: designation,
-                  isNew: true 
-                };
-                newAddedCount++;
+            cols.forEach(col => {
+              if (!col) return;
+              if (col.toUpperCase().startsWith("S-") || (col.length > 5 && /\d/.test(col) && !col.includes('/'))) {
+                if (!numero) numero = col;
+              } 
+              else if (col.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                return;
+              }
+              else if (!ref && col.length >= 3 && !col.includes('STA-') && !col.includes('C&C')) {
+                ref = col;
+              }
+              else if (!qte && (col.includes('DOMICILE') || col.includes('C&C') || !isNaN(col))) {
+                qte = col;
+              }
+              else if (!fournisseur) {
+                fournisseur = col;
               } else {
-                const cmd = groupCommandes[numero];
-                
-                if (!cmd.ref1) {
-                  cmd.fournisseur1 = fournisseur;
-                  cmd.ref1 = ref;
-                  cmd.qte1 = qte;
-                  if (!cmd.photo) cmd.photo = photoTrouvee;
-                  if (designation && !cmd.notes) cmd.notes = designation;
-                } else if (!cmd.ref2 && cmd.ref1 !== ref) {
-                  cmd.fournisseur2 = fournisseur;
-                  cmd.ref2 = ref;
-                  cmd.qte2 = qte;
-                  if (!cmd.photo2) cmd.photo2 = photoTrouvee;
-                  if (designation && cmd.notes && !cmd.notes.includes(designation)) {
-                    cmd.notes = cmd.notes + " / " + designation;
-                  }
+                designation += (designation ? " " : "") + col;
+              }
+            });
+
+            if (!numero) continue;
+
+            const refKey = ref ? ref.toLowerCase() : "";
+            const photoTrouvee = photoParReference[refKey] || "";
+
+            if (!groupCommandes[numero]) {
+              const newId = Date.now() + i;
+              groupCommandes[numero] = {
+                id: newId,
+                numero: numero,
+                date: currentDate,
+                photo: photoTrouvee,
+                fournisseur1: fournisseur,
+                ref1: ref,
+                qte1: qte,
+                photo2: "",
+                fournisseur2: "",
+                ref2: "",
+                qte2: "",
+                notes: designation,
+                isNew: true 
+              };
+              newAddedCount++;
+            } else {
+              const cmd = groupCommandes[numero];
+              
+              if (!cmd.ref1) {
+                cmd.fournisseur1 = fournisseur || cmd.fournisseur1;
+                cmd.ref1 = ref;
+                cmd.qte1 = qte;
+                if (!cmd.photo) cmd.photo = photoTrouvee;
+                if (designation && !cmd.notes) cmd.notes = designation;
+              } else if (!cmd.ref2 && cmd.ref1 !== ref) {
+                cmd.fournisseur2 = fournisseur;
+                cmd.ref2 = ref;
+                cmd.qte2 = qte;
+                if (!cmd.photo2) cmd.photo2 = photoTrouvee;
+                if (designation && cmd.notes && !cmd.notes.includes(designation)) {
+                  cmd.notes = cmd.notes + " / " + designation;
                 }
               }
             }
@@ -1678,4 +1696,3 @@ Si, le code complet était présent dans la première réponse, mais avec le cor
 
 </body>
 </html>
-
