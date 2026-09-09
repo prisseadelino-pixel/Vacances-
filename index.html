@@ -1237,10 +1237,10 @@
       inputNumero.value = item.numero ? item.numero.split(',')[0].trim() : "";
       inputFournisseur1.value = item.fournisseur1 || "";
       inputRef1.value = item.ref1 || "";
-      inputQte1.value = item.qte1 || "";
+      inputQte1.value = item.qte1 || "1";
       inputFournisseur2.value = item.fournisseur2 || "";
       inputRef2.value = item.ref2 || "";
-      inputQte2.value = item.qte2 || "";
+      inputQte2.value = item.qte2 || "1";
       inputNotes.value = item.notes || "";
       
       imageCaptureeData1 = item.photo || "";
@@ -1416,7 +1416,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // IMPORTATION CSV CORRIGÉE : Remplit proprement chaque champ du formulaire (Référence, Fournisseur, Désignation)
+    // IMPORTATION CSV CORRIGÉE : Remplit proprement tous les champs du formulaire (Fournisseur, Référence, Désignation/Remarques)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1486,18 +1486,11 @@
 
             if (cols.length < 4) continue;
 
-            // Vos 4 colonnes d'origine exactes :
-            // 0 : Référence interne doc. (N° commande, ex: S-96713)
-            // 1 : Fournisseur en contremarque (ex: OPJET)
-            // 2 : Code article / Référence (ex: 017899)
-            // 3 : Désignation (ex: SET 4 ASSIETTES...)
-
             let numeroBrut = cols[0] || "";      
             let fournisseur = cols[1] || ""; 
             let ref = cols[2] || "";         
             let designation = cols[3] || ""; 
 
-            // Extraction propre du numéro (on retire toute éventuelle virgule parasite)
             let numero = numeroBrut.split(',')[0].trim();
             if (!numero || !numero.toUpperCase().startsWith("S-")) continue;
 
@@ -1532,7 +1525,7 @@
                 if (!cmd.photo) cmd.photo = photoTrouvee;
                 if (designation && !cmd.notes) cmd.notes = designation;
               } else if (cmd.ref1 === ref) {
-                // Si même article déjà présent, on ne fait rien ou on garde
+                if (designation && !cmd.notes) cmd.notes = designation;
               } else if (!cmd.ref2 && cmd.ref1 !== ref) {
                 cmd.fournisseur2 = fournisseur;
                 cmd.ref2 = ref;
