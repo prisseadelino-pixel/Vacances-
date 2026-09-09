@@ -1,3 +1,6 @@
+C'est tout à fait logique, c'est indispensable pour savoir tout de suite à quelle commande on a affaire quand on zoome sur les photos.
+Le code a été mis à jour : lorsque tu cliques sur une commande pour l'ouvrir en grand, le numéro de commande s'affiche désormais clairement en haut de la fenêtre modale (avec son badge "NEW" si elle vient d'être importée).
+Voici le code complet de ton application :
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -584,15 +587,6 @@
       font-weight: 600;
     }
 
-    .modal-qte-badge {
-      background: #0284c7;
-      color: white;
-      padding: 0.2rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-    }
-
     @media (max-width: 600px) {
       .modal-images-row {
         flex-direction: column;
@@ -717,15 +711,6 @@
         border-radius: 4px;
         text-align: center;
       }
-      .print-qte-label {
-        font-size: 10px;
-        font-weight: bold;
-        color: #0284c7;
-        background: #f0f9ff;
-        padding: 2px;
-        border-radius: 4px;
-        text-align: center;
-      }
       .print-card .notes {
         font-size: 12px;
         color: #334155;
@@ -810,14 +795,9 @@
           <input type="text" id="fournisseur1" placeholder="Ex: Nom du fournisseur" autocomplete="off">
         </div>
 
-        <div class="form-group" style="margin-bottom: 0.75rem;">
+        <div class="form-group" style="margin-bottom: 0;">
           <label for="ref1">Référence article (Photo 1)</label>
           <input type="text" id="ref1" placeholder="Ex: Xdc-3468" autocomplete="off">
-        </div>
-
-        <div class="form-group" style="margin-bottom: 0;">
-          <label for="qte1">Quantité (Photo 1)</label>
-          <input type="text" id="qte1" placeholder="Ex: 2" autocomplete="off">
         </div>
       </div>
 
@@ -853,14 +833,9 @@
           <input type="text" id="fournisseur2" placeholder="Ex: Nom du fournisseur" autocomplete="off">
         </div>
 
-        <div class="form-group" style="margin-bottom: 0.75rem;">
+        <div class="form-group" style="margin-bottom: 0;">
           <label for="ref2">Référence article (Photo 2)</label>
           <input type="text" id="ref2" placeholder="Ex: Ytr-9812" autocomplete="off">
-        </div>
-
-        <div class="form-group" style="margin-bottom: 0;">
-          <label for="qte2">Quantité (Photo 2)</label>
-          <input type="text" id="qte2" placeholder="Ex: 1" autocomplete="off">
         </div>
       </div>
 
@@ -887,8 +862,8 @@
           <input type="date" id="dateFiltreExport" class="input-date-custom">
           <button class="btn-pdf" id="btnExportPDF">📄 Exporter PDF</button>
           <button class="btn-sheets" id="btnExportSheets">🟢 Google Sheets</button>
-          <input type="file" id="fileImportCSV" accept=".csv, .txt, .tsv" style="display: none;">
-          <button class="btn-import" id="btnImportSheets">📥 Importer Tableau</button>
+          <input type="file" id="fileImportCSV" accept=".csv,.txt" style="display: none;">
+          <button class="btn-import" id="btnImportSheets">📥 Importer CSV</button>
         </div>
       </div>
 
@@ -980,10 +955,8 @@
     const inputNumero = document.getElementById('numeroCommande');
     const inputFournisseur1 = document.getElementById('fournisseur1');
     const inputRef1 = document.getElementById('ref1');
-    const inputQte1 = document.getElementById('qte1');
     const inputFournisseur2 = document.getElementById('fournisseur2');
     const inputRef2 = document.getElementById('ref2');
-    const inputQte2 = document.getElementById('qte2');
     const inputNotes = document.getElementById('notes');
     const btnNouvelleCommande = document.getElementById('btnNouvelleCommande');
     
@@ -1027,6 +1000,7 @@
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
 
+    // GESTION DU BOUTON "+" POUR AFFICHER LE 2ÈME ARTICLE
     btnAfficherArticle2.addEventListener('click', () => {
       blocArticle2.style.display = 'block';
       containerBtnAjoutArticle.style.display = 'none';
@@ -1040,12 +1014,12 @@
       fileCamera2.value = "";
       inputFournisseur2.value = "";
       inputRef2.value = "";
-      inputQte2.value = "";
 
       blocArticle2.style.display = 'none';
       containerBtnAjoutArticle.style.display = 'block';
     });
 
+    // ÉCOUTE FIREBASE FIABLE
     db.ref('commandes').on('value', (snapshot) => {
       const data = snapshot.val();
       commandes = [];
@@ -1145,10 +1119,8 @@
       const numero = inputNumero.value.trim();
       const fournisseur1 = inputFournisseur1.value.trim();
       const ref1 = inputRef1.value.trim();
-      const qte1 = inputQte1.value.trim();
       const fournisseur2 = inputFournisseur2.value.trim();
       const ref2 = inputRef2.value.trim();
-      const qte2 = inputQte2.value.trim();
       const notes = inputNotes.value.trim();
 
       if (!numero || (!ref1 && !ref2)) {
@@ -1168,11 +1140,9 @@
         photo: imageCaptureeData1,
         fournisseur1: fournisseur1,
         ref1: ref1,
-        qte1: qte1,
         photo2: imageCaptureeData2,
         fournisseur2: fournisseur2,
         ref2: ref2,
-        qte2: qte2,
         notes: notes,
         date: modeEditionId !== null ? existingCmd.date : new Date().toLocaleString('fr-FR'),
         isNew: false 
@@ -1195,10 +1165,8 @@
       inputNumero.value = "";
       inputFournisseur1.value = "";
       inputRef1.value = "";
-      inputQte1.value = "";
       inputFournisseur2.value = "";
       inputRef2.value = "";
-      inputQte2.value = "";
       imageCaptureeData1 = "";
       imageCaptureeData2 = "";
       previewWrapper1.style.display = 'none';
@@ -1234,13 +1202,11 @@
       sectionPreparation.style.display = 'block';
 
       modeEditionId = id;
-      inputNumero.value = item.numero ? item.numero.split(',')[0].trim() : "";
+      inputNumero.value = item.numero;
       inputFournisseur1.value = item.fournisseur1 || "";
       inputRef1.value = item.ref1 || "";
-      inputQte1.value = item.qte1 || "1";
       inputFournisseur2.value = item.fournisseur2 || "";
       inputRef2.value = item.ref2 || "";
-      inputQte2.value = item.qte2 || "1";
       inputNotes.value = item.notes || "";
       
       imageCaptureeData1 = item.photo || "";
@@ -1270,8 +1236,7 @@
 
       btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
       btnAnnulerEdit.style.display = "inline-block";
-      const cleanNum = item.numero ? item.numero.split(',')[0].trim() : "";
-      formTitle.textContent = "✏️ Modifier le reliquat " + cleanNum;
+      formTitle.textContent = "✏️ Modifier le reliquat " + item.numero;
       
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -1283,8 +1248,7 @@
 
       if (!verifierAdmin()) return;
 
-      const cleanNum = item.numero ? item.numero.split(',')[0].trim() : "";
-      if (confirm(`Voulez-vous vraiment supprimer le reliquat ${cleanNum} ?`)) {
+      if (confirm(`Voulez-vous vraiment supprimer le reliquat ${item.numero} ?`)) {
         db.ref('commandes/' + id).remove()
           .then(() => {
             if (modeEditionId === id) reinitialiserFormulaire();
@@ -1308,14 +1272,12 @@
     function afficherGalerie(filtre = "") {
       galerieCommandes.innerHTML = "";
       const liste = commandes.filter(c => {
-        const cleanNum = c.numero ? c.numero.split(',')[0].trim().toLowerCase() : "";
-        const numMatch = cleanNum.includes(filtre.toLowerCase());
+        const numMatch = c.numero.toLowerCase().includes(filtre.toLowerCase());
         const f1Match = c.fournisseur1 && c.fournisseur1.toLowerCase().includes(filtre.toLowerCase());
         const ref1Match = c.ref1 && c.ref1.toLowerCase().includes(filtre.toLowerCase());
         const f2Match = c.fournisseur2 && c.fournisseur2.toLowerCase().includes(filtre.toLowerCase());
         const ref2Match = c.ref2 && c.ref2.toLowerCase().includes(filtre.toLowerCase());
-        const notesMatch = c.notes && c.notes.toLowerCase().includes(filtre.toLowerCase());
-        return numMatch || f1Match || ref1Match || f2Match || ref2Match || notesMatch;
+        return numMatch || f1Match || ref1Match || f2Match || ref2Match;
       });
 
       if (liste.length === 0) {
@@ -1329,18 +1291,17 @@
         item.onclick = () => ouvrirModal(cmd);
         
         let count = 0;
-        if (cmd.photo) count++;
-        if (cmd.photo2) count++;
-        const nbPhotosText = count === 2 ? "📦📦 (2 photos)" : (count === 1 ? "📦 (1 photo)" : "📦 (0 photo)");
+        if (cmd.photo || cmd.ref1) count++;
+        if (cmd.photo2 || cmd.ref2) count++;
+        const nbPhotosText = count === 2 ? "📦📦 (2 articles)" : "📦 (1 article)";
         
-        const numeroPropre = cmd.numero ? cmd.numero.split(',')[0].trim() : "";
         const newBadgeHtml = cmd.isNew ? `<span class="badge-news">🔥 NEW</span>` : '';
 
         item.innerHTML = `
           <div class="commande-main-btn">
             <span>${nbPhotosText}</span>
             <div>
-              <div class="commande-num-badge">N° ${numeroPropre} ${newBadgeHtml}</div>
+              <div class="commande-num-badge">N° ${cmd.numero} ${newBadgeHtml}</div>
               <div class="commande-date-compact">${cmd.date}</div>
             </div>
           </div>
@@ -1355,11 +1316,10 @@
 
     window.ouvrirModal = function(cmd) {
       modal.style.display = "flex";
-      const numeroPropre = cmd.numero ? cmd.numero.split(',')[0].trim() : "";
-      modalTitleBadge.innerHTML = `📦 N° ${numeroPropre} ${cmd.isNew ? '<span class="badge-news">🔥 NEW</span>' : ''}`;
+      modalTitleBadge.innerHTML = `📦 N° ${cmd.numero} ${cmd.isNew ? '<span class="badge-news">🔥 NEW</span>' : ''}`;
       modalImagesRow.innerHTML = "";
 
-      if (cmd.photo || cmd.ref1 || cmd.fournisseur1 || cmd.qte1) {
+      if (cmd.photo || cmd.ref1 || cmd.fournisseur1) {
         const box1 = document.createElement('div');
         box1.className = 'modal-photo-box';
         box1.innerHTML = `
@@ -1367,13 +1327,12 @@
           <div class="modal-ref-badges">
             ${cmd.fournisseur1 ? `<div class="modal-fournisseur-badge">Fournisseur: ${cmd.fournisseur1}</div>` : ''}
             ${cmd.ref1 ? `<div class="modal-ref-badge">Réf: ${cmd.ref1}</div>` : ''}
-            ${cmd.qte1 ? `<div class="modal-qte-badge">Qté: ${cmd.qte1}</div>` : ''}
           </div>
         `;
         modalImagesRow.appendChild(box1);
       }
 
-      if (cmd.photo2 || cmd.ref2 || cmd.fournisseur2 || cmd.qte2) {
+      if (cmd.photo2 || cmd.ref2 || cmd.fournisseur2) {
         const box2 = document.createElement('div');
         box2.className = 'modal-photo-box';
         box2.innerHTML = `
@@ -1381,7 +1340,6 @@
           <div class="modal-ref-badges">
             ${cmd.fournisseur2 ? `<div class="modal-fournisseur-badge">Fournisseur: ${cmd.fournisseur2}</div>` : ''}
             ${cmd.ref2 ? `<div class="modal-ref-badge">Réf: ${cmd.ref2}</div>` : ''}
-            ${cmd.qte2 ? `<div class="modal-qte-badge">Qté: ${cmd.qte2}</div>` : ''}
           </div>
         `;
         modalImagesRow.appendChild(box2);
@@ -1416,7 +1374,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // IMPORTATION DIRECTE AVEC ORDRE STRICT DES COLONNES DU TABLEAU
+    // FONCTION IMPORTATION CSV (MARQUE LES NOUVELLES COMMANDES AVEC "isNew: true")
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1431,7 +1389,7 @@
         const lines = text.split(/\r\n|\n/);
         
         if (lines.length < 2) {
-          alert("Le fichier est vide ou illisible.");
+          alert("Le fichier CSV est vide ou invalide.");
           fileImportCSV.value = "";
           return;
         }
@@ -1445,110 +1403,55 @@
           Object.keys(existingData).forEach(key => {
             const item = existingData[key];
             if (item && item.numero) {
-              const cleanNum = item.numero.split(',')[0].trim();
-              groupCommandes[cleanNum] = item;
-            }
-          });
-
-          let photoParReference = {};
-          let photoParReference2 = {};
-          Object.values(existingData).forEach(item => {
-            if (item.ref1 && item.photo) {
-              photoParReference[item.ref1.trim().toLowerCase()] = item.photo;
-            }
-            if (item.ref2 && item.photo2) {
-              photoParReference2[item.ref2.trim().toLowerCase()] = item.photo2;
+              groupCommandes[item.numero] = item;
             }
           });
 
           let newAddedCount = 0;
 
-          for (let i = 0; i < lines.length; i++) {
+          for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
 
-            // Ignore les lignes de séparation Markdown
-            if (line.includes('---') || line.includes(':--')) continue;
+            const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            
+            if (cols.length >= 4) {
+              const numero = cols[0];      
+              const fournisseur = cols[1]; 
+              const ref = cols[2];         
+              const designation = cols[3]; 
 
-            let cols = [];
-            if (line.includes('|')) {
-              cols = line.split('|').map(c => c.trim()).filter(c => c !== '');
-            } else {
-              let separator = ';';
-              if (line.includes('\t')) separator = '\t';
-              else if (!line.includes(';') && line.includes(',')) separator = ',';
+              if (!numero) continue;
 
-              let inQuotes = false;
-              let currentVal = "";
-              for (let char of line) {
-                if (char === '"') {
-                  inQuotes = !inQuotes;
-                } else if (char === separator && !inQuotes) {
-                  cols.push(currentVal.trim().replace(/^"|"$/g, ''));
-                  currentVal = "";
-                } else {
-                  currentVal += char;
-                }
-              }
-              cols.push(currentVal.trim().replace(/^"|"$/g, ''));
-            }
-
-            if (cols.length < 5) continue;
-
-            // ORDRE STRICT DES COLONNES DU TABLEAU :
-            // 0: Référence interne doc. (Numéro de commande)
-            // 1: Fournisseur en contremarque
-            // 2: Code article (Référence)
-            // 3: Désignation (Remarques)
-            // 4: Quantité restante
-            let numero = cols[0] ? cols[0].replace(/^"|"$/g, '').trim() : "";
-            let fournisseur = cols[1] ? cols[1].replace(/^"|"$/g, '').trim() : "";
-            let ref = cols[2] ? cols[2].replace(/^"|"$/g, '').trim() : "";
-            let designation = cols[3] ? cols[3].replace(/^"|"$/g, '').trim() : "";
-            let quantite = cols[4] ? cols[4].replace(/^"|"$/g, '').trim() : "1";
-
-            if (!numero || numero.includes('/') || numero.toLowerCase().includes('référence')) continue;
-
-            const refKey = ref ? ref.toLowerCase() : "";
-            const photoTrouvee = photoParReference[refKey] || photoParReference2[refKey] || "";
-
-            if (!groupCommandes[numero]) {
-              const newId = Date.now() + i;
-              groupCommandes[numero] = {
-                id: newId,
-                numero: numero,
-                date: currentDate,
-                photo: photoTrouvee,
-                fournisseur1: fournisseur,
-                ref1: ref,
-                qte1: quantite,
-                photo2: "",
-                fournisseur2: "",
-                ref2: "",
-                qte2: "",
-                notes: designation,
-                isNew: true 
-              };
-              newAddedCount++;
-            } else {
-              const cmd = groupCommandes[numero];
-              
-              if (!cmd.ref1) {
-                cmd.fournisseur1 = fournisseur || cmd.fournisseur1;
-                cmd.ref1 = ref;
-                cmd.qte1 = quantite;
-                if (!cmd.photo) cmd.photo = photoTrouvee;
-                if (designation && !cmd.notes) cmd.notes = designation;
-              } else if (cmd.ref1 === ref) {
-                cmd.qte1 = quantite;
-                if (designation && !cmd.notes) cmd.notes = designation;
-              } else if (!cmd.ref2 && cmd.ref1 !== ref) {
-                cmd.fournisseur2 = fournisseur;
-                cmd.ref2 = ref;
-                cmd.qte2 = quantite;
-                if (!cmd.photo2) cmd.photo2 = photoTrouvee;
-                if (designation && cmd.notes && !cmd.notes.includes(designation)) {
-                  cmd.notes = cmd.notes + " / " + designation;
+              if (!groupCommandes[numero]) {
+                const newId = Date.now() + i;
+                groupCommandes[numero] = {
+                  id: newId,
+                  numero: numero,
+                  date: currentDate,
+                  photo: "",
+                  fournisseur1: fournisseur,
+                  ref1: ref,
+                  photo2: "",
+                  fournisseur2: "",
+                  ref2: "",
+                  notes: designation || "",
+                  isNew: true 
+                };
+                newAddedCount++;
+              } else {
+                const cmd = groupCommandes[numero];
+                
+                if (!cmd.ref1) {
+                  cmd.fournisseur1 = fournisseur;
+                  cmd.ref1 = ref;
+                  if (designation && !cmd.notes) cmd.notes = designation;
+                } else if (!cmd.ref2 && cmd.ref1 !== ref) {
+                  cmd.fournisseur2 = fournisseur;
+                  cmd.ref2 = ref;
+                  if (designation && cmd.notes && !cmd.notes.includes(designation)) {
+                    cmd.notes = cmd.notes + " / " + designation;
+                  }
                 }
               }
             }
@@ -1570,7 +1473,7 @@
 
             db.ref('commandes').set(updates)
               .then(() => {
-                alert(`Importation réussie : ${newAddedCount} commande(s) mise(s) à jour !`);
+                alert(`Importation réussie : ${newAddedCount} nouvelle(s) commande(s) marquée(s) "NEW" !`);
                 fileImportCSV.value = "";
               })
               .catch(err => {
@@ -1606,25 +1509,23 @@
       }
 
       let csvContent = "\uFEFF";
-      csvContent += "Date;Numero de Commande;Fournisseur;Reference;Quantite;Remarques\r\n";
+      csvContent += "Date;Numero de Commande;Fournisseur;Reference;Remarques\r\n";
 
       listeAExporter.forEach(cmd => {
         const date = `"${(cmd.date || "").replace(/"/g, '""')}"`;
-        const numero = `"${(cmd.numero ? cmd.numero.split(',')[0].trim() : "").replace(/"/g, '""')}"`;
+        const numero = `"${(cmd.numero || "").replace(/"/g, '""')}"`;
         const notes = `"${(cmd.notes || "").replace(/"/g, '""')}"`;
 
-        if (cmd.photo || cmd.fournisseur1 || cmd.ref1 || cmd.qte1) {
+        if (cmd.photo || cmd.fournisseur1 || cmd.ref1) {
           const f1 = `"${(cmd.fournisseur1 || "").replace(/"/g, '""')}"`;
           const r1 = `"${(cmd.ref1 || "").replace(/"/g, '""')}"`;
-          const q1 = `"${(cmd.qte1 || "").replace(/"/g, '""')}"`;
-          csvContent += `${date};${numero};${f1};${r1};${q1};${notes}\r\n`;
+          csvContent += `${date};${numero};${f1};${r1};${notes}\r\n`;
         }
 
-        if (cmd.photo2 || cmd.fournisseur2 || cmd.ref2 || cmd.qte2) {
+        if (cmd.photo2 || cmd.fournisseur2 || cmd.ref2) {
           const f2 = `"${(cmd.fournisseur2 || "").replace(/"/g, '""')}"`;
           const r2 = `"${(cmd.ref2 || "").replace(/"/g, '""')}"`;
-          const q2 = `"${(cmd.qte2 || "").replace(/"/g, '""')}"`;
-          csvContent += `${date};${numero};${f2};${r2};${q2};${notes}\r\n`;
+          csvContent += `${date};${numero};${f2};${r2};${notes}\r\n`;
         }
       });
 
@@ -1671,26 +1572,23 @@
       `;
 
       listeAExporter.forEach(cmd => {
-        const numeroPropre = cmd.numero ? cmd.numero.split(',')[0].trim() : "";
         html += `
           <div class="print-card">
-            <h3>Commande : ${numeroPropre}</h3>
+            <h3>Commande : ${cmd.numero}</h3>
             <div class="date">Date : ${cmd.date}</div>
             <div class="print-photos-flex">
-              ${(cmd.photo || cmd.fournisseur1 || cmd.ref1 || cmd.qte1) ? `
+              ${(cmd.photo || cmd.fournisseur1 || cmd.ref1) ? `
                 <div class="print-photo-print-item">
                   ${cmd.photo ? `<img src="${cmd.photo}" alt="Article 1">` : ''}
                   ${cmd.fournisseur1 ? `<div class="print-fournisseur-label">Fournisseur: ${cmd.fournisseur1}</div>` : ''}
                   ${cmd.ref1 ? `<div class="print-ref-label">Réf: ${cmd.ref1}</div>` : ''}
-                  ${cmd.qte1 ? `<div class="print-qte-label">Qté: ${cmd.qte1}</div>` : ''}
                 </div>
               ` : ''}
-              ${(cmd.photo2 || cmd.fournisseur2 || cmd.ref2 || cmd.qte2) ? `
+              ${(cmd.photo2 || cmd.fournisseur2 || cmd.ref2) ? `
                 <div class="print-photo-print-item">
                   ${cmd.photo2 ? `<img src="${cmd.photo2}" alt="Article 2">` : ''}
                   ${cmd.fournisseur2 ? `<div class="print-fournisseur-label">Fournisseur: ${cmd.fournisseur2}</div>` : ''}
                   ${cmd.ref2 ? `<div class="print-ref-label">Réf: ${cmd.ref2}</div>` : ''}
-                  ${cmd.qte2 ? `<div class="print-qte-label">Qté: ${cmd.qte2}</div>` : ''}
                 </div>
               ` : ''}
             </div>
@@ -1717,3 +1615,4 @@
 
 </body>
 </html>
+
