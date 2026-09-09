@@ -445,6 +445,25 @@
       color: var(--primary);
     }
 
+    .badge-news {
+      background: #ff6b00;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      margin-left: 0.4rem;
+      vertical-align: middle;
+      display: inline-block;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
     .commande-date-compact {
       font-size: 0.75rem;
       color: #94a3b8;
@@ -865,7 +884,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 🔑 MOT DE PASSE ADMIN (Tu peux le changer ici si tu veux)
+    // 🔑 MOT DE PASSE ADMIN
     const ADMIN_PASSWORD = "1234";
 
     function verifierAdmin() {
@@ -1094,6 +1113,8 @@
       btnEnregistrer.textContent = "Enregistrement...";
 
       const idObjet = modeEditionId !== null ? modeEditionId : Date.now();
+      const existingCmd = commandes.find(c => c.id === idObjet);
+      
       const commandeData = {
         id: idObjet,
         numero: numero,
@@ -1104,7 +1125,8 @@
         fournisseur2: fournisseur2,
         ref2: ref2,
         notes: notes,
-        date: modeEditionId !== null ? commandes.find(c => c.id === modeEditionId).date : new Date().toLocaleString('fr-FR')
+        date: modeEditionId !== null ? existingCmd.date : new Date().toLocaleString('fr-FR'),
+        isNew: false // Dès qu'on l'enregistre/modifie, le badge "NEW" disparaît
       };
 
       db.ref('commandes/' + idObjet).set(commandeData)
@@ -1200,7 +1222,6 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // 🔒 SUPPRESSION PROTÉGÉE PAR MOT DE PASSE
     window.supprimerCommande = function(id, event) {
       if (event) event.stopPropagation();
       const item = commandes.find(c => c.id === id);
@@ -1216,7 +1237,6 @@
       }
     };
 
-    // 🔒 VIDAGE HISTORIQUE PROTÉGÉ PAR MOT DE PASSE
     btnViderHistorique.addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
       
@@ -1255,12 +1275,15 @@
         if (cmd.photo || cmd.ref1) count++;
         if (cmd.photo2 || cmd.ref2) count++;
         const nbPhotosText = count === 2 ? "📦📦 (2 articles)" : "📦 (1 article)";
+        
+        // Badge NEW si la commande vient d'être importée et n'a pas encore été modifiée
+        const newBadgeHtml = cmd.isNew ? `<span class="badge-news">🔥 NEW</span>` : '';
 
         item.innerHTML = `
           <div class="commande-main-btn">
             <span>${nbPhotosText}</span>
             <div>
-              <div class="commande-num-badge">N° ${cmd.numero}</div>
+              <div class="commande-num-badge">N° ${cmd.numero} ${newBadgeHtml}</div>
               <div class="commande-date-compact">${cmd.date}</div>
             </div>
           </div>
@@ -1332,7 +1355,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION IMPORTATION CSV (PRÉSERVE LES PHOTOS EXISTANTES DE FIREBASE)
+    // FONCTION IMPORTATION CSV (MARQUE LES NOUVELLES COMMANDES AVEC "isNew: true")
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1365,7 +1388,7 @@
             }
           });
 
-          let importedCount = 0;
+          let newAddedCount = 0;
 
           for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
@@ -1382,6 +1405,7 @@
               if (!numero) continue;
 
               if (!groupCommandes[numero]) {
+                // Vraie nouvelle commande dans l'historique
                 const newId = Date.now() + i;
                 groupCommandes[numero] = {
                   id: newId,
@@ -1393,9 +1417,10 @@
                   photo2: "",
                   fournisseur2: "",
                   ref2: "",
-                  notes: designation || ""
+                  notes: designation || "",
+                  isNew: true // 👈 Marquée comme nouvelle !
                 };
-                importedCount++;
+                newAddedCount++;
               } else {
                 const cmd = groupCommandes[numero];
                 
@@ -1421,7 +1446,7 @@
             return;
           }
 
-          if (confirm(`Voulez-vous importer et fusionner ces commandes ? (Vos photos enregistrées seront conservées)`)) {
+          if (confirm(`Voulez-vous importer et fusionner ces commandes ? (${newAddedCount} nouvelle(s) commande(s) détectée(s))`)) {
             let updates = {};
             keys.forEach(num => {
               const cmd = groupCommandes[num];
@@ -1430,7 +1455,7 @@
 
             db.ref('commandes').set(updates)
               .then(() => {
-                alert(`Importation réussie avec conservation des photos existantes !`);
+                alert(`Importation réussie : ${newAddedCount} nouvelle(s) commande(s) marquée(s) "NEW" !`);
                 fileImportCSV.value = "";
               })
               .catch(err => {
