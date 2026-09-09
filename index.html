@@ -1234,7 +1234,7 @@
       sectionPreparation.style.display = 'block';
 
       modeEditionId = id;
-      inputNumero.value = item.numero.split(',')[0].trim();
+      inputNumero.value = item.numero ? item.numero.split(',')[0].trim() : "";
       inputFournisseur1.value = item.fournisseur1 || "";
       inputRef1.value = item.ref1 || "";
       inputQte1.value = item.qte1 || "";
@@ -1270,7 +1270,8 @@
 
       btnEnregistrer.textContent = "💾 Sauvegarder les modifications";
       btnAnnulerEdit.style.display = "inline-block";
-      formTitle.textContent = "✏️ Modifier le reliquat " + item.numero.split(',')[0].trim();
+      const cleanNum = item.numero ? item.numero.split(',')[0].trim() : "";
+      formTitle.textContent = "✏️ Modifier le reliquat " + cleanNum;
       
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -1282,7 +1283,8 @@
 
       if (!verifierAdmin()) return;
 
-      if (confirm(`Voulez-vous vraiment supprimer le reliquat ${item.numero.split(',')[0].trim()} ?`)) {
+      const cleanNum = item.numero ? item.numero.split(',')[0].trim() : "";
+      if (confirm(`Voulez-vous vraiment supprimer le reliquat ${cleanNum} ?`)) {
         db.ref('commandes/' + id).remove()
           .then(() => {
             if (modeEditionId === id) reinitialiserFormulaire();
@@ -1306,7 +1308,7 @@
     function afficherGalerie(filtre = "") {
       galerieCommandes.innerHTML = "";
       const liste = commandes.filter(c => {
-        const cleanNum = c.numero.split(',')[0].trim().toLowerCase();
+        const cleanNum = c.numero ? c.numero.split(',')[0].trim().toLowerCase() : "";
         const numMatch = cleanNum.includes(filtre.toLowerCase());
         const f1Match = c.fournisseur1 && c.fournisseur1.toLowerCase().includes(filtre.toLowerCase());
         const ref1Match = c.ref1 && c.ref1.toLowerCase().includes(filtre.toLowerCase());
@@ -1331,7 +1333,6 @@
         if (cmd.photo2 || cmd.ref2) count++;
         const nbPhotosText = count === 2 ? "📦📦 (2 articles)" : "📦 (1 article)";
         
-        // On isole strictement le numéro de commande avant la virgule
         const numeroPropre = cmd.numero ? cmd.numero.split(',')[0].trim() : "";
         const newBadgeHtml = cmd.isNew ? `<span class="badge-news">🔥 NEW</span>` : '';
 
@@ -1415,7 +1416,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // IMPORTATION CSV CORRIGÉE : isole bien le numéro et place la désignation dans notes
+    // IMPORTATION CSV CORRIGÉE : Remplit proprement chaque champ du formulaire (Référence, Fournisseur, Désignation)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1485,12 +1486,18 @@
 
             if (cols.length < 4) continue;
 
+            // Vos 4 colonnes d'origine exactes :
+            // 0 : Référence interne doc. (N° commande, ex: S-96713)
+            // 1 : Fournisseur en contremarque (ex: OPJET)
+            // 2 : Code article / Référence (ex: 017899)
+            // 3 : Désignation (ex: SET 4 ASSIETTES...)
+
             let numeroBrut = cols[0] || "";      
             let fournisseur = cols[1] || ""; 
             let ref = cols[2] || "";         
             let designation = cols[3] || ""; 
 
-            // Extraction propre du numéro (ex: S-96713)
+            // Extraction propre du numéro (on retire toute éventuelle virgule parasite)
             let numero = numeroBrut.split(',')[0].trim();
             if (!numero || !numero.toUpperCase().startsWith("S-")) continue;
 
@@ -1524,6 +1531,8 @@
                 cmd.qte1 = "1";
                 if (!cmd.photo) cmd.photo = photoTrouvee;
                 if (designation && !cmd.notes) cmd.notes = designation;
+              } else if (cmd.ref1 === ref) {
+                // Si même article déjà présent, on ne fait rien ou on garde
               } else if (!cmd.ref2 && cmd.ref1 !== ref) {
                 cmd.fournisseur2 = fournisseur;
                 cmd.ref2 = ref;
