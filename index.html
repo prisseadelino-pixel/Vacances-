@@ -1412,7 +1412,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION IMPORTATION CSV (ANALYSE INTELLIGENTE DES COLONNES)
+    // FONCTION IMPORTATION CSV (PRÉSERVE LES PHOTOS EXISTANTES ET GÈRE LA QUANTITÉ)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1445,90 +1445,56 @@
             }
           });
 
-          let photoParReference = {};
-          Object.values(existingData).forEach(item => {
-            if (item.ref1 && item.photo) {
-              photoParReference[item.ref1.trim().toLowerCase()] = item.photo;
-            }
-            if (item.ref2 && item.photo2) {
-              photoParReference[item.ref2.trim().toLowerCase()] = item.photo2;
-            }
-          });
-
           let newAddedCount = 0;
 
           for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
 
-            const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+            const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
             
-            let numero = "";
-            let fournisseur = "";
-            let ref = "";
-            let designation = "";
-            let qte = "";
+            if (cols.length >= 4) {
+              const numero = cols[0];      
+              const fournisseur = cols[1]; 
+              const ref = cols[2];         
+              const designation = cols[3]; 
+              const qte = cols[4] || ""; // Optionnel si présent dans la 5ème colonne du CSV
 
-            cols.forEach(col => {
-              if (!col) return;
-              if (col.toUpperCase().startsWith("S-") || (col.length > 5 && /\d/.test(col) && !col.includes('/'))) {
-                if (!numero) numero = col;
-              } 
-              else if (col.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-                return;
-              }
-              else if (!ref && col.length >= 3 && !col.includes('STA-') && !col.includes('C&C')) {
-                ref = col;
-              }
-              else if (!qte && (col.includes('DOMICILE') || col.includes('C&C') || !isNaN(col))) {
-                qte = col;
-              }
-              else if (!fournisseur) {
-                fournisseur = col;
+              if (!numero) continue;
+
+              if (!groupCommandes[numero]) {
+                const newId = Date.now() + i;
+                groupCommandes[numero] = {
+                  id: newId,
+                  numero: numero,
+                  date: currentDate,
+                  photo: "",
+                  fournisseur1: fournisseur,
+                  ref1: ref,
+                  qte1: qte,
+                  photo2: "",
+                  fournisseur2: "",
+                  ref2: "",
+                  qte2: "",
+                  notes: designation || "",
+                  isNew: true 
+                };
+                newAddedCount++;
               } else {
-                designation += (designation ? " " : "") + col;
-              }
-            });
-
-            if (!numero) continue;
-
-            const refKey = ref ? ref.toLowerCase() : "";
-            const photoTrouvee = photoParReference[refKey] || "";
-
-            if (!groupCommandes[numero]) {
-              const newId = Date.now() + i;
-              groupCommandes[numero] = {
-                id: newId,
-                numero: numero,
-                date: currentDate,
-                photo: photoTrouvee,
-                fournisseur1: fournisseur,
-                ref1: ref,
-                qte1: qte,
-                photo2: "",
-                fournisseur2: "",
-                ref2: "",
-                qte2: "",
-                notes: designation,
-                isNew: true 
-              };
-              newAddedCount++;
-            } else {
-              const cmd = groupCommandes[numero];
-              
-              if (!cmd.ref1) {
-                cmd.fournisseur1 = fournisseur || cmd.fournisseur1;
-                cmd.ref1 = ref;
-                cmd.qte1 = qte;
-                if (!cmd.photo) cmd.photo = photoTrouvee;
-                if (designation && !cmd.notes) cmd.notes = designation;
-              } else if (!cmd.ref2 && cmd.ref1 !== ref) {
-                cmd.fournisseur2 = fournisseur;
-                cmd.ref2 = ref;
-                cmd.qte2 = qte;
-                if (!cmd.photo2) cmd.photo2 = photoTrouvee;
-                if (designation && cmd.notes && !cmd.notes.includes(designation)) {
-                  cmd.notes = cmd.notes + " / " + designation;
+                const cmd = groupCommandes[numero];
+                
+                if (!cmd.ref1) {
+                  cmd.fournisseur1 = fournisseur;
+                  cmd.ref1 = ref;
+                  cmd.qte1 = qte;
+                  if (designation && !cmd.notes) cmd.notes = designation;
+                } else if (!cmd.ref2 && cmd.ref1 !== ref) {
+                  cmd.fournisseur2 = fournisseur;
+                  cmd.ref2 = ref;
+                  cmd.qte2 = qte;
+                  if (designation && cmd.notes && !cmd.notes.includes(designation)) {
+                    cmd.notes = cmd.notes + " / " + designation;
+                  }
                 }
               }
             }
@@ -1550,7 +1516,7 @@
 
             db.ref('commandes').set(updates)
               .then(() => {
-                alert(`Importation réussie : ${newAddedCount} nouvelle(s) commande(s) traitée(s) !`);
+                alert(`Importation réussie : ${newAddedCount} nouvelle(s) commande(s) marquée(s) "NEW" !`);
                 fileImportCSV.value = "";
               })
               .catch(err => {
