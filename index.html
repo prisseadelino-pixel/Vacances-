@@ -1416,7 +1416,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // IMPORTATION CSV ANTI-DATE ET ANTI-ERREUR
+    // IMPORTATION CSV INTELLIGENTE AVEC DÉTECTION AUTOMATIQUE DES COLONNES
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1437,6 +1437,45 @@
         }
 
         const currentDate = new Date().toLocaleString('fr-FR');
+
+        // Analyse de la première ligne pour trouver l'index exact de chaque colonne
+        const headerLine = lines[0].trim();
+        let separator = ';';
+        if (headerLine.includes('\t')) separator = '\t';
+        else if (!headerLine.includes(';') && headerLine.includes(',')) separator = ',';
+
+        function parseLine(line) {
+          let cols = [];
+          let inQuotes = false;
+          let currentVal = "";
+          for (let char of line) {
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === separator && !inQuotes) {
+              cols.push(currentVal.trim().replace(/^"|"$/g, ''));
+              currentVal = "";
+            } else {
+              currentVal += char;
+            }
+          }
+          cols.push(currentVal.trim().replace(/^"|"$/g, ''));
+          return cols;
+        }
+
+        const headers = parseLine(headerLine).map(h => h.toLowerCase());
+        
+        let idxRefDoc = headers.findIndex(h => h.includes('référence interne') || h.includes('interne doc') || h.includes('commande'));
+        let idxFourn = headers.findIndex(h => h.includes('fournisseur') || h.includes('contremarque'));
+        let idxCodeArt = headers.findIndex(h => h.includes('code article') || h.includes('référence article') || h.includes('ref'));
+        let idxDesig = headers.findIndex(h => h.includes('désignation') || h.includes('designation'));
+        let idxQte = headers.findIndex(h => h.includes('quantité') || h.includes('qte') || h.includes('restante'));
+
+        // Valeurs par défaut si non trouvées
+        if (idxRefDoc === -1) idxRefDoc = 0;
+        if (idxFourn === -1) idxFourn = 1;
+        if (idxCodeArt === -1) idxCodeArt = 2;
+        if (idxDesig === -1) idxDesig = 3;
+        if (idxQte === -1) idxQte = 4;
 
         db.ref('commandes').once('value').then(snapshot => {
           const existingData = snapshot.val() || {};
@@ -1467,55 +1506,24 @@
             const line = lines[i].trim();
             if (!line) continue;
 
-            let separator = ';';
-            if (line.includes('\t')) separator = '\t';
-            else if (!line.includes(';') && line.includes(',')) separator = ',';
+            const cols = parseLine(line);
+            if (cols.length < 2) continue;
 
-            let cols = [];
-            let inQuotes = false;
-            let currentVal = "";
+            let numero = cols[idxRefDoc] ? cols[idxRefDoc].replace(/^"|"$/g, '').trim() : "";
+            let fournisseur = cols[idxFourn] ? cols[idxFourn].replace(/^"|"$/g, '').trim() : "";
+            let ref = cols[idxCodeArt] ? cols[idxCodeArt].replace(/^"|"$/g, '').trim() : "";
+            let designation = cols[idxDesig] ? cols[idxDesig].replace(/^"|"$/g, '').trim() : "";
+            let quantite = cols[idxQte] ? cols[idxQte].replace(/^"|"$/g, '').trim() : "1";
 
-            for (let char of line) {
-              if (char === '"') {
-                inQuotes = !inQuotes;
-              } else if (char === separator && !inQuotes) {
-                cols.push(currentVal.trim().replace(/^"|"$/g, ''));
-                currentVal = "";
-              } else {
-                currentVal += char;
-              }
-            }
-            cols.push(currentVal.trim().replace(/^"|"$/g, ''));
-
-            if (cols.length < 4) continue;
-
-            // RECHERCHE AUTOMATIQUE DU VRAI NUMÉRO DE COMMANDE (commençant par S-)
-            let numero = "";
-            let fournisseur = "";
-            let ref = "";
-            let designation = "";
-            let quantite = "1";
-
-            for (let c of cols) {
-              if (c && /^s-?\d+/i.test(c)) {
-                numero = c.toUpperCase().trim();
-                break;
-              }
-            }
-
-            if (!numero) {
+            // Si le numéro détecté n'a pas l'air d'un numéro de commande, on cherche une colonne qui commence par S-
+            if (!numero || numero.includes('/') || numero.toLowerCase().includes('référence')) {
               for (let c of cols) {
-                if (c && !c.includes('/') && !c.match(/^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$/)) {
-                  numero = c.trim();
+                if (c && /^s-?\d+/i.test(c)) {
+                  numero = c.toUpperCase().trim();
                   break;
                 }
               }
             }
-
-            fournisseur = cols[1] ? cols[1].replace(/^"|"$/g, '').trim() : "";
-            ref = cols[2] ? cols[2].replace(/^"|"$/g, '').trim() : "";
-            designation = cols[3] ? cols[3].replace(/^"|"$/g, '').trim() : "";
-            quantite = cols[4] ? cols[4].replace(/^"|"$/g, '').trim() : "1";
 
             if (!numero || numero.includes('/') || numero.toLowerCase().includes('référence')) continue;
 
@@ -1661,7 +1669,7 @@
         titreExport = `Historique Reliquats - Date : ${dateFormatee}`;
 
         if (listeAExporter.length === 0) {
-          alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`);
+          alert(`Aucun reliquat trouvé pour la date du ${dateFormatee}.`;
           return;
         }
       } else {
