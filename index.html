@@ -945,7 +945,7 @@
     });
 
     let commandes = [];
-    let cataloguePhotos = {}; // Mémoire globale des photos par référence article
+    let catalogueArticles = {}; // Mémoire globale des articles par référence (photo, fournisseur, remarque)
     let imageCaptureeData1 = "";
     let imageCaptureeData2 = "";
     let modeEditionId = null;
@@ -998,27 +998,42 @@
     const modalNotes = document.getElementById('modalNotes');
     const closeModal = document.getElementById('closeModal');
 
-    // ÉCOUTE DU CATALOGUE DE PHOTOS CENTRAL DANS FIREBASE
+    // ÉCOUTE DU CATALOGUE CENTRAL DANS FIREBASE
     db.ref('catalogue_photos').on('value', (snapshot) => {
-      cataloguePhotos = snapshot.val() || {};
+      catalogueArticles = snapshot.val() || {};
     });
 
-    // AUTO-RECHERCHE DE PHOTO QUAND ON SAISIT LA RÉFÉRENCE ARTICLE À LA MAIN
+    // AUTO-REMPLISSAGE (PHOTO, FOURNISSEUR, REMARQUE) QUAND ON SAISIT LA RÉFÉRENCE À LA MAIN
     inputRef1.addEventListener('blur', () => {
       const ref = inputRef1.value.trim();
-      if (ref && cataloguePhotos[ref] && !imageCaptureeData1) {
-        imageCaptureeData1 = cataloguePhotos[ref];
-        photoPreview1.src = imageCaptureeData1;
-        previewWrapper1.style.display = 'block';
+      if (ref && catalogueArticles[ref]) {
+        const item = catalogueArticles[ref];
+        if (item.photo && !imageCaptureeData1) {
+          imageCaptureeData1 = item.photo;
+          photoPreview1.src = imageCaptureeData1;
+          previewWrapper1.style.display = 'block';
+        }
+        if (item.fournisseur && !inputFournisseur1.value.trim()) {
+          inputFournisseur1.value = item.fournisseur;
+        }
+        if (item.remarque && !inputNotes.value.trim()) {
+          inputNotes.value = item.remarque;
+        }
       }
     });
 
     inputRef2.addEventListener('blur', () => {
       const ref = inputRef2.value.trim();
-      if (ref && cataloguePhotos[ref] && !imageCaptureeData2) {
-        imageCaptureeData2 = cataloguePhotos[ref];
-        photoPreview2.src = imageCaptureeData2;
-        previewWrapper2.style.display = 'block';
+      if (ref && catalogueArticles[ref]) {
+        const item = catalogueArticles[ref];
+        if (item.photo && !imageCaptureeData2) {
+          imageCaptureeData2 = item.photo;
+          photoPreview2.src = imageCaptureeData2;
+          previewWrapper2.style.display = 'block';
+        }
+        if (item.fournisseur && !inputFournisseur2.value.trim()) {
+          inputFournisseur2.value = item.fournisseur;
+        }
       }
     });
 
@@ -1093,12 +1108,6 @@
             imageCaptureeData1 = imageCompressée;
             photoPreview1.src = imageCaptureeData1;
             previewWrapper1.style.display = 'block';
-            
-            // Sauvegarde immédiate dans le catalogue si la référence est renseignée
-            const ref = inputRef1.value.trim();
-            if (ref) {
-              db.ref('catalogue_photos/' + encodeURIComponent(ref)).set(imageCaptureeData1);
-            }
           });
         };
         reader.readAsDataURL(file);
@@ -1127,11 +1136,6 @@
             imageCaptureeData2 = imageCompressée;
             photoPreview2.src = imageCaptureeData2;
             previewWrapper2.style.display = 'block';
-            
-            const ref = inputRef2.value.trim();
-            if (ref) {
-              db.ref('catalogue_photos/' + encodeURIComponent(ref)).set(imageCaptureeData2);
-            }
           });
         };
         reader.readAsDataURL(file);
@@ -1164,13 +1168,21 @@
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement...";
 
-      // Enregistrement des photos dans le catalogue global si présentes
+      // Enregistrement des données dans le catalogue global (photo, fournisseur, remarque)
       let updatesCatalogue = {};
-      if (ref1 && imageCaptureeData1) {
-        updatesCatalogue[encodeURIComponent(ref1)] = imageCaptureeData1;
+      if (ref1) {
+        updatesCatalogue[encodeURIComponent(ref1)] = {
+          photo: imageCaptureeData1 || (catalogueArticles[ref1] ? catalogueArticles[ref1].photo : ""),
+          fournisseur: fournisseur1,
+          remarque: notes
+        };
       }
-      if (ref2 && imageCaptureeData2) {
-        updatesCatalogue[encodeURIComponent(ref2)] = imageCaptureeData2;
+      if (ref2) {
+        updatesCatalogue[encodeURIComponent(ref2)] = {
+          photo: imageCaptureeData2 || (catalogueArticles[ref2] ? catalogueArticles[ref2].photo : ""),
+          fournisseur: fournisseur2,
+          remarque: notes
+        };
       }
       if (Object.keys(updatesCatalogue).length > 0) {
         db.ref('catalogue_photos').update(updatesCatalogue);
@@ -1419,7 +1431,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION IMPORTATION CSV (RÉCUPÈRE AUTOMATIQUEMENT LES PHOTOS DU CATALOGUE)
+    // FONCTION IMPORTATION CSV (RÉCUPÈRE AUTOMATIQUEMENT PHOTO, FOURNISSEUR ET REMARQUE DU CATALOGUE)
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1462,14 +1474,23 @@
             
             if (cols.length >= 4) {
               const numero = cols[0];      
-              const fournisseur = cols[1]; 
+              const fournisseurCSV = cols[1]; 
               const ref = cols[2];         
               const designation = cols[3]; 
 
               if (!numero) continue;
 
-              // Récupération automatique de la photo depuis le catalogue global si elle existe
-              const photoAuto = (ref && cataloguePhotos[ref]) ? cataloguePhotos[ref] : "";
+              // Récupération automatique depuis le catalogue global si la référence est connue
+              let photoAuto = "";
+              let fournisseurFinal = fournisseurCSV;
+              let remarqueFinale = designation || "";
+
+              if (ref && catalogueArticles[ref]) {
+                const catalogItem = catalogueArticles[ref];
+                if (catalogItem.photo) photoAuto = catalogItem.photo;
+                if (catalogItem.fournisseur) fournisseurFinal = catalogItem.fournisseur;
+                if (catalogItem.remarque && !remarqueFinale) remarqueFinale = catalogItem.remarque;
+              }
 
               if (!groupCommandes[numero]) {
                 const newId = Date.now() + i;
@@ -1478,12 +1499,12 @@
                   numero: numero,
                   date: currentDate,
                   photo: photoAuto,
-                  fournisseur1: fournisseur,
+                  fournisseur1: fournisseurFinal,
                   ref1: ref,
                   photo2: "",
                   fournisseur2: "",
                   ref2: "",
-                  notes: designation || "",
+                  notes: remarqueFinale,
                   isNew: true 
                 };
                 newAddedCount++;
@@ -1491,17 +1512,20 @@
                 const cmd = groupCommandes[numero];
                 
                 if (!cmd.ref1) {
-                  cmd.fournisseur1 = fournisseur;
+                  cmd.fournisseur1 = fournisseurFinal;
                   cmd.ref1 = ref;
                   if (!cmd.photo && photoAuto) cmd.photo = photoAuto;
-                  if (designation && !cmd.notes) cmd.notes = designation;
+                  if (remarqueFinale && !cmd.notes) cmd.notes = remarqueFinale;
                 } else if (!cmd.ref2 && cmd.ref1 !== ref) {
-                  cmd.fournisseur2 = fournisseur;
+                  cmd.fournisseur2 = fournisseurFinal;
                   cmd.ref2 = ref;
-                  const photoAuto2 = (ref && cataloguePhotos[ref]) ? cataloguePhotos[ref] : "";
+                  let photoAuto2 = "";
+                  if (ref && catalogueArticles[ref] && catalogueArticles[ref].photo) {
+                    photoAuto2 = catalogueArticles[ref].photo;
+                  }
                   if (!cmd.photo2 && photoAuto2) cmd.photo2 = photoAuto2;
-                  if (designation && cmd.notes && !cmd.notes.includes(designation)) {
-                    cmd.notes = cmd.notes + " / " + designation;
+                  if (remarqueFinale && cmd.notes && !cmd.notes.includes(remarqueFinale)) {
+                    cmd.notes = cmd.notes + " / " + remarqueFinale;
                   }
                 }
               }
@@ -1524,7 +1548,7 @@
 
             db.ref('commandes').set(updates)
               .then(() => {
-                alert(`Importation réussie : ${newAddedCount} nouvelle(s) commande(s) ajoutée(s) (avec récupération automatique des photos connues) !`);
+                alert(`Importation réussie : ${newAddedCount} nouvelle(s) commande(s) ajoutée(s) (avec récupération automatique des infos connues) !`);
                 fileImportCSV.value = "";
               })
               .catch(err => {
