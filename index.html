@@ -178,7 +178,7 @@
       border-radius: 10px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       z-index: 100;
-      min-width: 200px;
+      min-width: 220px;
       overflow: hidden;
       margin-top: 0.4rem;
     }
@@ -744,6 +744,9 @@
         <button class="btn-menu-hamburger" id="btnMenu" title="Menu options">☰</button>
         
         <div class="dropdown-menu" id="dropdownMenu">
+          <button class="dropdown-item" id="btnToggleAdmin">
+            🔒 Mode Admin : OFF
+          </button>
           <button class="dropdown-item danger" id="btnViderHistorique">
             🗑️ Vider l'historique
           </button>
@@ -901,16 +904,7 @@
 
     // 🔑 MOT DE PASSE ADMIN
     const ADMIN_PASSWORD = "1234";
-
-    function verifierAdmin() {
-      const mdp = prompt("🔒 Action protégée. Entrez le mot de passe administrateur :");
-      if (mdp === ADMIN_PASSWORD) {
-        return true;
-      } else if (mdp !== null) {
-        alert("❌ Mot de passe incorrect !");
-      }
-      return false;
-    }
+    let estAdmin = false;
 
     const homeScreen = document.getElementById('home-screen');
     const appScreen = document.getElementById('app-screen');
@@ -920,6 +914,7 @@
 
     const btnMenu = document.getElementById('btnMenu');
     const dropdownMenu = document.getElementById('dropdownMenu');
+    const btnToggleAdmin = document.getElementById('btnToggleAdmin');
 
     btnMenu.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -928,6 +923,29 @@
 
     document.addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
+    });
+
+    // GESTION DU MODE ADMIN
+    btnToggleAdmin.addEventListener('click', () => {
+      dropdownMenu.classList.remove('show');
+      if (!estAdmin) {
+        const mdp = prompt("🔒 Entrez le mot de passe administrateur :");
+        if (mdp === ADMIN_PASSWORD) {
+          estAdmin = true;
+          btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
+          btnToggleAdmin.style.color = "#16a34a";
+          alert("✅ Mode Administrateur activé ! Vous pouvez maintenant modifier ou supprimer librement.");
+          afficherGalerie(inputRecherche.value);
+        } else if (mdp !== null) {
+          alert("❌ Mot de passe incorrect !");
+        }
+      } else {
+        estAdmin = false;
+        btnToggleAdmin.innerHTML = "🔒 Mode Admin : OFF";
+        btnToggleAdmin.style.color = "var(--text)";
+        alert("🔒 Mode Administrateur désactivé.");
+        afficherGalerie(inputRecherche.value);
+      }
     });
 
     btnCommencer.addEventListener('click', () => {
@@ -945,7 +963,7 @@
     });
 
     let commandes = [];
-    let catalogueArticles = {}; // Mémoire globale des articles par référence (photo, fournisseur, remarque)
+    let catalogueArticles = {};
     let imageCaptureeData1 = "";
     let imageCaptureeData2 = "";
     let modeEditionId = null;
@@ -1003,7 +1021,7 @@
       catalogueArticles = snapshot.val() || {};
     });
 
-    // AUTO-REMPLISSAGE (PHOTO, FOURNISSEUR, REMARQUE) QUAND ON SAISIT LA RÉFÉRENCE À LA MAIN
+    // AUTO-REMPLISSAGE (PHOTO, FOURNISSEUR, REMARQUE) QUAND ON SAISIT LA RÉFÉRENCE
     inputRef1.addEventListener('blur', () => {
       const ref = inputRef1.value.trim();
       if (ref && catalogueArticles[ref]) {
@@ -1168,7 +1186,6 @@
       btnEnregistrer.disabled = true;
       btnEnregistrer.textContent = "Enregistrement...";
 
-      // Enregistrement des données dans le catalogue global (photo, fournisseur, remarque)
       let updatesCatalogue = {};
       if (ref1) {
         updatesCatalogue[encodeURIComponent(ref1)] = {
@@ -1252,6 +1269,19 @@
 
     window.editerCommande = function(id, event) {
       if (event) event.stopPropagation();
+      
+      if (!estAdmin) {
+        const mdp = prompt("🔒 Action réservée à l'administrateur. Entrez le code :");
+        if (mdp === ADMIN_PASSWORD) {
+          estAdmin = true;
+          btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
+          btnToggleAdmin.style.color = "#16a34a";
+        } else {
+          if (mdp !== null) alert("❌ Code incorrect !");
+          return;
+        }
+      }
+
       const item = commandes.find(c => c.id === id);
       if (!item) return;
 
@@ -1300,10 +1330,21 @@
 
     window.supprimerCommande = function(id, event) {
       if (event) event.stopPropagation();
+      
+      if (!estAdmin) {
+        const mdp = prompt("🔒 Action réservée à l'administrateur. Entrez le code :");
+        if (mdp === ADMIN_PASSWORD) {
+          estAdmin = true;
+          btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
+          btnToggleAdmin.style.color = "#16a34a";
+        } else {
+          if (mdp !== null) alert("❌ Code incorrect !");
+          return;
+        }
+      }
+
       const item = commandes.find(c => c.id === id);
       if (!item) return;
-
-      if (!verifierAdmin()) return;
 
       if (confirm(`Voulez-vous vraiment supprimer le reliquat ${item.numero} ?`)) {
         db.ref('commandes/' + id).remove()
@@ -1316,7 +1357,17 @@
     btnViderHistorique.addEventListener('click', () => {
       dropdownMenu.classList.remove('show');
       
-      if (!verifierAdmin()) return;
+      if (!estAdmin) {
+        const mdp = prompt("🔒 Action réservée à l'administrateur. Entrez le code :");
+        if (mdp === ADMIN_PASSWORD) {
+          estAdmin = true;
+          btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
+          btnToggleAdmin.style.color = "#16a34a";
+        } else {
+          if (mdp !== null) alert("❌ Code incorrect !");
+          return;
+        }
+      }
 
       if (confirm("Voulez-vous vraiment effacer TOUT l'historique de la base de données ?")) {
         db.ref('commandes').remove()
@@ -1364,7 +1415,7 @@
           </div>
           <div class="commande-actions">
             <button class="btn-edit-small" onclick="editerCommande(${cmd.id}, event)">✏️ Modifier</button>
-            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)" title="🔒 Protégé">❌</button>
+            <button class="btn-delete-small" onclick="supprimerCommande(${cmd.id}, event)" title="Supprimer">❌</button>
           </div>
         `;
         galerieCommandes.appendChild(item);
@@ -1431,7 +1482,7 @@
       if (e.key === 'Enter') executerRecherche();
     });
 
-    // FONCTION IMPORTATION CSV (RÉCUPÈRE AUTOMATIQUEMENT PHOTO, FOURNISSEUR ET REMARQUE DU CATALOGUE)
+    // FONCTION IMPORTATION CSV
     btnImportSheets.addEventListener('click', () => {
       fileImportCSV.click();
     });
@@ -1480,7 +1531,6 @@
 
               if (!numero) continue;
 
-              // Récupération automatique depuis le catalogue global si la référence est connue
               let photoAuto = "";
               let fournisseurFinal = fournisseurCSV;
               let remarqueFinale = designation || "";
@@ -1548,7 +1598,7 @@
 
             db.ref('commandes').set(updates)
               .then(() => {
-                alert(`Importation réussie : ${newAddedCount} nouvelle(s) commande(s) ajoutée(s) (avec récupération automatique des infos connues) !`);
+                alert(`Importation réussie : ${newAddedCount} nouvelle(s) commande(s) ajoutée(s) !`);
                 fileImportCSV.value = "";
               })
               .catch(err => {
