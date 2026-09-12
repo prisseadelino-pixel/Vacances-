@@ -501,6 +501,23 @@
       cursor: pointer;
     }
 
+    /* COMPTEUR DE RELIQUATS */
+    .section-header-flex {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .badge-count {
+      background: rgba(255, 107, 0, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(255, 107, 0, 0.3);
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
     /* MODAL ZOOM */
     .modal {
       display: none;
@@ -859,8 +876,9 @@
 
     <!-- HISTORIQUE DES RELIQUATS -->
     <section class="card">
-      <div class="section-header">
+      <div class="section-header-flex">
         <h2>Historique Reliquats</h2>
+        <span id="badgeCount" class="badge-count">0</span>
       </div>
 
       <div class="export-filter-container">
@@ -934,6 +952,7 @@
     const dropdownMenu = document.getElementById('dropdownMenu');
     const btnToggleAdmin = document.getElementById('btnToggleAdmin');
     const btnRestaurerBackup = document.getElementById('btnRestaurerBackup');
+    const badgeCount = document.getElementById('badgeCount');
 
     btnMenu.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -953,7 +972,7 @@
           estAdmin = true;
           btnToggleAdmin.innerHTML = "🔓 Mode Admin : ON";
           btnToggleAdmin.style.color = "#16a34a";
-          btnRestaurerBackup.style.display = "flex"; // Affiche le bouton de restauration
+          btnRestaurerBackup.style.display = "flex";
           alert("✅ Mode Administrateur activé !");
           afficherGalerie(inputRecherche.value);
         } else if (mdp !== null) {
@@ -963,7 +982,7 @@
         estAdmin = false;
         btnToggleAdmin.innerHTML = "🔒 Mode Admin : OFF";
         btnToggleAdmin.style.color = "var(--text)";
-        btnRestaurerBackup.style.display = "none"; // Masque le bouton de restauration
+        btnRestaurerBackup.style.display = "none";
         alert("🔒 Mode Administrateur désactivé.");
         afficherGalerie(inputRecherche.value);
       }
@@ -981,7 +1000,7 @@
           return;
         }
 
-        const keys = Object.keys(backups).sort().reverse(); // Les plus récentes d'abord
+        const keys = Object.keys(backups).sort().reverse();
         let message = "📋 Sauvegardes disponibles (plus récentes en premier) :\n\n";
         keys.forEach((key, index) => {
           message += `${index + 1} - ${key.replace(/-/g, ':').replace('T', ' à ')}\n`;
@@ -1460,6 +1479,9 @@
         const ref2Match = c.ref2 && c.ref2.toLowerCase().includes(filtre.toLowerCase());
         return numMatch || f1Match || ref1Match || f2Match || ref2Match;
       });
+
+      // Met à jour le compteur dynamique
+      badgeCount.textContent = liste.length;
 
       if (liste.length === 0) {
         galerieCommandes.innerHTML = `<p style="text-align:center; color:#94a3b8; padding:1rem;">Aucun reliquat trouvé.</p>`;
